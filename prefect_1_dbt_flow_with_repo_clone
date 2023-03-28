@@ -97,7 +97,7 @@ def pull_dbt_repo(target_dir):
     shutil.rmtree(target_dir, ignore_errors=True)
 
     logger.info("Cloning dbt repo")
-    clone("git@github.com:cureatr/data-warehouse", target=target_dir)
+    clone("git@github.com:<insert git repo url>", target=target_dir)
 
 
 @task(name="resolve dbt checkout target")
