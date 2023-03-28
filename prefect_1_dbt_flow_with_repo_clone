@@ -1,0 +1,167 @@
+import os
+import shutil
+from datetime import timedelta
+
+import pendulum
+import prefect
+
+from dulwich.porcelain import clone
+from prefect import task, Flow, Parameter
+from prefect.schedules import Schedule
+from prefect.schedules.clocks import IntervalClock
+from prefect.triggers import all_finished, any_failed
+from prefect.tasks.dbt import DbtShellTask
+from prefect.tasks.notifications import SlackTask
+import re
+
+schedule = Schedule(
+    clocks=[
+        IntervalClock(
+            start_date=pendulum.datetime(2022, 10, 11, 4, 0, 0, tz="America/New_York"),
+            interval=timedelta(hours=24),
+        )
+    ]
+)
+
+dbt = DbtShellTask(
+    profile_name="dw",
+    environment="dev",
+    return_all=True,
+    overwrite_profiles=True,
+    set_profiles_envar=True,
+    log_stdout=True,
+    log_stderr=True,
+)
+
+
+@task(trigger=all_finished)
+def output_print(output):
+    logger = prefect.context.get("logger")
+    for o in output:
+        logger.info(o)
+
+
+@task(trigger=any_failed)
+def send_slack_alert_on_failure(output):
+    msg = (
+        f" The task '{prefect.context.task_name}' "
+        f" in a flow run {prefect.context.flow_run_id} " + " " + str(output)
+    )
+    SlackTask(message=msg).run()
+
+
+@task(trigger=any_failed)
+def send_slack_alert_on_test_failure(output):
+    logs = str(output)
+
+    logs = logs.replace("\U0000001B", "").replace("\x1b", "")  # remove junk
+    summary_regex = re.compile(
+        r".*(Finished running \d+ tests in \d+ hours \d+ minutes and \d+.\d+ seconds \(\d+.\d+\w\).)",
+        re.MULTILINE,
+    )
+    summary_matches = re.findall(summary_regex, logs)
+    log_summary = summary_matches[0] if summary_matches else "<NO SUMMARY LOG FOUND/>"
+
+    noteable_tests_regex = re.compile(r"([Failure|Warning]+ in test \w+)", re.MULTILINE)
+    noteable_tests = re.findall(noteable_tests_regex, logs)
+
+    results_regex = re.compile(r"([Failure|Warning]+ in test \w+).*?(Got \d+ results)", re.MULTILINE)
+    results = re.findall(results_regex, logs)
+    results_dict = {test: res for test, res in results}
+
+    status_regex = re.compile(r"^.*(Done\. PASS=\d+ WARN=\d+ ERROR=\d+ SKIP=\d+ TOTAL=\d+)", re.MULTILINE)
+    status_matches = re.findall(status_regex, logs)
+    status = status_matches[0] if status_matches else "<NO STATUS LOG FOUND/>"
+
+    log_lines = [log_summary]
+    for noteable_test in noteable_tests:
+        icon = "\U00002757" if "Failure" in noteable_test else "\U0001F914"
+        results_msg = f" {results_dict.get(noteable_test, '')}"
+        log_lines.append(f"\t{icon} {noteable_test}{results_msg}")
+    log_lines.append(f"\n{status}\n")
+
+    log_blob = "\n".join(log_lines)
+
+    msg = (
+        f" The task '{prefect.context.task_name}' "
+        f" in a flow run {prefect.context.flow_run_id} " + " " + str(log_blob)
+    )
+    SlackTask(message=msg).run()
+
+
+@task(name="Clone DBT")
+def pull_dbt_repo(target_dir):
+    logger = prefect.context.get("logger")
+
+    logger.info("Cleaning up previous dw directory")
+    shutil.rmtree(target_dir, ignore_errors=True)
+
+    logger.info("Cloning dbt repo")
+    clone("git@github.com:cureatr/data-warehouse", target=target_dir)
+
+
+@task(name="resolve dbt checkout target")
+def resolve_clone_target(target_dir):
+    return f"cd {target_dir}"
+
+
+with Flow("dbt-data-warehouse-flow", schedule=schedule) as flow:
+    dw_clone_target = Parameter("dw_clone_target", default="./data-warehouse")
+    dbt_helper_script = resolve_clone_target(dw_clone_target)
+
+    dbt_kwargs = {
+        "type": "redshift",
+        "user": os.environ["PGUSER"],
+        "password": os.environ["PGPASSWORD"],
+        "dbname": Parameter("dbt_target_dbname", default=""),
+        "port": Parameter("dbt_target_port", default=),
+        "host": Parameter("dbt_target_host", default=""),
+        "schema": Parameter("dbt_target_schema", default=""),
+        "threads": Parameter("dbt_target_threads", default=8),
+    }
+
+    pull_repo = pull_dbt_repo(dw_clone_target)
+
+    dbt_deps = dbt(
+        command="dbt deps",
+        task_args={"name": "dbt deps"},
+        upstream_tasks=[pull_repo],
+        dbt_kwargs=dbt_kwargs,
+        helper_script=dbt_helper_script,
+    )
+
+    dbt_seed = dbt(
+        command="dbt seed",
+        task_args={"name": "dbt seed"},
+        upstream_tasks=[dbt_deps],
+        dbt_kwargs=dbt_kwargs,
+        helper_script=dbt_helper_script,
+    )
+
+    dbt_run = dbt(
+        command="dbt run",
+        task_args={"name": "dbt run"},
+        upstream_tasks=[dbt_deps, dbt_seed],
+        dbt_kwargs=dbt_kwargs,
+        helper_script=dbt_helper_script,
+    )
+
+    output_print(dbt_run, task_args={"name": "dbt run output"})
+
+    send_slack_alert_on_failure(dbt_run, task_args={"name": "dbt run alert"})
+
+    dbt_test = dbt(
+        command="dbt test",
+        task_args={"name": "dbt test"},
+        upstream_tasks=[pull_repo, dbt_run],
+        dbt_kwargs=dbt_kwargs,
+        helper_script=dbt_helper_script,
+    )
+
+    output_print(dbt_test, task_args={"name": "dbt test output"})
+
+    send_slack_alert_on_test_failure(dbt_test, task_args={"name": "dbt test alert"})
+
+flow.set_reference_tasks([dbt_run])
+
+flow.run()
