@@ -163,5 +163,3 @@ with Flow("dbt-data-warehouse-flow", schedule=schedule) as flow:
     send_slack_alert_on_test_failure(dbt_test, task_args={"name": "dbt test alert"})
 
 flow.set_reference_tasks([dbt_run])
-
-flow.run()
