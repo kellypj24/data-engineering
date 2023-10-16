@@ -4,7 +4,7 @@ from dagster import OpExecutionContext
 from dagster_dbt import DbtCliResource, build_schedule_from_dbt_selection, dbt_assets
 from dagster_slack import SlackResource
 
-from cureatr.constants import dbt_manifest_path
+from home.constants import dbt_manifest_path
 
 
 @dbt_assets(manifest=dbt_manifest_path)
