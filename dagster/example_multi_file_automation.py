@@ -1,12 +1,12 @@
 import pendulum
 from dagster import DefaultScheduleStatus, ScheduleDefinition, asset, define_asset_job
 
-from cureatr.io_managers.google_drive_io_manager import (
+from home.io_managers.google_drive_io_manager import (
     FileNameConstructor,
     GoogleDriveCSVFile,
     GoogleDriveDestination,
 )
-from cureatr.ops.file_generation_ops import (
+from home.ops.file_generation_ops import (
     op_factory_from_query,
 )
 from home.sql import FileGenerationQueries
