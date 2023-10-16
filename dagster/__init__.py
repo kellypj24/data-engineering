@@ -4,7 +4,7 @@ from dagster import Definitions, InMemoryIOManager, IOManager
 from dagster_dbt import DbtCliResource
 from dagster_slack import SlackResource
 
-from cureatr.assets.dbt_assets import daily_dbt_assets_schedule, dw_dbt_assets
+from home.assets.dbt_assets import daily_dbt_assets_schedule, dw_dbt_assets
 
 
 resources = {
