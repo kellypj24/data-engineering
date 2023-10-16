@@ -13,7 +13,7 @@ from home.sql import FileGenerationQueries
 
 
 @asset(group_name="multi_file_group", io_manager_key="google_drive_io_manager")
-def dialer_automation():
+def file_automation():
     query = FileGenerationQueries.EXAMPLE_QUERY
     df = op_factory_from_query(query)()
 
@@ -32,10 +32,10 @@ def dialer_automation():
     return google_drive_files  # Returning list of GoogleDriveCSVFile instances directly
 
 
-dialer_automation_job = define_asset_job(name="dialer_automation_job", selection="dialer_automation")
+file_automation_job = define_asset_job(name="file_automation_job", selection="file_automation")
 
-dialer_automation_daily_schedule = ScheduleDefinition(
-    job=dialer_automation_job,
+file_automation_daily_schedule = ScheduleDefinition(
+    job=file_automation_job,
     cron_schedule="0 5 * * *",
     execution_timezone="US/Eastern",
     default_status=DefaultScheduleStatus.RUNNING,
