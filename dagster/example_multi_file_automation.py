@@ -12,9 +12,9 @@ from cureatr.ops.file_generation_ops import (
 from home.sql import FileGenerationQueries
 
 
-@asset(group_name="dialer", io_manager_key="google_drive_io_manager")
+@asset(group_name="multi_file_group", io_manager_key="google_drive_io_manager")
 def dialer_automation():
-    query = FileGenerationQueries.DIALER_LOADER_CMR_COMMERCIAL
+    query = FileGenerationQueries.EXAMPLE_QUERY
     df = op_factory_from_query(query)()
 
     # Define custom filename constructor
@@ -24,8 +24,8 @@ def dialer_automation():
     google_drive_files = GoogleDriveCSVFile.from_dataframes(
         destination=GoogleDriveDestination.DESTINATION_GOOGLE_DRIVE,
         data_frames=[df],
-        columns_to_group="campaign",
-        folder_path=f"dialer_loader_{pendulum.now().format('YYYYMMDD')}",
+        columns_to_group="group_name",
+        folder_path=f"example_folder_{pendulum.now().format('YYYYMMDD')}",
         filename_constructor=filename_constructor,
     )
 
