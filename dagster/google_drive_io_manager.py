@@ -4,6 +4,7 @@ import dataclasses
 import io
 from abc import ABC, abstractmethod
 from enum import Enum
+from typing import Literal
 
 import pandas as pd
 import pendulum
@@ -15,12 +16,17 @@ from googleapiclient.http import MediaIoBaseUpload
 
 # map a description to a google drive share id
 class GoogleDriveDestination(Enum):
-    GOOGLE_DRIVE_ID = "{google drive hash}"
-
+    NO_PHI_TEST = "0AIPsABP1BAIYUk9PVA"
+    PHI_DATA_TEAM_REPORTING = "0ALbParwbfKqUUk9PVA"
+    XDRIVE_CAHPS_WEEKLY = "1pXOy7yxDg7U9YIooK8WH0z0UkjajvgxG"
+    XDRIVE_TMRP_MONTHLY = "1SR5bFWPp4KR8vSfBdPEV-zSB1IHmLn1F"
+    XDRIVE_DMRP_WEEKLY = "1e0aT4595b0598wI4J1Utti5THAvyLqyJ"
+    XDRIVE_DMRP_MONTHLY = "177_fnS-f0BWlLTO3kodgHbdOjuYFLPXY"
+    XDRIVE_STATIN_OUTREACH_WEEKLY = "1L5vthcRGKeQ3nch9_U-kfJ07kQEZx9I_"
 
 
 @dataclasses.dataclass
-class GoogleDriveFolderInfo:
+class GoogleDriveDirectoryInfo:
     id: str
     name: str
 
@@ -47,7 +53,7 @@ class GoogleDriveFile(ABC):
         destination: GoogleDriveDestination,
         name: str,
         content: bytes,
-        folder_path: str | None = None,
+        directory_path: str = "",
         append_date: bool = True,
     ):
         self.destination = destination
@@ -61,7 +67,7 @@ class GoogleDriveFile(ABC):
         # https://developers.google.com/drive/api/guides/ref-export-formats
         self.mime_type = self.get_mime_type()
         self.full_name = f"{self.name}.{self.get_extension()}"
-        self.folder_path = folder_path
+        self.directory_path = directory_path
 
     @abstractmethod
     def get_extension(self) -> str:
@@ -71,8 +77,8 @@ class GoogleDriveFile(ABC):
     def get_mime_type(self) -> str:
         pass
 
-    def get_folder_path(self) -> str | None:
-        return self.folder_path
+    def get_directory_path(self) -> str:
+        return self.directory_path
 
 
 class GoogleDriveTextFile(GoogleDriveFile):
@@ -90,7 +96,7 @@ class GoogleDriveTextFile(GoogleDriveFile):
         return cls(destination, name, bytes(content, "utf-8"))
 
 
-class GoogleDriveCSVFile(GoogleDriveFile):
+class GoogleDriveCsvFile(GoogleDriveFile):
     def __init__(
         self,
         destination: GoogleDriveDestination,
@@ -98,13 +104,13 @@ class GoogleDriveCSVFile(GoogleDriveFile):
         content: bytes,
         file_extension: str = "csv",
         sep: str = ",",
-        folder_path: str | None = None,
+        directory_path: str = "",
         append_date: bool = True,
     ):
         self.file_extension = file_extension
         self.sep = sep
-        self.folder_path = folder_path
-        super().__init__(destination, name, content, folder_path, append_date)
+        self.directory_path = directory_path
+        super().__init__(destination, name, content, directory_path, append_date)
 
     def get_extension(self) -> str:
         return self.file_extension
@@ -124,7 +130,7 @@ class GoogleDriveCSVFile(GoogleDriveFile):
         data_frame: pd.DataFrame,
         file_extension: str = "csv",
         sep: str = ",",
-        folder_path: str | None = None,
+        directory_path: str = "",
         append_date: bool = False,  # setting to false here so we can update other jobs in another PR
     ):
         return cls(
@@ -133,7 +139,7 @@ class GoogleDriveCSVFile(GoogleDriveFile):
             bytes(data_frame.to_csv(index=False, sep=sep), "utf-8"),
             file_extension,
             sep,
-            folder_path,
+            directory_path,
             append_date,
         )
 
@@ -144,7 +150,7 @@ class GoogleDriveCSVFile(GoogleDriveFile):
         data_frames: list[pd.DataFrame],
         columns_to_group: str | list[str],
         file_extension: str = "csv",
-        folder_path: str | None = None,
+        directory_path: str = "",
         filename_constructor: FileNameConstructor | None = None,
         append_date: bool = True,
     ):
@@ -178,7 +184,7 @@ class GoogleDriveCSVFile(GoogleDriveFile):
                     name=file_name,
                     data_frame=group,
                     file_extension=file_extension,
-                    folder_path=folder_path,
+                    directory_path=directory_path,
                     append_date=append_date,
                 )
                 google_drive_files.append(google_drive_file)
@@ -186,27 +192,45 @@ class GoogleDriveCSVFile(GoogleDriveFile):
         return google_drive_files  # Returning list of GoogleDriveCSVFile instances
 
 
+FindDirectoryCacheKey = tuple[str, str, str]
+
+
 class GoogleDriveIOManager(IOManager):
     # !!! Do not sub-class ConfigurableIOManagerFactory !!!
     # Using ConfigurableIOManagerFactory will expose the auth_info in the dagster UI !!!
     def __init__(self, auth_info: dict[str, str]):
         self.auth_info = auth_info
+        self.find_directory_cache: dict[FindDirectoryCacheKey, GoogleDriveDirectoryInfo | None] = {}
 
     def _get_drive_service(self):
         credentials = service_account.Credentials.from_service_account_info(self.auth_info)
+
         api_name = "drive"
         api_version = "v3"
         scope = "https://www.googleapis.com/auth/drive.file"
         scoped_credentials = credentials.with_scopes([scope])
+
         return build(api_name, api_version, credentials=scoped_credentials)
 
-    def _find_folder(
-        self, drive_id: str, name: str, parent_id: str | None = None
-    ) -> GoogleDriveFolderInfo | None:
+    def _find_directory(
+        self, drive_id: str, name: str, parent_id: str = ""
+    ) -> GoogleDriveDirectoryInfo | None:
+        cache_key = (drive_id, name, parent_id)
+
+        if cache_key in self.find_directory_cache:
+            return self.find_directory_cache[cache_key]
+
+        dir_info = self._find_directory_impl(drive_id, name, parent_id)
+        self.find_directory_cache[cache_key] = dir_info
+        return dir_info
+
+    def _find_directory_impl(
+        self, drive_id: str, name: str, parent_id: str = ""
+    ) -> GoogleDriveDirectoryInfo | None:
         query = f"name='{name}' and mimeType='application/vnd.google-apps.folder' and trashed=false"
-        # added trashed=false
         if parent_id:
             query += f" and '{parent_id}' in parents"
+
         results = (
             self._get_drive_service()
             .files()
@@ -219,29 +243,65 @@ class GoogleDriveIOManager(IOManager):
             )
             .execute()
         )
-        folders = results.get("files", [])
-        if folders:
-            folder = folders[0]  # assuming the first folder is the one we want
-            return GoogleDriveFolderInfo(id=folder["id"], name=folder["name"])
-        return None  # Explicitly return None when no folder is found
+        directories = results.get("files", [])
 
-    def _create_directory(self, parent_id: str, name: str) -> GoogleDriveFolderInfo:
-        file_metadata = {
-            "driveId": parent_id,
-            "parents": [parent_id],
-            "name": name,
-            "mimeType": "application/vnd.google-apps.folder",
-        }
-        folder = (
+        # return None if no directories found
+        if not directories:
+            return None
+
+        directory = directories[0]  # assuming the first directory is the one we want
+        return GoogleDriveDirectoryInfo(id=directory["id"], name=directory["name"])
+
+    def _create_directory_tree(self, destination: GoogleDriveDestination, path: str) -> str:
+        # Set root directory node as the first parent
+        return self._create_directory_tree_impl([{"name": "", "id": destination.value}], path.split("/"))
+
+    def _create_directory_tree_impl(
+        self, parents: list[dict[Literal["name", "id"], str]], directory_tree: list[str]
+    ) -> str:
+        # No more directory nodes to create in the directory tree, return the id of the leaf node
+        if not directory_tree:
+            return parents[-1]["id"]
+
+        # Create next directory node in directory tree
+        dir_info = self._create_directory(directory_tree[0], parents[-1]["id"], parents[0]["id"])
+
+        # Mark the newly created directory node as the next parent, then recurse
+        return self._create_directory_tree_impl(
+            [*parents, {"name": dir_info.name, "id": dir_info.id}], directory_tree[1:]
+        )
+
+    def _create_directory(
+        self, directory_name: str, parent_id: str, drive_id: str, error_on_existing_directory: bool = False
+    ) -> GoogleDriveDirectoryInfo:
+        # If the requested directory already exists, return the directory info
+        existing_directory = self._find_directory(drive_id, directory_name, parent_id)
+        if existing_directory is not None:
+            if error_on_existing_directory:
+                raise Exception(f"Directory {directory_name} with parent id {parent_id} already exists")
+
+            return existing_directory
+
+        # Otherwise, create a new directory
+        new_directory = (
             self._get_drive_service()
             .files()
-            .create(body=file_metadata, fields="id, name", supportsAllDrives=True)
+            .create(
+                body={
+                    "driveId": parent_id,
+                    "parents": [parent_id],
+                    "name": directory_name,
+                    "mimeType": "application/vnd.google-apps.folder",
+                },
+                fields="id, name",
+                supportsAllDrives=True,
+            )
             .execute()
         )
-        return GoogleDriveFolderInfo(id=folder.get("id"), name=folder.get("name"))
+
+        return GoogleDriveDirectoryInfo(id=new_directory.get("id"), name=new_directory.get("name"))
 
     def handle_output(self, context: OutputContext, files: GoogleDriveFile | list[GoogleDriveFile]):
-        folder_cache: dict[str, str] = {}
         google_drive_file_ids = []
         google_drive_locations = []
 
@@ -252,27 +312,12 @@ class GoogleDriveIOManager(IOManager):
                 iterable_files = files
 
         for file in iterable_files:
-            parent_id = file.destination.value
-            if file.folder_path:
-                if file.folder_path in folder_cache:
-                    folder_id = folder_cache[file.folder_path]
-                    parent_id = folder_id  # Update parent_id here as well
-                else:
-                    existing_folder = self._find_folder(
-                        drive_id=file.destination.value, name=file.folder_path
-                    )
-                    if existing_folder:
-                        context.log.info(
-                            f"found existing folder {file.folder_path} / id: {existing_folder.id}"
-                        )
-                        folder_id = existing_folder.id
-                        parent_id = folder_id  # Update parent_id here
-                    else:
-                        context.log.info(f"creating folder {file.folder_path}")
-                        folder_info = self._create_directory(file.destination.value, file.folder_path)
-                        folder_id = folder_info.id
-                        parent_id = folder_id  # This line updates parent_id when a new folder is created
-                    folder_cache[file.folder_path] = folder_id  # Update folder_cache
+            # The parent directory node is either the leaf subdirectory node, or the root directory node
+            parent_id = (
+                self._create_directory_tree(file.destination, file.directory_path)
+                if file.directory_path
+                else file.destination.value
+            )
 
             file_metadata = {
                 "driveId": parent_id,
