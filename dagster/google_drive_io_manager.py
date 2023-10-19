@@ -16,13 +16,7 @@ from googleapiclient.http import MediaIoBaseUpload
 
 # map a description to a google drive share id
 class GoogleDriveDestination(Enum):
-    NO_PHI_TEST = "0AIPsABP1BAIYUk9PVA"
-    PHI_DATA_TEAM_REPORTING = "0ALbParwbfKqUUk9PVA"
-    XDRIVE_CAHPS_WEEKLY = "1pXOy7yxDg7U9YIooK8WH0z0UkjajvgxG"
-    XDRIVE_TMRP_MONTHLY = "1SR5bFWPp4KR8vSfBdPEV-zSB1IHmLn1F"
-    XDRIVE_DMRP_WEEKLY = "1e0aT4595b0598wI4J1Utti5THAvyLqyJ"
-    XDRIVE_DMRP_MONTHLY = "177_fnS-f0BWlLTO3kodgHbdOjuYFLPXY"
-    XDRIVE_STATIN_OUTREACH_WEEKLY = "1L5vthcRGKeQ3nch9_U-kfJ07kQEZx9I_"
+    GOOGLE_DRIVE_ID = {"insert google drive id"}
 
 
 @dataclasses.dataclass
