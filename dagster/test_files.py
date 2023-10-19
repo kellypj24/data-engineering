@@ -1,9 +1,11 @@
+from datetime import datetime
+
 import pandas as pd
 from dagster import asset
 
-from home.io_managers.google_drive_io_manager import (
+from cureatr.io_managers.google_drive_io_manager import (
     FileNameConstructor,
-    GoogleDriveCSVFile,
+    GoogleDriveCsvFile,
     GoogleDriveDestination,
     GoogleDriveTextFile,
 )
@@ -23,12 +25,12 @@ def test_csv_file():
     df = pd.DataFrame(
         {"name": ["Raphael", "Donatello"], "mask": ["red", "purple"], "weapon": ["sai", "bo staff"]}
     )
-    return GoogleDriveCSVFile.from_dataframe(
+    return GoogleDriveCsvFile.from_dataframe(
         destination=GoogleDriveDestination.NO_PHI_TEST,
         name="from_data_frame",
         data_frame=df,
         file_extension="csv",
-        folder_path="test_folder2",
+        directory_path="test_folder2",
     )
 
 
@@ -47,13 +49,32 @@ def test_dialer_split():
     filename_constructor = FileNameConstructor(constructor_pattern)
 
     # Convert single DataFrame to list as input
-    google_drive_files = GoogleDriveCSVFile.from_dataframes(
+    google_drive_files = GoogleDriveCsvFile.from_dataframes(
         destination=GoogleDriveDestination.NO_PHI_TEST,
         data_frames=[df],
         columns_to_group="name",
-        folder_path="splinters_students",
+        directory_path="splinters_students",
         filename_constructor=filename_constructor,
         append_date=False,
     )
 
     return google_drive_files  # Returning list of GoogleDriveCSVFile instances directly
+
+
+@asset(group_name="test_files", io_manager_key="google_drive_io_manager")
+def test_create_directory_tree():
+    dataframe = pd.DataFrame(
+        {
+            "column_A": ["foo", "bar"],
+            "column_B": ["foo", "bar"],
+            "column_C": ["foo", "bar"],
+        }
+    )
+
+    return GoogleDriveCsvFile.from_dataframe(
+        destination=GoogleDriveDestination.NO_PHI_TEST,
+        data_frame=dataframe,
+        name=f"{datetime.now().strftime('%Y%m%d%H%M%S')}_test_create_directory_tree",
+        file_extension="csv",
+        directory_path="tests/subdir_A/subdir_B",
+    )
