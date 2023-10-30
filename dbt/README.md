@@ -11,34 +11,33 @@ TODO
 - Find [dbt events](https://events.getdbt.com) near you
 - Check out [the blog](https://blog.getdbt.com/) for the latest news on dbt's development and best practices
 
-## Set project to reference profiles.yml within the project
+## Configuring dbt to Reference profiles.yml Inside Project Directory
 
-To reference a profiles.yml file located inside the project directory instead of one level outside the project directory (which is the default behavior), you can use the --profiles-dir flag when running dbt commands. This flag allows you to specify the directory to look in for the profiles.yml file​​. Here's a breakdown of how you could adjust the setup:
+By default, dbt looks for the `profiles.yml` file one level outside the project directory. To set dbt to reference a `profiles.yml` file located inside the project directory, follow these steps:
 
-https://64byte.net/2022/03/how-to-set-location-of-profiles-yml-and-dbt_project-yml-files-in-dbt/#:~:text=Solution%20%E2%80%93%201%20dbt%20run,dbt
+1. **Using Command Line Flag**:
+    - Utilize the `--profiles-dir` flag when running dbt commands, specifying the path to the directory containing the `profiles.yml` file.
+    ```bash
+    dbt run --profiles-dir /path/to/directory
+    ```
+    Replace `/path/to/directory` with the path to the directory containing the `profiles.yml` file.
+    - [Reference](https://64byte.net/2022/03/how-to-set-location-of-profiles-yml-and-dbt_project-yml-files-in-dbt/#:~:text=Solution%20%E2%80%93%201%20dbt%20run,dbt)
 
-https://stackoverflow.com/questions/71482406/how-to-set-location-of-profiles-yml-and-dbt-project-yml-files-in-dbt#:~:text=3%20Answers%20Sorted%20by%3A%202,yml%20file
+2. **Profiles Directory**:
+    - The `profiles.yml` file contains all the information dbt needs to connect to your data platform.
+    - By default, dbt looks for the `profiles.yml` file in the `~/.dbt/` directory.
+    - Provide the path to the project directory using the `--profiles-dir` flag to reference a `profiles.yml` file inside the project directory.
+    - [Reference](https://stackoverflow.com/questions/71482406/how-to-set-location-of-profiles-yml-and-dbt-project-yml-files-in-dbt)
 
-Command Line Flag:
-Use the --profiles-dir flag followed by the path to the directory containing the profiles.yml file when running dbt commands. The command would look something like this:
+3. **Project Directory** (Optional):
+    - Use the `--project-dir` flag to specify the directory to look for the `dbt_project.yml` file if needed.
+    ```bash
+    dbt run --project-dir /path/to/project/directory
+    ```
+    Replace `/path/to/project/directory` with the path to your dbt project directory.
 
-```
-dbt run --profiles-dir /path/to/directory
-```
-Replace /path/to/directory with the path to the directory containing the profiles.yml file. This way, dbt will use the specified directory to look for the profiles.yml file each time it runs.
+This setup enables more flexibility in organizing your dbt project and managing connection profiles, especially useful if managing multiple profiles for different data warehouses.
 
-Profiles Directory:
-By default, dbt looks for the profiles.yml file in the ~/.dbt/ directory. If you want dbt to reference a profiles.yml file inside the project directory, you would provide the path to the project directory using the --profiles-dir flag​1​​2​.
-
-Project Directory:
-You can also use the --project-dir flag to specify the directory to look for the dbt_project.yml file if needed, though this doesn't directly address the profiles.yml location. The flag can be used as follows:
-
-```
-dbt run --project-dir /path/to/project/directory
-```
-The profiles.yml file is crucial for dbt operations as it contains all the information dbt needs to connect to your data platform. When you run dbt Core from the command line, it reads the dbt_project.yml file to find the profile name, and then looks for a profile with the same name in your profiles.yml file​3​.
-
-This setup allows for more flexibility in organizing your dbt project and managing connection profiles, especially if you have multiple profiles for different data warehouses​4​.
 
 ## Jinja Templated SQL Style Guide for dbt Project
 
