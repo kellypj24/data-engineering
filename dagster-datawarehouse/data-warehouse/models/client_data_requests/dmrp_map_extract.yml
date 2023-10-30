@@ -14,7 +14,7 @@ models:
 
         - name: patient_id
           description: >
-            Cureatr generated unique id for a patient not required for this report used for testing
+            company generated unique id for a patient not required for this report used for testing
           tests:
             - not_null
 
@@ -85,13 +85,13 @@ models:
 
         - name: mrp_completed_by
           description: >
-            Name of Cureatr staff member who completed patient's desktop MRP
+            Name of company staff member who completed patient's desktop MRP
           tests:
             - not_null
 
         - name: mrp_co_signed_by
           description: >
-            Name of Cureatr PharmD who co-signed medlist if required
+            Name of company PharmD who co-signed medlist if required
 
         - name: provider_summary
           description: >

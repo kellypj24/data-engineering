@@ -1,6 +1,6 @@
 version: 2
 
 models:
-    - name: dim_user_cureatr
+    - name: dim_user_company
       description: >
-        dimensional table capturing all Cureatr users for mapping to user_id foreign key
+        dimensional table capturing all company users for mapping to user_id foreign key

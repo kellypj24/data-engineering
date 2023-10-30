@@ -1,9 +1,9 @@
 version: 2
 
 models:
-    - name: bcbsm_supplemental_file
+    - name: client2_supplemental_file
       description: >
-        monthly supplemental file sent to BCBSM.  Must match billing report med list for med list.
+        monthly supplemental file sent to client2.  Must match billing report med list for med list.
       columns:
         - name: "(MemberKey || '-' || DOS)"
           description: >
@@ -11,7 +11,7 @@ models:
           tests:
             - unique
             - dbt_utils.relationships_where:
-                to: ref('advantasure_billing')
+                to: ref('client1_billing')
                 field: "(source_patient_id || '-' || mrp_visit_date::date)"
                 to_condition: map_transmission_date between date_trunc('month', current_date) - interval '1 month' and date_trunc('month', current_date) - interval '1 second'
             - not_null

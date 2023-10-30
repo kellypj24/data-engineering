@@ -31,7 +31,7 @@ models:
 
         - name: institution_name
           description: >
-            name of the cureatr customer tied to this member and service.
+            name of the company customer tied to this member and service.
           tests:
             - not_null
 

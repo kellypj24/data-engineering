@@ -1,10 +1,10 @@
 Datascience Dagster
 ===================
 
-The `main` github branch will deploy to the `main` Dagster [code location](https://docs.dagster.io/concepts/code-locations#code-locations) here https://cureatr.dagster.cloud/prod/locations
-It references the `cureatr` package, so new jobs, assets, schedules etc. should be added to the 
+The `main` github branch will deploy to the `main` Dagster [code location](https://docs.dagster.io/concepts/code-locations#code-locations) here https://company.dagster.cloud/prod/locations
+It references the `company` package, so new jobs, assets, schedules etc. should be added to the 
 [`Definitions`](https://docs.dagster.io/_apidocs/definitions#dagster.Definitions)
-declaration in [cureatr/__init__.py](cureatr/__init__.py).
+declaration in [company/__init__.py](company/__init__.py).
 
 Any merge to `main` will redeploy the `main` Dagster code location.
 A Github action builds and pushes a new Docker image, tagged with the git commit SHA,
@@ -23,11 +23,11 @@ Set `PGUSER` and `PGPASSWORD` environment variables to your Redshift credentials
 webUI (similar to Dagster Cloud UI) - you can then access it in your browser via
 http://localhost:3000 and execute your jobs etc. locally.
 
-If you set `PGHOST=playbastion-public.play.internal.aws.cureatr.com` before launching, you can  use play Redshift instead, you can also set `PGDATABASE` to point to a play database.
-You must be using the Cureatr VPN to access play or live Redshift.
+If you set `PGHOST=playbastion-public.play.internal.aws.company.com` before launching, you can  use play Redshift instead, you can also set `PGDATABASE` to point to a play database.
+You must be using the company VPN to access play or live Redshift.
 
 ### Google Drive/BigQuery Access
-The [google_drive_io_manager](cureatr/io_managers/google_drive_io_manager.py) uses authentication information stored in an AWS secret share facilitate dropping files into Cureatr's workspace.
+The [google_drive_io_manager](company/io_managers/google_drive_io_manager.py) uses authentication information stored in an AWS secret share facilitate dropping files into company's workspace.
 To test locally add a file named `GOOGLE_CREDENTIALS.json` in the `.local` directory. 
 
 The contents should look similar to this:
@@ -54,11 +54,11 @@ Here is an example launching dagit against a personal database in play Redshift,
 
 ```sh-session
 [macos]$ read -s -p "Password: " PGPASSWORD
-[macos]$ export PGUSER=rectalogic PGPASSWORD PGHOST=playbastion-public.play.internal.aws.cureatr.com
+[macos]$ export PGUSER=rectalogic PGPASSWORD PGHOST=playbastion-public.play.internal.aws.company.com
 [macos]$ bin/docker-dagster.sh
-dev: Pulling from cureatr/datascience-dagster-base
+dev: Pulling from company/datascience-dagster-base
 Digest: sha256:64fa18d7d411851e574361393bef0a40aa3008dddb58e7af3e2f0aa836cb8c43
-Status: Image is up to date for public.ecr.aws/cureatr/datascience-dagster-base:dev
+Status: Image is up to date for public.ecr.aws/company/datascience-dagster-base:dev
 2023-04-06 18:36:49 +0000 - dagster - INFO - Launching Dagster services...
 2023-04-06 18:36:53 +0000 - dagster.daemon - INFO - Instance is configured with the following daemons: ['BackfillDaemon', 'SchedulerDaemon', 'SensorDaemon']
 2023-04-06 18:36:53 +0000 - dagster.daemon.SensorDaemon - INFO - Not checking for any runs since no sensors have been started.

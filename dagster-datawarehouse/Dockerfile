@@ -1,7 +1,7 @@
-FROM public.ecr.aws/cureatr/datascience-dagster-base:ds-dagster-cm-009
+FROM public.ecr.aws/company/datascience-dagster-base:ds-dagster-cm-009
 
-LABEL com.cureatr.tag="$tag"
-LABEL com.cureatr.imagename="datascience-dagster"
+LABEL com.company.tag="$tag"
+LABEL com.company.imagename="datascience-dagster"
 
 COPY --chown=dagster:dagster ./ /home/dagster/
 USER dagster

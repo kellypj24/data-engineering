@@ -13,7 +13,7 @@ with pop as (
      where
            opportunities.program_type = 'cahps'
            and enrollments.status = 'Completed'
-           and patients.institution_id = 'humana'
+           and patients.institution_id = 'client3'
      order by
          patients.source_patient_id,
          enrollments.completed_at_est

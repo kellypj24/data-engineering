@@ -7,7 +7,7 @@ models:
 
       columns:
           - name: patient_id
-            description: cureatr generated id for each patient
+            description: company generated id for each patient
             tests:
                 - not_null
 

@@ -3,13 +3,13 @@ with
 {{ import(ref('dim_patient'), 'patients') }},
 {{ import(ref('fact_statin_outreach_visit'), 'statin_outreach_events') }},
 {{ import(ref('fact_finalized_medlist'), 'finalized_med_lists') }},
-{{ import(ref('dim_user_cureatr'), 'users') }},
+{{ import(ref('dim_user_company'), 'users') }},
 
 filter_visits as (
 
     select
         case
-            when patients.institution_id = 'advantasure' then 'bcbsm'
+            when patients.institution_id = 'client1' then 'client2'
             else patients.institution_id
         end as institution_id,
 
@@ -31,7 +31,7 @@ filter_visits as (
         join statin_outreach_events on opportunities.opportunity_id = statin_outreach_events.opportunity_id
             and statin_outreach_completed = 1
         join finalized_med_lists on statin_outreach_events.opportunity_id = finalized_med_lists.opportunity_id
-        join users on users.cureatr_user_id = coalesce(finalized_med_lists.coauthor_user_id, finalized_med_lists.pharmacist_user_id)
+        join users on users.company_user_id = coalesce(finalized_med_lists.coauthor_user_id, finalized_med_lists.pharmacist_user_id)
     where opportunities.program_type = 'statin_gap'
     group by
         patients.institution_id,

@@ -1,7 +1,7 @@
 with
 {{ import(ref('desktop_mrp_billing'), 'billing') }},
 {{ import(ref('dim_patient'), 'patients') }},
-{{ import(ref('dim_user_cureatr'), 'users') }},
+{{ import(ref('dim_user_company'), 'users') }},
 
 filter_med_lists as (
 
@@ -57,7 +57,7 @@ filter_med_lists as (
        ''                                             as rx_norm_cd
     from billing
     join patients on patients.patient_id = billing.patient_id
-    join users on users.cureatr_user_id = billing.pharmacist_user_id
+    join users on users.company_user_id = billing.pharmacist_user_id
     where billing.map_finalized_date between date_trunc('month', current_date) - interval '1 month'
          and date_trunc('month', current_date) - interval '1 second'
 

@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: redshift_datascience
     schema: datascience
-    database: cureatr
+    database: company
     loader: server
 
     tables:

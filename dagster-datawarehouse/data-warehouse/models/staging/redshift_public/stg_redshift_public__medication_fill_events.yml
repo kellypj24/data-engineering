@@ -5,7 +5,7 @@ models:
       description: Represents medication fill events pull from Sure Scripts
       columns:
         - name: patient_id
-          description: cureatr unique patient_id
+          description: company unique patient_id
 
         - name: institution_id
           description: institution_id

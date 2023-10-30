@@ -8,7 +8,7 @@ filter_patients as (
 
     select *
     from patients
-    where patients.institution_id = 'advantasure'
+    where patients.institution_id = 'client1'
 
     ),
 

@@ -17,7 +17,7 @@ from home.sql import FileGenerationQueries
 
 
 @asset(group_name="reports_weekly_report", io_manager_key="google_drive_io_manager")
-def bcbsm_statin_outreach_completed_visits_report():
+def client2_statin_outreach_completed_visits_report():
     query = FileGenerationQueries.WEEKLY_REPORT_EXAMPLE
     df = op_factory_from_query(query)()
     df_header_updated = update_column_headers(query, df=df)()

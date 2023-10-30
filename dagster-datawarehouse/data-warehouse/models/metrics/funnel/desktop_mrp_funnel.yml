@@ -21,7 +21,7 @@ models:
 
         - name: patient_id
           description: >
-            Cureatr generated unique patient id.
+            company generated unique patient id.
           tests:
             - not_null
 

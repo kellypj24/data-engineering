@@ -23,4 +23,4 @@ models:
           - name: discharge_event_id
             tests:
               - dbt_utils.expression_is_true:
-                  expression: "is not null or institution_id not in ('advantasure', 'sinfonia')"
+                  expression: "is not null or institution_id not in ('client1', 'client5')"

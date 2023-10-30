@@ -8,7 +8,7 @@ models:
       columns:
         - name: patient_id
           description: >
-            Cureatr generated unique id for the patient
+            company generated unique id for the patient
           tests:
             - not_null
 

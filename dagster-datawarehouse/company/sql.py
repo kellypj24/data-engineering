@@ -12,11 +12,11 @@ class FileGenerationQuery:
 
 
 class FileGenerationQueries:
-    BCBSM_SUPPLEMENTAL = FileGenerationQuery(
-        name="bcbsm_supplemental",
+    client2_SUPPLEMENTAL = FileGenerationQuery(
+        name="client2_supplemental",
         query="""
         SELECT *
-        FROM datascience.bcbsm_supplemental_file
+        FROM datascience.client2_supplemental_file
     """,
         mapping={
             "memberkey": "MemberKey",
@@ -44,12 +44,12 @@ class FileGenerationQueries:
         },
     )
 
-    BCBSM_STATIN_OUTREACH_COMPLETED_VISITS = FileGenerationQuery(
-        name="bcbsm_statin_completed_visits",
+    client2_STATIN_OUTREACH_COMPLETED_VISITS = FileGenerationQuery(
+        name="client2_statin_completed_visits",
         query="""
         SELECT *
         FROM datascience.statin_outreach_completed_visits
-        WHERE institution_id = 'bcbsm'
+        WHERE institution_id = 'client2'
     """,
         mapping={
             "institution_id": "iid",
@@ -66,12 +66,12 @@ class FileGenerationQueries:
         },
     )
 
-    BCBSM_STATIN_OUTREACH_MEMBER_DISPOSITION = FileGenerationQuery(
-        name="bcbsm_statin_member_disposition",
+    client2_STATIN_OUTREACH_MEMBER_DISPOSITION = FileGenerationQuery(
+        name="client2_statin_member_disposition",
         query="""
         SELECT *
         FROM datascience.statin_outreach_member_level_detail
-        WHERE institution_id = 'bcbsm'
+        WHERE institution_id = 'client2'
     """,
         mapping={
             "institution_id": "iid",
@@ -91,8 +91,8 @@ class FileGenerationQueries:
         },
     )
 
-    HUMANA_CAHPS_WEEKLY_GND_OUTCOMES = FileGenerationQuery(
-        name="humana_cahps_weekly_gnd_outcomes",
+    client3_CAHPS_WEEKLY_GND_OUTCOMES = FileGenerationQuery(
+        name="client3_cahps_weekly_gnd_outcomes",
         query="""
         SELECT 
             member_id,
@@ -134,8 +134,8 @@ class FileGenerationQueries:
         filename_pattern="dialer_loader_{campaign}",
     )
 
-    HUMANA_DMRP_WEEKLY_EVENT_LEVEL_DETAIL = FileGenerationQuery(
-        name="humana_dmpr_weekly_event_level_detail",
+    client3_DMRP_WEEKLY_EVENT_LEVEL_DETAIL = FileGenerationQuery(
+        name="client3_dmpr_weekly_event_level_detail",
         query="""
         SELECT 
             secondary_patient_id,
@@ -180,8 +180,8 @@ class FileGenerationQueries:
         },
     )
 
-    HUMANA_DMRP_WEEKLY_MAP_EXTRACT = FileGenerationQuery(
-        name="humana_dmpr_weekly_map_extract",
+    client3_DMRP_WEEKLY_MAP_EXTRACT = FileGenerationQuery(
+        name="client3_dmpr_weekly_map_extract",
         query="""
         SELECT 
             institution_id,
@@ -232,8 +232,8 @@ class FileGenerationQueries:
         },
     )
 
-    HUMANA_DMRP_SUPPLEMENTAL = FileGenerationQuery(
-        name="humana_dmpr_supplemental",
+    client3_DMRP_SUPPLEMENTAL = FileGenerationQuery(
+        name="client3_dmpr_supplemental",
         query="""
             SELECT *
             FROM datascience.dmrp_supplemental_file

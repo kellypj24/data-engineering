@@ -1,7 +1,7 @@
 version: 2
 
 models:
-    - name: bcbsm_annual_member_detail
+    - name: client2_annual_member_detail
       columns:
         - name: discharge_date
           description: >
@@ -16,11 +16,11 @@ models:
 
         - name: institution_id
           description: >
-            unique id for client institution should always be advantasure in this model
+            unique id for client institution should always be client1 in this model
           tests:
             - not_null
             - accepted_values:
-                values: ['advantasure']
+                values: ['client1']
 
         - name: source_patient_id
           description: >
@@ -143,7 +143,7 @@ models:
             created here in the yaml for the purpose of testing unique relationships
           tests:
             - dbt_utils.relationships_where:
-                to: ref('advantasure_billing')
+                to: ref('client1_billing')
                 field: "(source_patient_id || '-' || mrp_visit_date::date)"
                 to_condition: discharge_date between to_date((date_part('year' , current_date) - 1) || '-' || '01' || '-' || '01', 'yyyy-mm-dd') and to_date((date_part('year' , current_date) - 1) || '-' || '12' || '-' || '31', 'yyyy-mm-dd')
                 from_condition: mrp_visit_date is not null and date_diff('day', discharge_date, mrp_visit_date) <= 31

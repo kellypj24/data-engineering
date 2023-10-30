@@ -64,7 +64,7 @@ billing as (
     where opportunities.logical_event_type = 'HD'
         AND NOT patients.is_control
         AND days_between_discharge_and_visit between 0 and 31
-        and patients.institution_id = 'advantasure'
+        and patients.institution_id = 'client1'
 
 )
 

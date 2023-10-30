@@ -17,7 +17,7 @@ filter_opportunities as (
 
     from opportunities
     join patients on opportunities.patient_id = patients.patient_id
-        and patients.institution_id = 'humana'
+        and patients.institution_id = 'client3'
     join cahps_visits on opportunities.opportunity_id = cahps_visits.opportunity_id
         and cahps_visits.cahps_completed = 1
     where opportunities.program_type = 'cahps'

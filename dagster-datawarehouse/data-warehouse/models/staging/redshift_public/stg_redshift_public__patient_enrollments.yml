@@ -4,7 +4,7 @@ models:
     - name: stg_redshift_public__patient_enrollments
       description: >
         Represents attempts to reach a patient to enroll them in
-        Cureatr's services.
+        company's services.
       columns:
           - name: task_id
             description: The primary key of the given row.

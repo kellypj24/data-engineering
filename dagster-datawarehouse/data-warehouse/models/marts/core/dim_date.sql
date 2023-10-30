@@ -1,5 +1,5 @@
 with
-{{ import(ref('stg_cureatr__holiday_calendar'), 'holiday_calendar') }},
+{{ import(ref('stg_company__holiday_calendar'), 'holiday_calendar') }},
 
 date_spine as (
 

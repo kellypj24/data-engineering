@@ -5,7 +5,7 @@ with
 {{ import(ref('fact_finalized_medlist'), 'finalized_med_lists') }},
 {{ import(ref('dim_medication'), 'medication_details') }},
 {{ import(ref('fact_medlist_med'), 'medications') }},
-{{ import(ref('dim_user_cureatr'), 'users') }},
+{{ import(ref('dim_user_company'), 'users') }},
 {{ import(ref('fact_medication_problems'), 'problems') }},
 
 
@@ -80,7 +80,7 @@ final_results as (
     join opportunities on opportunities.opportunity_id = finalized_med_lists.opportunity_id
     join desktop_mrp_events on desktop_mrp_events.opportunity_id = opportunities.opportunity_id
     join patients on patients.patient_id = opportunities.patient_id
-    left join users coauthor on coauthor.cureatr_user_id = finalized_med_lists.coauthor_user_id
+    left join users coauthor on coauthor.company_user_id = finalized_med_lists.coauthor_user_id
 
 )
 

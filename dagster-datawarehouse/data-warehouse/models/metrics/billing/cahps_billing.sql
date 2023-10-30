@@ -62,7 +62,7 @@ billing as (
         and opportunities.opportunity_id = patient_map_sends.opportunity_id
         and patient_map_sends.map_send_sequence = 1
     where not patients.is_control
-        and patients.institution_id = 'humana'
+        and patients.institution_id = 'client3'
     group by
         patients.patient_id,
         patients.given_name,

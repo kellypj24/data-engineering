@@ -3,11 +3,11 @@ version: 2
 models:
     - name: stg_redshift_public__patient_opportunities
       description: > 
-        Represents unique opportunities for Cureatr to provide services to patients
+        Represents unique opportunities for company to provide services to patients
       columns:
           - name: patient_id
             description: > 
-              Cureatr generated unique id for each patient
+              company generated unique id for each patient
             tests:
               - not_null
 
@@ -74,7 +74,7 @@ models:
 
           - name: eligibility_status
             description: >
-              field marking the opportunity as eligible for Cureatr service or not
+              field marking the opportunity as eligible for company service or not
             tests:
               - accepted_values:
                   values: ['ineligible', 'eligible']

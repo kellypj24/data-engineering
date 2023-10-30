@@ -4,7 +4,7 @@ with
 filter_users as (
 
     select
-        id::varchar as cureatr_user_id,
+        id::varchar as company_user_id,
         external_id as user_login,
         iid as institution_id,
         first_name,
@@ -17,7 +17,7 @@ filter_users as (
 
     from users
     where iid in (
-    {% for iid in var('cureatr_user_institutions') -%}
+    {% for iid in var('company_user_institutions') -%}
                 '{{ iid }}'
                 {%- if not loop.last %},{{ '\n' }}{% endif %}
             {%- endfor %}

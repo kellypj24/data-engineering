@@ -57,25 +57,25 @@ vars:
     patient_event__discharge_disposition: "HOME"
 
     patient_institution_filter: [
-      "united",
-      "advantasure",
-      "sinfonia",
-      "humana"
+      "client4",
+      "client1",
+      "client5",
+      "client3"
     ]
 
     contact_institution_filter: [
-      "united",
-      "united_gap",
-      "advantasure",
-      "sinfonia",
-      "humana",
-      "wph_cares"
+      "client4",
+      "client4_gap",
+      "client1",
+      "client5",
+      "client3",
+      "client6"
     ]
 
     patient_subscription_filter: [
-      "united",
-      "advantasure",
-      "sinfonia",
+      "client4",
+      "client1",
+      "client5",
       "chf_program",
       "rtm_chf"
     ]
@@ -135,17 +135,7 @@ vars:
     ]
 
     duplicate_patients_to_ignore: [
-      "6262d19ba3a57a857fb39417",
-      "6262d945a3a57a857fb5d534",
-      "621967c521b65fc6d3137f1b",
-      "6219671e21b65fc6d3137b5a",
-      "621968f521b65fc6d31387a5",
-      "617826d44ab7ef03feec96ca",
-      "6219675e21b65fc6d3137ccf",
-      "6262d463a3a57a857fb45e60",
-      "61781dbb4ab7ef03fee6d341",
-      "6262d2f4a3a57a857fb3f13f",
-      "61782bb94ab7ef03fef1ffb2"
+
     ]
 
     map_finalized_status: "finalized"
@@ -184,9 +174,9 @@ vars:
                  "NY", "NC", "ND", "MP", "OH", "OK", "OR", "PW", "PA", "PR", "RI", "SC",
                  "SD", "TN", "TX", "UT", "VT", "VI", "VA", "WA", "WV", "WI", "WY"      ]
 
-    cureatr_user_institutions: [
-    "cureatrpharmacy",
-    "cureatr"
+    company_user_institutions: [
+    "companypharmacy",
+    "company"
     ]
 
     follow_up_task_types: [
@@ -196,17 +186,9 @@ vars:
     "pharmacy follow-up"
     ]
 
-    cmr_card_name_exclusions: ['WALMT','WRTHI','2485','9716','HTM4','JD68','JD77','PLRX1','PLRX6',
-      'QMTM','AHF01','AHF02','LHP01','LPH01','CARE','IEH01','UHCMR','E3335','E3351','S3521','U3335','U3351'
+    cmr_card_name_exclusions: [
     ]
 
     opportunity_id_tied_same_discharge_date: [
-        '64429ca14833b9ea6b4ec74e',
-        '64387ebd607abb918f7f1918',
-        '63f543b4953814ffd42f88d5',
-        '63f89c17953814ffd42f8fd2',
-        '64d1256101e431a747a59bf6',
-        '64c966f754fba80e1170f4e6',
-        '6460119d4a2f74ea6e0b6c0c',
-        '646304abad771b4b24061973'
+
     ]

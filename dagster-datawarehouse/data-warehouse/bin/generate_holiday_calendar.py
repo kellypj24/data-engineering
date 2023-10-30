@@ -13,7 +13,7 @@ from pandas.tseries.holiday import (
 from pandas.tseries.offsets import DateOffset, Day
 
 
-class CureatrHolidayCalendar(AbstractHolidayCalendar):
+class companyHolidayCalendar(AbstractHolidayCalendar):
     """
     US Federal Government Holiday Calendar based on rules specified by:
     https://www.opm.gov/policy-data-oversight/
@@ -35,7 +35,7 @@ class CureatrHolidayCalendar(AbstractHolidayCalendar):
     ]
 
 
-cal = CureatrHolidayCalendar()
+cal = companyHolidayCalendar()
 holidays = cal.holidays(start="2010-01-01", end="2029-12-31", return_name=True)
 holidays = holidays.reset_index(name="holiday").rename(columns={"index": "date_key"})
-holidays.to_csv("seeds/stg_cureatr__holiday_calendar.csv", index=False)
+holidays.to_csv("seeds/stg_company__holiday_calendar.csv", index=False)

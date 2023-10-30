@@ -13,9 +13,9 @@ models:
           tests:
             - unique
             - dbt_utils.relationships_where:
-                 to: ref('advantasure_billing')
+                 to: ref('client1_billing')
                  field: opportunity_id
-                 from_condition: institution_id = 'advantasure' and map_finalized_date_est is not null and map_transmission_date is not null and date_diff('day', discharge_date, mrp_completed_date) <= 31
+                 from_condition: institution_id = 'client1' and map_finalized_date_est is not null and map_transmission_date is not null and date_diff('day', discharge_date, mrp_completed_date) <= 31
 
         - name: discharge_event_id
           description: >
@@ -34,7 +34,7 @@ models:
 
         - name: patient_id
           description: >
-            Cureatr generated unique patient id.
+            company generated unique patient id.
           tests:
             - not_null
 
@@ -210,23 +210,23 @@ models:
 
         - name: ea_1_reached
           description: >
-            Boolean indicator of Cureatr CSS successfully speaking with patient for first enrollment attempt.
+            Boolean indicator of company CSS successfully speaking with patient for first enrollment attempt.
 
         - name: ea_2_reached
           description: >
-            Boolean indicator of Cureatr CSS successfully speaking with patient for second enrollment attempt.
+            Boolean indicator of company CSS successfully speaking with patient for second enrollment attempt.
 
         - name: ea_3_reached
           description: >
-            Boolean indicator of Cureatr CSS successfully speaking with patient for third enrollment attempt.
+            Boolean indicator of company CSS successfully speaking with patient for third enrollment attempt.
 
         - name: re_enroll_reached
           description: >
-            Boolean indicator of Cureatr CSS successfully speaking with patient for re-enrollment attempt.
+            Boolean indicator of company CSS successfully speaking with patient for re-enrollment attempt.
 
         - name: ea_4_reached
           description: >
-            Boolean indicator of Cureatr CSS successfully speaking with patient for fourth enrollment attempt.
+            Boolean indicator of company CSS successfully speaking with patient for fourth enrollment attempt.
 
         - name: ea_1_scheduled
           description: >
@@ -254,7 +254,7 @@ models:
 
         - name: ea_reached
           description: >
-            Boolean indicator of Cureatr CSS successfully speaking with patient for any enrollment or re-enrollment attempts.
+            Boolean indicator of company CSS successfully speaking with patient for any enrollment or re-enrollment attempts.
 
         - name: ea_scheduled
           description: >
@@ -392,9 +392,9 @@ models:
           tests:
             - unique
             - dbt_utils.relationships_where:
-                to: ref('advantasure_billing')
+                to: ref('client1_billing')
                 field: "(patient_id || '-' || mrp_visit_date::date)"
-                from_condition: institution_id = 'advantasure' and map_finalized_date_est is not null and map_transmission_date is not null and date_diff('day', discharge_date, mrp_completed_date) <= 31
+                from_condition: institution_id = 'client1' and map_finalized_date_est is not null and map_transmission_date is not null and date_diff('day', discharge_date, mrp_completed_date) <= 31
 
       tests:
         - dbt_expectations.expect_compound_columns_to_be_unique:

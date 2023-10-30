@@ -1,11 +1,11 @@
 version: 2
 
 models:
-    - name: stg_redshift_public__users_cureatr
+    - name: stg_redshift_public__users_company
       description: >
-        Represents users within Cureatr with their user keys to tie to objects within our data infrastructure
+        Represents users within company with their user keys to tie to objects within our data infrastructure
       columns:
-          - name: cureatr_user_id
+          - name: company_user_id
             description: >
               The primary key of the given row.  maps to user_id foreign key in other tables.
               Users represented in multiple institutions will have a separate unique key for each institution
@@ -15,7 +15,7 @@ models:
 
           - name: user_login
             description: >
-              login name used by the user to log into cureatr systems.  Generally linked to g-suite SSO login
+              login name used by the user to log into company systems.  Generally linked to g-suite SSO login
             tests:
               - not_null
 
@@ -39,11 +39,11 @@ models:
 
           - name: specialty
             description: >
-              user specialization within Cureatr organization
+              user specialization within company organization
 
           - name: title
             description: >
-              user title within Cureatr organization
+              user title within company organization
 
           - name: time_created
             description: >
@@ -59,4 +59,4 @@ models:
 
           - name: npi
             description: >
-              national provider identifier of Cureatr staff member
+              national provider identifier of company staff member

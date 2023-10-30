@@ -1,6 +1,6 @@
 with
-{{ import(ref('advantasure_billing'), 'billing') }},
-{{ import(ref('dim_user_cureatr'), 'users') }},
+{{ import(ref('client1_billing'), 'billing') }},
+{{ import(ref('dim_user_company'), 'users') }},
 
 filter_med_lists as (
 
@@ -27,7 +27,7 @@ filter_med_lists as (
        'M'                                as SuppSource,
        ''                                 as Result
     from billing
-    join users on users.cureatr_user_id = billing.pharmacist_user_id
+    join users on users.company_user_id = billing.pharmacist_user_id
     where extract(year from map_transmission_date ) = 2023
 
 

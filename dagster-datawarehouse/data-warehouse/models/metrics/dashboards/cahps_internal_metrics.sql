@@ -28,7 +28,7 @@ filter_opportunities as (
     from events
     left join opportunities on events.opportunity_id = opportunities.opportunity_id
     left join patients on opportunities.patient_id = patients.patient_id
-        and patients.institution_id = 'humana'
+        and patients.institution_id = 'client3'
     left join enrollments on events.opportunity_id = enrollments.opportunity_id
     where opportunities.program_type = 'cahps'
     and enrollments.status = 'Completed'

@@ -78,7 +78,7 @@ with
 	left join re_enroll_cmr_event_altered as re_enroll_cmr_event
         on enrollment.opportunity_id = re_enroll_cmr_event.opportunity_id
         and re_enroll_cmr_event.cmr_sequence_desc_altered = 1
-    where enrollment.institution_id IN ('sinfonia')
+    where enrollment.institution_id IN ('client5')
 	)
 
 select *

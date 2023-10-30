@@ -1,6 +1,6 @@
 from dagster import job
 
-from cureatr.ops.sample import hello_redshift
+from company.ops.sample import hello_redshift
 
 
 @job

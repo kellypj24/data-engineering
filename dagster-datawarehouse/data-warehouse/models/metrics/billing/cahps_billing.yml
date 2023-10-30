@@ -3,12 +3,12 @@ version: 2
 models:
     - name: cahps_billing
       description: >
-        Cureatr-generated report identifying billable CAHPS visit completed.
+        company-generated report identifying billable CAHPS visit completed.
 
       columns:
         - name: patient_id
           description: >
-            Cureatr-generated unique patient id.
+            company-generated unique patient id.
           tests:
             - not_null
 
@@ -39,7 +39,7 @@ models:
 
         - name: institution_id
           description: >
-            Cureatr-generated unique client id.
+            company-generated unique client id.
 
         - name: enrollment_date
           description: >
@@ -49,18 +49,18 @@ models:
 
         - name: cahps_visit_date
           description: >
-            Date and time in EST of CAHPS visit assigned by Cureatr Clinic in Cureatr Web App (Meds360).
+            Date and time in EST of CAHPS visit assigned by company Clinic in company Web App (Meds360).
           tests:
             - dbt_utils.expression_is_true:
                 expression: "::date >= enrollment_date::date"
 
         - name: pharmacist_user_id
           description: >
-            cureatr_used_id for pharmacist attached to the finalized MAP (Medication Access Plan).
+            company_used_id for pharmacist attached to the finalized MAP (Medication Access Plan).
 
         - name: map_finalized_date
           description: >
-            Date in EST of MAP finalization completed by Cureatr Clinic in Cureatr Web App (Meds360).
+            Date in EST of MAP finalization completed by company Clinic in company Web App (Meds360).
           tests:
             - dbt_expectations.expect_column_values_to_not_be_null:
                 row_condition: "datediff(hour, cahps_visit_date::date, current_date::date) >= 24"

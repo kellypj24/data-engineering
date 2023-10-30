@@ -10,7 +10,7 @@ filter_institutions as (
 
     select *
     from patients
-    where institution_id IN ('advantasure', 'sinfonia')
+    where institution_id IN ('client1', 'client5')
 
 ),
 

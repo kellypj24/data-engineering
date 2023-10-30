@@ -17,7 +17,7 @@ combined_map_sends (patient_contact_id, opportunity_id, map_transmission_method,
         provider_map_sends.recipient_provider_npi,
         provider_map_sends.recipient_provider_name
     from provider_map_sends
-    where institution_name = 'Advantasure'
+    where institution_name = 'client1'
     and opportunity_id IS NOT NULL
 
     union
@@ -31,7 +31,7 @@ combined_map_sends (patient_contact_id, opportunity_id, map_transmission_method,
         null as provider_npi,
         null as provider_name
     from patient_map_sends
-    where institution_name = 'Advantasure'
+    where institution_name = 'client1'
     and opportunity_id IS NOT NULL
 
 ),
@@ -73,7 +73,7 @@ filter_map_sends as (
         and opportunities.opportunity_id = combined_map_sends.opportunity_id
     where opportunities.logical_event_type = 'HD'
         AND NOT patients.is_control
-        and patients.institution_id = 'advantasure'
+        and patients.institution_id = 'client1'
 
 )
 

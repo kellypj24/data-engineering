@@ -7,7 +7,7 @@ models:
       columns:
           - name: patient_id
             description: >
-              The Cureatr generated unique identifier for the patient.
+              The company generated unique identifier for the patient.
             tests:
                 - dbt_expectations.expect_column_values_to_not_be_null:
                     row_condition: "missing_follow_up is not null"

@@ -4,30 +4,30 @@ from dagster import In, Out, op
 
 
 @op
-def generate_filename_humana_gnd_outcomes_weekly():
+def generate_filename_client3_gnd_outcomes_weekly():
     today = pendulum.now().format("YYYYMMDD")
-    filename = f"Cureatr_Disposition_20230516_{today}"
+    filename = f"company_Disposition_20230516_{today}"
     return filename
 
 
 @op
-def generate_filename_humana_dmrp_event_level_weekly():
+def generate_filename_client3_dmrp_event_level_weekly():
     today = pendulum.now().format("YYYYMMDD")
-    filename = f"Cureatr_Humana_EVENT_Detail_{today}"
+    filename = f"company_client3_EVENT_Detail_{today}"
     return filename
 
 
 @op
-def generate_filename_humana_dmrp_map_extract_weekly():
+def generate_filename_client3_dmrp_map_extract_weekly():
     today = pendulum.now().format("YYYYMMDD")
-    filename = f"Cureatr_Humana_MAP_Extract_{today}"
+    filename = f"company_client3_MAP_Extract_{today}"
     return filename
 
 
 @op
-def generate_filename_humana_dmrp_supplemental():
+def generate_filename_client3_dmrp_supplemental():
     today = pendulum.now().format("YYYYMMDD")
-    filename = f"CUREATR_humanasupplemental_{today}"
+    filename = f"company_client3supplemental_{today}"
     return filename
 
 

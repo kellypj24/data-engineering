@@ -23,9 +23,9 @@ docker run --pull always --init --rm "${docker_args[@]}" \
     --workdir=/home/dagster \
     --env=DAGSTER_HOME=/home/dagster/.dagster/home \
     --env=PYTHONPATH=/home/dagster \
-    --env=PGHOST=${PGHOST:-bastion1-public.live.internal.aws.cureatr.com} \
+    --env=PGHOST=${PGHOST:-bastion1-public.live.internal.aws.company.com} \
     --env=PGPORT=${PGPORT:-5432} \
-    --env=PGDATABASE=${PGDATABASE:-cureatr} \
+    --env=PGDATABASE=${PGDATABASE:-company} \
     --env=PGSSLMODE=require \
     --env=PGUSER=${PGUSER:-$USER} \
     --env=PGPASSWORD=${PGPASSWORD} \
@@ -34,5 +34,5 @@ docker run --pull always --init --rm "${docker_args[@]}" \
     --env=PGSCHEMA=${PGSCHEMA:-$USER} \
     --hostname $USER-dagster.dev \
     -p 3000:3000 \
-    public.ecr.aws/cureatr/datascience-dagster-base:${DAGSTER_TAG:-dev} \
+    public.ecr.aws/company/datascience-dagster-base:${DAGSTER_TAG:-dev} \
     "${command_args[@]}"

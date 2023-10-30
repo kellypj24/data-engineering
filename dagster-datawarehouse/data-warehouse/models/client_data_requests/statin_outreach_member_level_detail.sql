@@ -8,7 +8,7 @@ filter_enrollments as (
 
     select
         case
-            when patients.institution_id = 'advantasure' then 'bcbsm'
+            when patients.institution_id = 'client1' then 'client2'
             else patients.institution_id
         end as institution_id,
 

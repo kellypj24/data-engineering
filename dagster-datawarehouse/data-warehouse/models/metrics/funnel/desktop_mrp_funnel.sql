@@ -5,7 +5,7 @@ with
 {{ import(ref('fact_finalized_medlist'), 'finalized_med_lists') }},
 {{ import(ref('fact_map_send'), 'map_sends') }},
 {{ import(ref('fact_discharge_summary_needed'), 'ds_needed') }},
-{{ import(ref('dim_user_cureatr'), 'users') }},
+{{ import(ref('dim_user_company'), 'users') }},
 {{ import(ref('fact_admin_qa'), 'admin_qa') }},
 {{ import(ref('fact_provider_urgent_request'), 'pur') }},
 
@@ -89,7 +89,7 @@ filter_opportunities as (
     left join finalized_med_lists on finalized_med_lists.opportunity_id = opportunities.opportunity_id
         and finalized_med_lists.map_sequence = 1
     left join map_sends on map_sends.opportunity_id = opportunities.opportunity_id
-    left join users on finalized_med_lists.pharmacist_user_id = users.cureatr_user_id
+    left join users on finalized_med_lists.pharmacist_user_id = users.company_user_id
     left join admin_qa on opportunities.opportunity_id = admin_qa.opportunity_id
     left join ds_needed on opportunities.opportunity_id = ds_needed.opportunity_id
         and ds_needed.task_sequence_desc = 1

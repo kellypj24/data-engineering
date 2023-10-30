@@ -18,7 +18,7 @@ with
             opportunity.discharge_date
         from dim_patient
                  join opportunity on dim_patient.patient_id = opportunity.patient_id
-        where dim_patient.institution_id in ('advantasure')
+        where dim_patient.institution_id in ('client1')
           and DATE_DIFF('day', opportunity.discharge_date::date, CURRENT_DATE) >= 30)     -- bring discharge date in from fact_discharges and joins on discharge event id
 
     , completed_mrp_visits as (

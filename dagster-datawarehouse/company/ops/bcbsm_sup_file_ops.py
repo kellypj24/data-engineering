@@ -56,7 +56,7 @@ def output_dataframe_to_redshift(context, dataframe: pd.DataFrame):
 
 
 @op
-def generate_filename_bcbsm_supplemental():
+def generate_filename_client2_supplemental():
     today = pendulum.now()
     last_month = today.subtract(months=1)
     current_year = last_month.year
@@ -67,14 +67,14 @@ def generate_filename_bcbsm_supplemental():
 
 
 @op
-def generate_file_name_bcbsm_statin_outreach_completed_visits():
+def generate_file_name_client2_statin_outreach_completed_visits():
     today = pendulum.now().format("YYYYMMDD")
-    filename = f"CUR_BCBSM_Statin_Member_Completed_Visit_Report_{today}"
+    filename = f"CUR_client2_Statin_Member_Completed_Visit_Report_{today}"
     return filename
 
 
 @op
-def generate_file_name_bcbsm_statin_outreach_member_disposition():
+def generate_file_name_client2_statin_outreach_member_disposition():
     today = pendulum.now().format("YYYYMMDD")
-    filename = f"CUR_BCBSM_Statin_Member_Disposition_Report_{today}"
+    filename = f"CUR_client2_Statin_Member_Disposition_Report_{today}"
     return filename

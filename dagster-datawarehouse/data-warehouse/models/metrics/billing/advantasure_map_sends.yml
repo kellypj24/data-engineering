@@ -1,12 +1,12 @@
 version: 2
 
 models:
-    - name: advantasure_map_sends
+    - name: client1_map_sends
 
       columns:
           - name: mrp_visit_date
             description: >
-                Date of visit with Cureatr clinic
+                Date of visit with company clinic
             tests:
                 - dbt_expectations.expect_column_values_to_not_be_null:
                     row_condition: "mrp_visit_date is not null and 
@@ -14,7 +14,7 @@ models:
                     datediff(hour, mrp_visit_date, map_finalized_date) <= 24"
           - name: patient_id
             description: >
-                Cureatr generated id for each patient
+                company generated id for each patient
             tests:
               - not_null
           - name: discharge_event_id
@@ -44,7 +44,7 @@ models:
               - not_null
           - name: map_finalized_date
             description: >
-              Date in EST of MAP finalization completed by Cureatr Clinic in Cureatr Web App (Meds360).
+              Date in EST of MAP finalization completed by company Clinic in company Web App (Meds360).
             tests:
               - not_null
           - name: days_between_visit_and_map_finalized

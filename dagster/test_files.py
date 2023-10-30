@@ -3,7 +3,7 @@ from datetime import datetime
 import pandas as pd
 from dagster import asset
 
-from cureatr.io_managers.google_drive_io_manager import (
+from company.io_managers.google_drive_io_manager import (
     FileNameConstructor,
     GoogleDriveCsvFile,
     GoogleDriveDestination,

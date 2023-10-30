@@ -21,7 +21,7 @@ discharge_pdc   as (select pdc.patient_id
                          where pdc.followup_interval_in_days = 0
 	                       and pdc.discharge_event_id is not null
                            and discharge_record_created >= '2022-11-01'
-                           and pdc.iid = 'advantasure')
+                           and pdc.iid = 'client1')
 
    , discharge_date  as (select
                               discharge_pdc.patient_id

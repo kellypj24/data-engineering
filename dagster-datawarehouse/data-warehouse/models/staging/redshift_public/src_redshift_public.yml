@@ -3,12 +3,12 @@ version: 2
 sources:
   - name: redshift_public
     schema: public
-    database: cureatr
+    database: company
     loader: server
 
     tables:
       - name: dim_institution
-        description: Represents a client institution of Cureatr
+        description: Represents a client institution of company
         columns:
           - name: id
             tests:
@@ -177,13 +177,13 @@ sources:
 
           - name: patient_id
             description: >
-              Cureatr generated unique patient key
+              company generated unique patient key
             tests:
               - not_null
 
           - name: iid
             description: >
-              unique id for Cureatr customer institution
+              unique id for company customer institution
             tests:
               - not_null
 
@@ -196,7 +196,7 @@ sources:
               - not_null
 
           - name: patient_id
-            description: cureatr unique patient_id
+            description: company unique patient_id
             tests:
               - not_null
 
@@ -233,7 +233,7 @@ sources:
               - not_null
 
           - name: patient_id
-            description: cureatr unique patient_id
+            description: company unique patient_id
             tests:
               - not_null
 
@@ -382,7 +382,7 @@ sources:
       - name: dim_user
         description: >
           dimensional table containing users and their keys across all applications.
-          This includes customers as well as internal Cureatr users.
+          This includes customers as well as internal company users.
 
       - name: fact_patient_pdc
         description: >

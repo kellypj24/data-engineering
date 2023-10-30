@@ -73,11 +73,11 @@ models:
 
           - name: completed_by_user_id
             description: >
-              Salesforce generated unique user id of Cureatr Clinic staff member who completed the MAP.
+              Salesforce generated unique user id of company Clinic staff member who completed the MAP.
 
           - name: completed_by_user_name
             description: >
-              Proper name of Cureatr Clinic staff member who completed the MAP.
+              Proper name of company Clinic staff member who completed the MAP.
 
           - name: time_created
             description: >

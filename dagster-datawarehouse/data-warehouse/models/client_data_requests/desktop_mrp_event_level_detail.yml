@@ -9,7 +9,7 @@ models:
       columns:
         - name: patient_id
           description: >
-            Cureatr generated unique id for a patient not required for this report used for testing
+            company generated unique id for a patient not required for this report used for testing
           tests:
             - not_null
 

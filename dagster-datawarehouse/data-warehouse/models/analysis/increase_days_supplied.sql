@@ -17,7 +17,7 @@ with
         from dim_patient
             join opportunity on dim_patient.patient_id = opportunity.patient_id
                  and lower(dim_patient.control_type) in ('intervention', 'control')
-        where dim_patient.institution_id in ('advantasure', 'united')
+        where dim_patient.institution_id in ('client1', 'client4')
     )
 
    , ea_indicator as (

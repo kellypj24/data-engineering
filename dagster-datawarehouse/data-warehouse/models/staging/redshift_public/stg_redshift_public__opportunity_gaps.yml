@@ -3,7 +3,7 @@ version: 2
 models:
     - name: stg_redshift_public__opportunity_gaps
       description: > 
-        Represents unique opportunities for Cureatr to provide services to patients
+        Represents unique opportunities for company to provide services to patients
       columns:
           - name: opportunity_id
             description: >
@@ -19,7 +19,7 @@ models:
 
           - name: patient_id
             description: > 
-              Cureatr generated unique id for each patient
+              company generated unique id for each patient
             tests:
               - not_null
 

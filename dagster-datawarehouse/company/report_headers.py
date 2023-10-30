@@ -8,8 +8,8 @@ class FileGenerationReportHeader:
 
 
 class FileGenerationReportHeaders:
-    BCBSM_SUPPLEMENTAL = FileGenerationReportHeader(
-        name="bcbsm_supplemental",
+    client2_SUPPLEMENTAL = FileGenerationReportHeader(
+        name="client2_supplemental",
         mapping={
             "memberkey": "MemberKey",
             "providerkey": "ProviderKey",

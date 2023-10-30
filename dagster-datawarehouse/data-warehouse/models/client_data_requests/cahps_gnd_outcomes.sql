@@ -18,7 +18,7 @@ filter_opportunities as (
 
     from opportunities
     join patients on opportunities.patient_id = patients.patient_id
-        and patients.institution_id = 'humana'
+        and patients.institution_id = 'client3'
     join enrollments on opportunities.opportunity_id = enrollments.opportunity_id
         and enrollments.task_type = 'Enrollment Attempt #1'
     where opportunities.program_type = 'cahps'

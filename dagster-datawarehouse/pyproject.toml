@@ -1,5 +1,5 @@
 [tool.dagster]
-module_name = "cureatr"
+module_name = "company"
 
 [tool.mypy]
 incremental = true

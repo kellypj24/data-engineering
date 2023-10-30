@@ -2,8 +2,8 @@ import pandas as pd
 import sqlalchemy as sa
 from dagster import In, Out, op
 
-from cureatr.sql import FileGenerationQuery
-from cureatr.utils import BIGQUERY_URL, google_credentials
+from company.sql import FileGenerationQuery
+from company.utils import BIGQUERY_URL, google_credentials
 
 
 def op_factory_from_query(query: FileGenerationQuery):
