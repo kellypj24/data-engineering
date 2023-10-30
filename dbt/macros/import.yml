@@ -1,0 +1,20 @@
+version: 2
+
+macros:
+  - name: import
+    description: >
+      Templates a `select * from x` CTE. Used to help improve readability when all references are listed
+      by line at the top of the file.
+
+      This macro intentionally does not provide the ability to modify the select statement since it is usually
+      more appropriate to push the logic up the dependency graph into a well defined model.
+
+      Regarding the performance concerns of using blanket `select *`s everywhere, see
+      https://discourse.getdbt.com/t/ctes-are-passthroughs-some-research/155
+    arguments:
+      - name: from
+        type: model
+        description: The ref or source to import.
+      - name: alias_name
+        type: string
+        description: The string to alias the CTE with.
