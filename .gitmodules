@@ -1,0 +1,3 @@
+[submodule "datascience-dagster"]
+	path = datascience-dagster
+	url = git@github.com:cureatr/datascience-dagster.git
