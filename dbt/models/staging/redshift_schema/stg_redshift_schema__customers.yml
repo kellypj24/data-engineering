@@ -1,0 +1,11 @@
+version: 2
+
+models:
+    - name: stg_redshift_schema__customers
+      description: Represents eligible customers
+      columns:
+          - name: customer_id
+            description: The primary key of the given row.
+            tests:
+                - unique
+                - not_null
