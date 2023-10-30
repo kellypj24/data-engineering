@@ -1,0 +1,26 @@
+version: 2
+
+models:
+    - name: dim_srx_current_contracts
+      description: >
+        Contracts for the current year and plan information related to them
+      columns:
+        - name: card_name
+          description: Internally-generated id to differentiate sponsor's customers.
+          tests:
+            - not_null
+
+        - name: logo_id
+          description: Contract identifier.
+          tests:
+            - not_null
+
+        - name: program_name
+          description: Name of program
+          tests:
+            - not_null
+
+        - name: plan_name
+          description: Name of plan from the customer
+          tests:
+            - not_null

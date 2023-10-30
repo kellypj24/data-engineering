@@ -1,0 +1,63 @@
+name: Build Docker
+on:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - 'deploy/*'
+      - 'deploy-*'
+
+jobs:
+  docker:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+    - name: Login to Private ECR
+      uses: docker/login-action@v2
+      with:
+        registry: 262456549263.dkr.ecr.us-west-2.amazonaws.com
+        username: ${{ secrets.CUREATR_ECR_AWS_ACCESS_KEY_ID }}
+        password: ${{ secrets.CUREATR_ECR_AWS_SECRET_ACCESS_KEY }}
+    - name: Login to Public ECR
+      uses: docker/login-action@v2
+      with:
+        registry: public.ecr.aws
+        username: ${{ secrets.CUREATR_ECR_AWS_ACCESS_KEY_ID }}
+        password: ${{ secrets.CUREATR_ECR_AWS_SECRET_ACCESS_KEY }}
+    - name: Build/Push Docker
+      id: docker
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.CUREATR_ECR_AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.CUREATR_ECR_AWS_SECRET_ACCESS_KEY }}
+      run: |
+        SHA_TAG=sha-${GITHUB_SHA}
+        # If no SHA_TAG image exists in ECR, build it
+        NO_IMAGE=$(aws --region us-west-2 ecr batch-get-image --repository-name datascience-dagster --image-ids imageTag=${SHA_TAG} | jq -M .failures[0].imageId.imageTag)
+        if [ "$NO_IMAGE" != "null" ]; then
+          docker buildx build --push --build-arg tag=${SHA_TAG} --pull --tag 262456549263.dkr.ecr.us-west-2.amazonaws.com/datascience-dagster:${SHA_TAG} .
+        fi
+
+        if [ "$GITHUB_REF_NAME" == "main" ]; then
+            echo "image=262456549263.dkr.ecr.us-west-2.amazonaws.com/datascience-dagster:${SHA_TAG}" >> $GITHUB_OUTPUT
+        else
+            # Add the specified ECR tag to that image
+            # https://docs.aws.amazon.com/AmazonECR/latest/userguide/image-retag.html
+            # Replace '/'' with '-'' to be docker legal
+            TAG=${GITHUB_REF_NAME/\//-}
+            MANIFEST=$(aws --region us-west-2 ecr batch-get-image --repository-name datascience-dagster --image-ids imageTag=${SHA_TAG} --query 'images[].imageManifest' --output text)
+            aws --region us-west-2 ecr put-image --repository-name datascience-dagster --image-tag ${TAG} --image-manifest "$MANIFEST"
+        fi
+    - name: Update Dagster Code Location
+      if: steps.docker.outputs.image
+      run: |
+          # Update main dagster code location
+          bin/_docker-run.sh --entrypoint=/bin/bash \
+            --env=DAGSTER_CLOUD_ORGANIZATION=cureatr \
+            --env=DAGSTER_CLOUD_DEPLOYMENT=prod \
+            --env=DAGSTER_CLOUD_API_TOKEN=${{ secrets.CUREATR_DAGSTER_API_KEY }} \
+            --command -c "dagster-cloud workspace add-location main --image ${{ steps.docker.outputs.image }} --package-name cureatr"
+

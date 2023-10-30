@@ -1,0 +1,87 @@
+version: 2
+
+models:
+    - name: fact_statin_outreach_visit
+      description: >
+        Represents clinical staff meeting with a patient to educate about statin use.
+
+      columns:
+          - name: statin_outreach_event_id
+            description: >
+              The primary key of given row representing a completed statin outreach visit.
+
+          - name: discharge_event_id
+            description: >
+              Unique id associated with patient hospital discharge related to the statin outreach visit.
+
+          - name: opportunity_id
+            description: >
+              Unique id associated with patient service opportunities.
+
+          - name: account_id
+            description: >
+              Salesforce generated patient event id.
+
+          - name: institution_name
+            description: >
+              The client name associated with the patient.
+
+          - name: patient_contact_id
+            description: >
+              Salesforce generated unique patient id.
+
+          - name: time_start
+            description: >
+              Date and time in EST marking the start of the statin outreach visit.
+
+          - name: statin outreach_visit_date
+            description: >
+              Date and time in UTC marking the end of the statin outreach visit.
+
+          - name: statin outreach_visit_date_est
+            description: >
+              Date and time in EST marking the end of the statin outreach visit.
+
+          - name: event_type
+            description: >
+              Type of event performed, focused to Statin Gap.
+
+          - name: event_disposition
+            description: >
+              Outcome of statin outreach visit.
+
+          - name: statin outreach_status
+            description: >
+              Status of statin outreach visit.
+
+          - name: time_created
+            description: >
+              Date and time in EST when the event was created in Salesforce.
+
+          - name: time_updated
+            description: >
+              Date and time in EST when the event was last updated in Salesforce.
+
+          - name: statin outreach_completed
+            description: >
+              Boolean indicator whether statin outreach event has been completed.
+
+          - name: statin outreach_sequence
+            description: >
+              Ascending date order in which the statin outreaches occur per patient opportunity.
+
+          - name: statin outreach_sequence_desc
+            description: >
+              Descending date order in which the statin outreaches occur per patient opportunity.
+
+          - name: statin outreach_completed_sequence
+            description: >
+              Ascending date order in which the completed statin outreaches occur per patient opportunity.
+
+          - name: statin outreach_bad_phone_number
+            description: >
+              Boolean indicator whether patient phone number is unreachable.
+
+          - name: no_show
+            description: >
+              Boolean indicator whether patient did not attend the statin outreach visit.

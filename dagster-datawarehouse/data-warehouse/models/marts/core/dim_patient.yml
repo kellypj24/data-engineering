@@ -1,0 +1,13 @@
+version: 2
+
+models:
+    - name: dim_patient
+      description: >
+        Patient dimension providing descriptive information across all patients.
+      columns:
+        - name: patient_id
+          description: >
+            Unique Cureatr id for each patient.
+          tests:
+            - not_null
+            - unique

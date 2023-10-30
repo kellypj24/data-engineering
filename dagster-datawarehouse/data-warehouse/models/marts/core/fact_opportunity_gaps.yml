@@ -1,0 +1,50 @@
+version: 2
+
+models:
+    - name: fact_opportunity_gaps
+      description: > 
+        Represents unique opportunities for Cureatr to provide services to patients
+      columns:
+          - name: opportunity_id
+            description: >
+              id representing a unique patient opportunity
+            tests:
+              - not_null
+
+          - name: institution_id
+            description: >
+              id representing a unique institution
+            tests:
+              - not_null
+
+          - name: patient_id
+            description: > 
+              Cureatr generated unique id for each patient
+            tests:
+              - not_null
+
+          - name: gap_added_date
+            description: >
+              when the gap was added in eastern time
+
+          - name: gap
+            description: >
+              text representing the gap
+            tests:
+              - not_null
+
+          - name: pdc
+            description: >
+              percent days covered by current refills indicating medication adherence
+
+          - name: gap_payment_status
+            description: >
+              indicates whether the payment is potential or earned already by our work
+            tests:
+              - not_null
+
+          - name: gap_payment
+            description: >
+              total payment for the gap
+            tests:
+              - not_null

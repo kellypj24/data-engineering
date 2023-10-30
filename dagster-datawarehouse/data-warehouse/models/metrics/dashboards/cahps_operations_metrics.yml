@@ -1,0 +1,88 @@
+version: 2
+
+models:
+    - name: cahps_operations_metrics
+      description: >
+        dataset for CAHPS operations reporting metrics
+
+      columns:
+        - name: opportunity_id
+          description: >
+              unique id for the opportunity to serve the patient.
+          tests:
+            - unique
+            - not_null
+
+        - name: patient_id
+          description: >
+            Cureatr generated unique id for the patient.
+          tests:
+            - not_null
+
+        - name: institution_id
+          description: >
+             id for the client institution the patient is registered with.
+          tests:
+            - not_null
+
+        - name: opportunity_created_date
+          description: >
+             Date the patient opportunity was created.
+          tests:
+            - not_null
+
+        - name: visit_completed_date
+          description: >
+             Date the CAHPS visit was completed with a patient.
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: "> opportunity_created_date"
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "map_send_date is not null"
+
+        - name: member_attempted
+          description: >
+             Indicates whether or not we attempted to reach a patient.
+          tests:
+            - not_null
+
+        - name: member_reached
+          description: >
+            Indicates whether or not we were able to reach a patient.
+          tests:
+            - not_null
+
+        - name: member_accepted
+          description: >
+            Indicates whether or not a patient agreed to a visit.
+          tests:
+            - not_null
+
+        - name: member_reached_accepted
+          description: >
+            Indicates whether or not a patient we reached agreed to a visit.
+          tests:
+            - not_null
+
+        - name: member_attempted_within_24hrs_eligibility
+          description: >
+            Indicates whether or not we attempted to reach a patient within 24 hours of eligibility.
+          tests:
+            - not_null
+
+        - name: map_send_date
+          description: >
+            Date the MAP was sent to the patient.
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                  row_condition: "visit_complete is not null and datediff(day, visit_completed_date, map_send_date) < 2"
+            - dbt_utils.expression_is_true:
+                  expression: "::date >= visit_completed_date::date"
+
+      tests:
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "visit_completed_date" ]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false
+
+

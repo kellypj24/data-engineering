@@ -1,0 +1,21 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__map_sends
+      description: >
+        Represents Medication Action Plans to be sent to a provider
+      columns:
+          - name: task_id
+            description: The primary key of the given row.
+            tests:
+                - unique
+                - not_null
+
+          - name: discharge_event_id
+            description: >
+              The discharge event related to the map being sent. This value can
+              currently be null, but should not allowed to be.
+
+          - name: "(discharge_event_id || '-' || map_transmission_date_est::date)"
+            description: >
+              field created for testing unique map sends existence downstream

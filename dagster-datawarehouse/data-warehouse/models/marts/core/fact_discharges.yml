@@ -1,0 +1,6 @@
+version: 2
+
+models:
+    - name: fact_discharges
+      description: >
+        fact table listing discharges from the hospital with the potential to trigger cureatr services

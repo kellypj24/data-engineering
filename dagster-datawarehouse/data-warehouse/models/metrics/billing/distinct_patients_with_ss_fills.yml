@@ -1,0 +1,7 @@
+version: 2
+
+models:
+    - name: distinct_patients_with_ss_fills
+      description: calculates the number of distinct patient SS pulls between Dec 1st to Dec 1st rolling
+                   for notification when this value exceeds 50k.
+

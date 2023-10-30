@@ -1,0 +1,6 @@
+version: 2
+
+models:
+    - name: fact_cahps_visit
+      description: >
+        Represents clinical staff meeting with a patient to review CAHPS survey results

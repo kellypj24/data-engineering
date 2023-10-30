@@ -1,0 +1,74 @@
+version: 2
+
+sources:
+  - name: redshift_datascience
+    schema: datascience
+    database: cureatr
+    loader: server
+
+    tables:
+      - name: mf2tcgpi
+        description: lists general product identifiers for medications and provides hierarchical classification information
+        columns:
+          - name: tcgpi_id
+            description: id for general product
+            tests:
+              - not_null
+
+          - name: tcgpi_name
+            description: name associated with gpi_id
+            tests:
+              - not_null
+
+          - name: tc_level_code
+            description: therapeutic class leveling for tcgpi_id
+            tests:
+              - not_null
+
+      - name: mf2name
+        description: lists drug descriptor ids for medications with respective dosage and strength information
+        columns:
+          - name: drug_descriptor_id
+            description: id for medication name
+            tests:
+              - not_null
+              - unique
+
+          - name: drug_name
+            description: name associated with drug_id
+            tests:
+              - not_null
+
+          - name: route_of_administration
+            description: how the medication was administered (e.g. IV, IJ, OP)
+            tests:
+              - not_null
+
+          - name: dosage_form
+            description: form of medication dose (e.g. TABS, SOLN, SYRP)
+            tests:
+              - not_null
+
+          - name: strength
+            description: strength of medication administered
+
+          - name: strength_unit_of_measure
+            description: measurement for medication strength (e.g. MG, %)
+
+          - name: generic_product_identifier
+            description: id for general product
+            tests:
+              - not_null
+
+      - name: mf2ndc
+        description: lists national drug codes for medications
+        columns:
+          - name: ndc_upc_hri
+            description: national drug code (NDC)
+            tests:
+              - not_null
+
+          - name: drug_descriptor_id
+            description: id for medication name
+            tests:
+              - not_null

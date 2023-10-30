@@ -1,0 +1,20 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__patient_map_sends
+      description: >
+        Represents Medication Action Plans to be sent to a patient
+      columns:
+          - name: task_id
+            description: The primary key of the given row.
+            tests:
+                - unique
+                - not_null
+
+          - name: opportunity_id
+            description: >
+              The opportunity event related to the map being sent.
+
+          - name: "(opportunity_id || '-' || map_transmission_date_est::date)"
+            description: >
+              field created for testing unique map sends existence downstream

@@ -1,0 +1,61 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__patient_medication_problems
+      description: >
+        Lists issues patient have with taking medication
+      columns:
+        - name: patient_med_problems_id
+          description: Unique identifier for each patients medication issue per medication
+          tests:
+            - not_null
+
+        - name: institution_id
+          description: Unique institution identifier
+          tests:
+            - not_null
+
+        - name: patient_id
+          description: Unique institution identifier
+          tests:
+            - not_null
+
+        - name: medlist_id
+          description: Identifier for each list of medications a patient is taking
+          tests:
+            - not_null
+
+        - name: medlist_med_id
+          description: Identifier for each medication within the list
+          tests:
+            - not_null
+
+        - name: problem
+          description: Problem identified by pharmacist at visit
+          tests:
+            - not_null
+
+        - name: category
+          description: Type of problem identified
+          tests:
+            - not_null
+
+        - name: is_emergent
+          description: Identifies high risk problems
+          tests:
+            - not_null
+
+        - name: status
+          description: Indicator for whether problem is still occurring or has been resolved
+          tests:
+            - not_null
+
+        - name: time_created
+          description: Time problem was identified
+          tests:
+            - not_null
+
+        - name: interventions
+          description: Any actions taken to resolve the issue
+          tests:
+            - not_null

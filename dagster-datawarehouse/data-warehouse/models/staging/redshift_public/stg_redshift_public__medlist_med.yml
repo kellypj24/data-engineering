@@ -1,0 +1,21 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__medlist_med
+      description: >
+        Represents the individual medications that exists within a patients unique medlist.
+      columns:
+        - name: medlist_id
+          description: unique_id for each medication list
+          tests:
+            - not_null
+
+        - name: drug_id
+          description: medication identifier for each medication in a medlist
+          tests:
+            - not_null
+
+        - name: medlist_drug_name
+          description: name of the medication
+          tests:
+            - not_null

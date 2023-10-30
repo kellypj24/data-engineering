@@ -1,0 +1,6 @@
+version: 2
+
+models:
+    - name: fact_discharge_summary_needed
+      description: >
+        Fact table capturing Discharge Summary Needed task information

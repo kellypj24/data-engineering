@@ -1,0 +1,6 @@
+version: 2
+
+models:
+    - name: fact_srx_call_log
+      description: >
+        Fact table capturing individual calls made or received

@@ -1,0 +1,26 @@
+version: 2
+
+models:
+    - name: fact_finalized_medlist
+      description: >
+        Medlists that have been finalized for patients. Medlists represent the 
+        list of medications that a patient is currently taking or is recommended taking.
+      columns:
+          - name: med_list_id
+            description: The primary key of the given row.
+            tests:
+                - unique
+                - not_null
+
+          - name: patient_id
+            tests:
+                - not_null
+
+          - name: institution_id
+            tests:
+                - not_null
+
+          - name: discharge_event_id
+            tests:
+              - dbt_utils.expression_is_true:
+                  expression: "is not null or institution_id not in ('advantasure', 'sinfonia')"

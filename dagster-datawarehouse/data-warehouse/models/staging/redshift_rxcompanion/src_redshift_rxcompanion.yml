@@ -1,0 +1,37 @@
+version: 2
+
+sources:
+  - name: redshift_rxcompanion
+    schema: rxcompanion
+    database: rxcompanion
+    loader: server
+
+    tables:
+      - name: rxc_subscriber
+        description: > 
+          This table contains the subscriber information for the RxCompanion
+          application.
+
+      - name: rxc_history_qualification
+        description: >
+          This table contains the qualification data for subscribers.
+
+      - name: rxc_sponsor_ref
+        description: >
+          This table contains the master list of sponsors and plan (card) names.
+
+      - name: rxc_subscriber_perm_optout
+        description: >
+          This table contains the list of patients that have opted out of a program permanently.
+
+      - name: rxc_contracts
+        description: >
+          This table contains information around the different contracts for the current year.
+
+      - name: rxc_call_log
+        description: >
+          This table contains master list of all calls.
+
+      - name: application_user
+        description: >
+          This table contains the master list of all HUB users, mostly call center callers and their information.

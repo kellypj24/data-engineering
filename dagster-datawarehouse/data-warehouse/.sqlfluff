@@ -1,0 +1,34 @@
+[sqlfluff]
+templater = dbt
+dialect = redshift
+# L048 throws an exception
+exclude_rules = L034, L048
+
+[sqlfluff:indentation]
+indented_joins = False
+indented_on_contents = False
+
+[sqlfluff:rules]
+tab_space_size = 4
+max_line_length = 120
+indent_unit = space
+comma_style = trailing
+# allow_scalar = True
+# single_table_references = consistent
+# unquoted_identifiers_policy = all
+
+[sqlfluff:rules:L003]
+# https://docs.sqlfluff.com/en/stable/rules.html#sqlfluff.rules.Rule_L003
+hanging_indents = False
+
+[sqlfluff:rules:L010]
+# https://docs.sqlfluff.com/en/stable/rules.html#sqlfluff.rules.Rule_L010
+capitalisation_policy = lower
+
+[sqlfluff:rules:L014]
+# https://docs.sqlfluff.com/en/stable/rules.html#sqlfluff.rules.Rule_L014
+capitalisation_policy = lower
+
+[sqlfluff:rules:L030]
+# https://docs.sqlfluff.com/en/stable/rules.html#sqlfluff.rules.Rule_L030
+capitalisation_policy = lower

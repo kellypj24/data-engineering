@@ -1,0 +1,17 @@
+.cache
+.dagster/.*
+.dagster/logs
+.dagster/home/.*
+.dagster/home/history
+.dagster/home/schedules
+.dagster/home/storage
+data-warehouse/dbt_packages
+.local/
+__pycache__
+
+# User-specific stuff
+.idea/*
+.bash_history
+
+#General
+.DS_Store

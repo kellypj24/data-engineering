@@ -1,0 +1,194 @@
+version: 2
+
+models:
+    - name: desktop_mrp_funnel
+      description: >
+          Represents the collection of a patient's potential Desktop MRP services after a patient opportunity is created.
+
+      columns:
+        - name: opportunity_id
+          description: >
+            Unique id associated with patient service opportunities.
+          tests:
+            - unique
+
+        - name: opportunity_created_date
+          description: >
+            Date in EST when patient opportunity was created.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: timestamp without time zone
+
+        - name: patient_id
+          description: >
+            Cureatr generated unique patient id.
+          tests:
+            - not_null
+
+        - name: source_patient_id
+          description: >
+            Unique patient id provided by client.
+          tests:
+            - not_null
+
+        - name: institution_id
+          description: >
+            Unique id for client institution.
+          tests:
+            - not_null
+
+        - name: plan_name
+          description: >
+            Describes patient's insurance plan coverage type.
+
+        - name: contract_id
+          description: >
+            Associated contract id for plan name.
+
+        - name: desktop_mrp_completed_date
+          description: >
+            Date and time in EST of the desktop MRP completed per patient opportunity id.
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "extract(year from desktop_mrp_completed_date) >= 2023 and datediff(hour, desktop_mrp_completed_date, map_finalized_date) <=24"
+
+        - name: desktop_mrp_completed_by
+          description: >
+            Clinic staff who completed the desktop MRP.
+
+        - name: desktop_mrp_disposition
+          description: >
+            Outcome of desktop MRP.
+
+        - name: desktop_mrp_status
+          description: >
+            Status of desktop MRP.
+
+        - name: desktop_mrp_completed
+          description: >
+            Boolean indicator whether the desktop MRP has been completed.
+
+        - name: med_list_id
+          description: >
+            Unique id associated with specific med lists.
+
+        - name: map_finalized_date
+          description: >
+            The date in EST when the MAP was reviewed by the PharmD and finalized.
+          tests:
+#            - dbt_utils.expression_is_true:
+#                expression: "is not null or map_transmission_date is null"
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: timestamp without time zone
+
+        - name: map_transmission_date
+          description: >
+            The date and time in EST when the task was completed signifying that the medlist was sent.
+            Some medlists were finalized out of sequence so are ignored from the test.
+          tests:
+#            - dbt_utils.expression_is_true:
+#                expression: "is not null or map_finalized_date is null"
+#                config:
+#                  where: "datediff(day, map_finalized_date, current_date) >= 7"
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: timestamp without time zone
+
+        - name: map_transmission_method
+          description: >
+            Communication method use to send MAP.
+
+        - name: map_finalized
+          description: >
+            Boolean indicator whether the MAP has been completed.
+
+        - name: map_finalized_by
+          description: >
+            PharmD who finalized the MAP.
+
+        - name: map_sent
+          description: >
+            Boolean indicator whether the MAP has been sent.
+
+        - name: map_recipient
+          description: >
+            Person who is receiving the MAP.
+            
+        - name: discharge_summary_needed_task_exists
+          description: >
+            Boolean indicator whether a Discharge Summary Needed task exists.
+
+        - name: desktop_mrp_in_qa
+          description: >
+            Boolean indicator whether an Admin QA task has a status of New or In Progress.
+
+        - name: provider_urgent_request_completed
+          description: >
+            Boolean indicator whether a PUR task was completed.
+
+        - name: days_between_opportunity_created_dmrp_completed
+          description: >
+            Day difference from the opportunity created date to the date the desktop MRP completed.
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: "is null or days_between_opportunity_created_dmrp_completed >= 0"
+
+        - name: days_between_discharge_dmrp_completed
+          description: >
+            Day difference from the discharge date to the date the desktop MRP completed.
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: "is null or days_between_discharge_dmrp_completed >= 0"
+
+        - name: days_between_ds_needed_created_ds_received
+          description: >
+            Day difference from the D/S Needed task created date to the date the D/S Needed task completed.
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: "is null or days_between_ds_needed_created_ds_received >= 0"
+
+        - name: days_between_dmrp_completed_map_finalized
+          description: >
+            Day difference from the date the first MRP visit or re-enrollment MRP visit completed and the date the MAP completed.
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: "is null or days_between_dmrp_completed_map_finalized >= 0"
+
+        - name: days_between_map_finalized_map_sent
+          description: >
+            Day difference from the date the MAP finalized and the date the MAP was sent.
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: "is null or days_between_map_finalized_map_sent >= 0"
+
+        - name: days_between_dmrp_completed_map_sent
+          description: >
+            Day difference from the date the first MRP visit or re-enrollment MRP visit completed and the date the MAP was sent.
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: "is null or days_between_dmrp_completed_map_sent >= 0"
+
+      tests:
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: desktop_mrp_completed_date
+            column_B: opportunity_created_date
+            or_equal: True
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: map_transmission_date::date
+            column_B: map_finalized_date
+            or_equal: True
+
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "opportunity_id" ]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false
+
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "desktop_mrp_completed_date" ]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false
+
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "opportunity_created_date" ]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false

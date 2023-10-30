@@ -1,0 +1,47 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__medication_fill_events
+      description: Represents medication fill events pull from Sure Scripts
+      columns:
+        - name: patient_id
+          description: cureatr unique patient_id
+
+        - name: institution_id
+          description: institution_id
+
+        - name: fill_date
+          description: date of medicaiton fill
+
+        - name: ndc
+          description: ndc code for medication
+
+        - name: medication_description
+          description: detailed description of medicaiton providing name dosage and strength
+
+        - name: strength
+          description: medication strength per dosage
+
+        - name: days_supply
+          description: days supplied at fill given appropriate dosage taken
+
+        - name: directions
+          descriptions: directions for application of medication
+
+        - name: pharmacy_name
+          description: name of pharmacy where medication filled
+
+        - name: pharmacy_npi
+          description: national provider id of pharmacy where medication filled
+
+        - name: prescriber_npi
+          description: national provider id of prescriber of medication
+
+        - name: last_fill_date
+          description: last date the medication was filled
+
+        - name: prescription_date
+          description: date prescription was written
+
+        - name: amount_dispensed
+          description: amount of medication dispensed at the fill event

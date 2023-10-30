@@ -1,0 +1,56 @@
+version: 2
+
+models:
+    - name: provider_rec_aggregate
+      description: >
+        Aggregated medication problem statistics extracted from problem_resolution_provider_rec
+      columns:
+        - name: institution_id
+          description: Unique institution identifier
+          tests:
+            - not_null
+
+        - name: problem
+          description: Problem identified by pharmacist at visit
+          tests:
+            - not_null
+
+        - name: category
+          description: Type of problem identified
+          tests:
+            - not_null
+
+        - name: resolution_percentage
+          description: Percentage of problems for that payer, category, and problem, that are resolved
+          tests:
+            - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+                  max_value: 100
+                  row_condition: "resolution_percentage is not null"
+
+        - name: prescriber_acceptance_percentage
+          description: Percentage of prescriber recommendations for that payer, 
+                        category, and problem, that are accepted
+          tests:
+            - dbt_expectations.expect_column_values_to_be_between:
+                min_value: 0
+                max_value: 100
+                row_condition: "prescriber_acceptance_percentage is not null"
+
+        - name: call_acceptance_percentage
+          description: Percentage of provider calls for that payer, 
+                        category, and problem, that result in accepted recommendations
+          tests:
+            - dbt_expectations.expect_column_values_to_be_between:
+                min_value: 0
+                max_value: 100
+                row_condition: "call_acceptance_percentage is not null"
+
+        - name: map_acceptance_percentage
+          description: Percentage of map sends only for that payer, 
+                        category, and problem, that result in accepted recommendations
+          tests:
+            - dbt_expectations.expect_column_values_to_be_between:
+                min_value: 0
+                max_value: 100
+                row_condition: "map_acceptance_percentage is not null"

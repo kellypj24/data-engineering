@@ -1,0 +1,6 @@
+version: 2
+
+models:
+    - name: fact_provider_urgent_request
+      description: >
+        Fact table capturing PUR task information

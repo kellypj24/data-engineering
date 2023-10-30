@@ -1,0 +1,6 @@
+version: 2
+
+models:
+    - name: fact_patient_opportunity
+      description: >
+        fact table listing all potential patient opportunities

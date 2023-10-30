@@ -1,0 +1,69 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__discharges
+      description: >
+        Represents when a patient has been discharged.
+      tests:
+        - dbt_utils.unique_combination_of_columns:
+            combination_of_columns:
+              - discharge_event_id
+              - patient_id
+      columns:
+          - name: discharge_event_id
+            description: > 
+              The primary key of the given row.
+            tests:
+                - not_null
+
+          - name: patient_id
+            description: >
+              cureatr generated unique patient_id
+            tests:
+                - not_null
+
+          - name: discharge_date
+            description: >
+              discharge date from adt feed recorded in UTC
+            tests:
+                - not_null
+
+          - name: discharge_date_est
+            description: >
+              discharge date converted to eastern standard time to align with cureatr systems if needed
+
+          - name: event_type
+            description: >
+              event type provided in adt feed
+
+          - name: logical_event_type
+            description: >
+              field created by cureatr logic to roll up event types provided in adt feed to single category
+
+          - name: instituion_id
+            description: >
+              id created by cureatr to link information to specific customer
+
+          - name: chf_flag
+            description: >
+              flag indicating diagnosis for congestive heart failure recorded on discharge
+
+          - name: diabetes_flag
+            description: >
+              flag indicating diagnosis for diabetes recorded on discharge
+
+          - name: copd_flag
+            description: >
+              flag indicating diagnosis for chronic obstructive pulmonary disease recorded on discharge
+
+          - name: pna_flag
+            description: >
+              flag indicating diagnosis for pneumonia recorded on discharge
+
+          - name: ami_flag
+            description: >
+              flag indicating diagnosis for acute myocardial infarction recorded on discharge
+
+          - name: sepsis_flag
+            description: >
+              flag indicating diagnosis for sepsis recorded on discharge

@@ -1,0 +1,6 @@
+version: 2
+
+models:
+    - name: dim_user_cureatr
+      description: >
+        dimensional table capturing all Cureatr users for mapping to user_id foreign key

@@ -1,0 +1,419 @@
+version: 2
+
+sources:
+  - name: redshift_public
+    schema: public
+    database: cureatr
+    loader: server
+
+    tables:
+      - name: dim_institution
+        description: Represents a client institution of Cureatr
+        columns:
+          - name: id
+            tests:
+              - not_null
+              - unique
+
+      - name: dim_patient
+        description: Represents a patient that the clinic works with
+        columns:
+          - name: id
+            tests:
+              - not_null
+              - unique
+
+      - name: fact_patient_event
+        description: Represents a patient that the clinic works with
+        columns:
+          - name: id
+            tests:
+              - not_null
+              - unique
+
+      - name: fact_patient_event_matched_patient
+        description: Many to many table between patients and patient events
+        tests:
+          - dbt_utils.unique_combination_of_columns:
+              combination_of_columns:
+                - event_id
+                - patient_id
+
+      - name: fact_medlist
+        description: Represents a list of medications for a patient
+        columns:
+          - name: id
+            tests:
+              - not_null
+              - unique
+          - name: patient_id
+            tests:
+              - not_null
+
+
+      - name: salesforce_contact
+        description: Represents a patient that the clinic works with
+        columns:
+          - name: id
+            tests:
+              - not_null
+              - unique
+
+          - name: patient_id
+            tests:
+              - not_null
+              - relationships:
+                  to: source('redshift_public', 'dim_patient')
+                  field: id
+                  config:
+                    error_if: ">41"  # these are all test patients found in all_test_patients
+                    warn_if: ">0"
+              - unique:
+                  config:
+                    error_if: ">2"
+                    warn_if: ">0"
+
+          - name: iid
+            tests:
+              - not_null
+
+          - name: time_initial_discharge
+
+          - name: is_control
+            tests:
+              - not_null
+
+          - name: control_type
+            tests:
+              - not_null:
+                  config:
+                    error_if: ">18"
+                    warn_if: ">0"
+              - accepted_values:
+                  values: [ "None", "Intervention", "Control" ]
+
+          - name: patient_status
+            tests:
+              - accepted_values:
+                  values: [
+                    "Open", "Ineligible", "Completed", "Could Not Reach",
+                    "Enrolled", "Rejected", "Opt-out"
+                  ]
+
+      - name: salesforce_ctr
+        description: >
+          contact trace record
+
+      - name: salesforce_cca
+        description: >
+          contact channel analytics
+
+      - name: salesforce_event
+        description: TODO
+        columns:
+          - name: id
+            tests:
+              - not_null
+              - unique
+          - name: who_id
+            tests:
+              - not_null:
+                  config:
+                    error_if: ">2"
+                    warn_if: ">0"
+          - name: event_type
+            tests:
+              - not_null:
+                  config:
+                    error_if: ">2"
+                    warn_if: ">0"
+              - accepted_values:
+                  values: [ "CMR", "MRP", "Patient Follow-up Encounter", "CMM Initial Encounter", "CAHPS", "Statin Gap"]
+          - name: status
+            tests:
+              - not_null:
+                  config:
+                    error_if: ">2"
+                    warn_if: ">0"
+              - accepted_values:
+                  values: [ "New", "In Progress", "Completed" ]
+
+      - name: salesforce_task
+        description: Represents a unit of work that the clinical staff is performing
+        columns:
+          - name: id
+            tests:
+              - not_null
+              - unique
+          - name: who_id
+            tests:
+              - not_null:
+                  config:
+                    error_if: ">24"
+                    warn_if: ">0"
+
+          - name: associated_discharge_event_id
+          - name: task_disposition
+          - name: task_type
+          - name: status
+            tests:
+              - not_null
+
+          - name: time_created
+            tests:
+              - not_null
+
+          - name: completed_at_date_time
+
+      - name: fact_patient_opportunity
+        description: Represents all potential opportunities for the clinic to provide service
+        columns:
+          - name: id
+            description: >
+              unique key for each row
+            tests:
+              - not_null
+              - unique
+
+          - name: patient_id
+            description: >
+              Cureatr generated unique patient key
+            tests:
+              - not_null
+
+          - name: iid
+            description: >
+              unique id for Cureatr customer institution
+            tests:
+              - not_null
+
+      - name: fact_patient_subscription_tag
+        description: Represents updates to patient roster subscriptions
+        columns:
+          - name: patient_subscription_id
+            description: unique id for patient subscription
+            tests:
+              - not_null
+
+          - name: patient_id
+            description: cureatr unique patient_id
+            tests:
+              - not_null
+
+          - name: tag_
+            description: tag label categorizing patient subscription
+            tests:
+              - not_null
+
+          - name: time_start
+            description: timestamp marking beginning of subscription
+            tests:
+              - not_null
+
+          - name: time_end
+            description: timestamping marking end of subscription if null subscription is active
+
+          - name: iid
+            description: institution_id
+            tests:
+              - not_null
+
+      - name: fact_medication_event
+        description: represents medication fill events sourced from surescripts
+        columns:
+          - name: id
+            description: unique_id for individual fill event
+            tests:
+              - not_null
+              - unique
+
+          - name: iid
+            description: institution id
+            tests:
+              - not_null
+
+          - name: patient_id
+            description: cureatr unique patient_id
+            tests:
+              - not_null
+
+          - name: event_time
+            description: time the fill event was recorded
+            tests:
+              - not_null
+
+          - name: time_created
+            description: time the fill event record was created based on pull from SureScripts
+            tests:
+              - not_null
+
+          - name: medication_dispensed
+            description: super column containing detail around the fill event ready for extraction via partiQL
+            tests:
+              - not_null
+
+      - name: fact_discharge_summary
+        description: represents a discharge summary for a patient
+        columns:
+          - name: id
+            description: unique_id for an individual discharge summary
+            tests:
+              - not_null
+              - unique
+
+          - name: patient_id
+            description: unique_id for an individual patient
+            tests:
+              - not_null
+
+          - name: discharge_event_id
+            description: unique id for a discharge event
+
+          - name: patient_opportunity_id
+            description: unique id for an opportunity
+
+          - name: state
+            description: TODO
+            tests:
+              - not_null
+
+          - name: document_source
+            description: TODO
+            tests:
+              - not_null
+
+          - name: document_user_id
+            description: TODO
+
+          - name: ccda_association_id
+            description: TODO
+
+          - name: time_created
+            description: time the discharge event record was created
+            tests:
+              - not_null
+
+          - name: time_updated
+            description: time the discharge event record was updated
+            tests:
+              - not_null
+
+          - name: document
+            description: super column containing detail around the discharge summary ready for extraction via partiQL
+            tests:
+              - not_null
+
+      - name: fact_medlist_med
+        description: lists individual medications found within the medlist
+        columns:
+          - name: medlist_id
+            description: unique_id for each medication list
+            tests:
+              - not_null
+
+          - name: drug_id
+            description: medication identifier for each medication in a medlist
+            tests:
+              - not_null
+
+          - name: drug_name_fallback
+            description: name of the medication
+            tests:
+              - not_null
+
+      - name: fact_patient_medication_problems
+        description: lists issues patient have with taking medication
+        columns:
+          - name: id
+            description: Unique identifier for each patients medication issue per medication
+            tests:
+              - not_null
+
+          - name: iid
+            description: Unique institution identifier
+            tests:
+              - not_null
+
+          - name: patient_id
+            description: Unique institution identifier
+            tests:
+              - not_null
+
+          - name: medlist_id
+            description: Identifier for each list of medications a patient is taking
+            tests:
+              - not_null
+
+          - name: medlist_med_id
+            description: Identifier for each medication within the list
+            tests:
+              - not_null
+
+          - name: problem
+            description: Problem identified by pharmacist at visit
+            tests:
+              - not_null
+
+          - name: category
+            description: Type of problem identified
+            tests:
+              - not_null
+
+          - name: is_emergent
+            description: Identifies high risk problems
+            tests:
+              - not_null
+
+          - name: status
+            description: Indicator for whether problem is still occurring or has been resolved
+            tests:
+              - not_null
+
+          - name: time_created
+            description: Time problem was identified
+            tests:
+              - not_null
+
+          - name: interventions
+            description: Any actions taken to resolve the issue
+            tests:
+              - not_null
+
+      - name: dim_user
+        description: >
+          dimensional table containing users and their keys across all applications.
+          This includes customers as well as internal Cureatr users.
+
+      - name: fact_patient_pdc
+        description: >
+          table containing pdc data
+
+      - name: fact_cahps_report
+        description: >
+          table containing reports generated by CAHPS visits with patients
+        columns:
+          - name: id
+            description: unique id for each report
+            tests:
+              - not_null
+              - unique
+
+          - name: patient_id
+            description: unique id for each patient
+            tests:
+              - not_null
+
+          - name: iid
+            description: unique id for each institution
+            tests:
+              - not_null
+
+          - name: time_updated
+            description: time the report was updated
+            tests:
+              - not_null
+
+          - name: document
+            description: super column containing detail around the report ready for extraction via partiQL
+            tests:
+              - not_null

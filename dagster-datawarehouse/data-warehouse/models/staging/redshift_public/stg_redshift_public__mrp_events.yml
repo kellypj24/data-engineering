@@ -1,0 +1,19 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__mrp_events
+      description: >
+        Represents clinical staff meeting with a patient to
+        reconcile their medications.
+
+      columns:
+          - name: mrp_event_id
+            description: The primary key of the given row.
+            tests:
+                - unique
+                - not_null
+
+          - name: discharge_event_id
+            description: >
+              The discharge event related to the mrp visit. This value can
+              currently be null, but should not allowed to be.

@@ -1,0 +1,20 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__statin_outreach_events
+      description: >
+        Represents clinical staff meeting with a patient to
+        educate them on statin use.
+
+      columns:
+          - name: statin_outreach_event_id
+            description: The primary key of the given row.
+            tests:
+                - unique
+                - not_null
+
+          - name: opportunity_id
+            description: >
+              The opportunity event related to the statin outreach visit.
+            tests:
+                - not_null

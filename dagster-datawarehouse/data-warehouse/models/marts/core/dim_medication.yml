@@ -1,0 +1,10 @@
+version: 2
+
+models:
+    - name: dim_medication
+      description: >
+        Medication dimension providing descriptive information across all medications.
+      columns:
+        - name: drug_id
+          tests:
+            - not_null

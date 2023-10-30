@@ -1,0 +1,100 @@
+version: 2
+
+models:
+    - name: cahps_barriers_interventions_metrics
+      description: >
+        Dataset for CAHPS barriers and interventions metrics.
+
+      columns:
+        - name: opportunity_id
+          description: >
+              Unique id for the opportunity to serve the patient.
+          tests:
+            - not_null
+
+        - name: patient_id
+          description: >
+            Cureatr-generated unique id for the patient.
+          tests:
+            - not_null
+
+        - name: institution_id
+          description: >
+             Id for the client institution the patient is registered with.
+          tests:
+            - not_null
+
+        - name: opportunity_created_date
+          description: >
+             Date the patient opportunity was created.
+          tests:
+            - not_null
+
+        - name: visit_completed_date
+          description: >
+             Date the CAHPS visit was completed with a patient.
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: " > opportunity_created_date"
+
+        - name: drug_id
+          description: >
+             Id of the drug prescribed.
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                  row_condition: "datediff(hour, visit_completed_date::date, current_date::date) >= 24"
+
+        - name: barrier
+          description: >
+            CAHPS barrier identified during the visit.
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                  row_condition: "datediff(hour, visit_completed_date::date, current_date::date) >= 24"
+
+        - name: resolution
+          description: >
+            CAHPS resolution reached during the visit.
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "datediff(hour, visit_completed_date::date, current_date::date) >= 24"
+
+        - name: intervention
+          description: >
+            CAHPS intervention provided addressing patient barriers.
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "datediff(hour, visit_completed_date::date, current_date::date) >= 24"
+
+        - name: pharmacy_provider_call
+          description: >
+            Indicates whether a visit resulted in a call to a pharmacy or provider.
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "datediff(hour, visit_completed_date::date, current_date::date) >= 24"
+
+        - name: medication_class
+          description: >
+            Class of the drug prescribed.
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "datediff(hour, visit_completed_date, current_date) >= 24"
+
+        - name: medication_name
+          description: >
+            Name of the drug prescribed.
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "datediff(hour, visit_completed_date, current_date) >= 24"
+
+        - name: medication_gpi
+          description: >
+            General Product Indicator of the drug prescribed.
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "datediff(hour, visit_completed_date, current_date) >= 24"
+
+      tests:
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "opportunity_id", "patient_id", "drug_id", "barrier", "resolution", "intervention" ]
+
+

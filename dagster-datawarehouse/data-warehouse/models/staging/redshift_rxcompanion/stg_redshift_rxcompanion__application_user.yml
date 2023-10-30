@@ -1,0 +1,16 @@
+version: 2
+
+models:
+    - name: stg_redshift_rxcompanion__application_user
+      description: Represents unique user ids in HUB (internal/client/vendor caller information)
+      columns:
+          - name: user_id
+            description: Numeric system generated id for each user in HUB.
+            tests:
+                - unique
+                - not_null
+
+          - name: department_id
+            description: Numeric id of the department that user is associated with.  Department ties directly to Organization.
+            tests:
+                - not_null

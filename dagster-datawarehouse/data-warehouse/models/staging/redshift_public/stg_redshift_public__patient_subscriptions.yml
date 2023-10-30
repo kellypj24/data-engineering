@@ -1,0 +1,32 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__patient_subscriptions
+      description: represents subscriptions for patients in active subscriptions
+      columns:
+        - name: subscription_tag
+          description: label for identifying patient subscribed for service
+          tests:
+            - not_null
+            - accepted_values:
+                values: ["united", "advantasure", "sinfonia", "chf_program", "rtm_chf"]
+
+        - name: iid
+          description: institution id
+          tests:
+            - not_null
+
+        - name: patient_id
+          description: cureatr assigned unique patient_id
+          tests:
+            - not_null
+
+        - name: time_start
+          description: timestamp marking the beginning of subscription
+          tests:
+            - not_null
+            - dbt_utils.expression_is_true:
+                expression: "< time_end"
+
+        -  name: time_end
+           description: timestamp marking the end of subscription

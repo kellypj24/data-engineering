@@ -1,0 +1,72 @@
+version: 2
+
+models:
+    - name: discharge_summary
+      columns:
+
+        - name: discharge_event_id
+          description: >
+            The id for the discharge event triggering service if applicable
+
+        - name: opportunity_id
+          description: >
+            The id for the opportunity triggering service if applicable
+
+        - name: discharge_summary_id
+          description: >
+             id for the discharge summary recorded forming unique id for this table
+          tests:
+            - unique
+            - not_null
+
+        - name: patient_id
+          description: >
+             Cureatr generated id for the patient
+          tests:
+            - not_null
+
+        - name: institution_id
+          description: >
+             id for the client institution the patient is registered with
+          tests:
+            - not_null
+
+        - name: event_type
+          description: >
+             The type of service rendered to the patient
+
+        - name: state
+          description: >
+             The status of the discharge summary documentation
+          tests:
+            - not_null
+
+        - name: document_source
+          description: >
+                 The source of the discharge summary document
+          tests:
+            - not_null
+
+        - name: document_used_id
+          description: >
+            unique Cureatr user id of the user who obtained the discharge summary document
+
+        - name: document_set
+
+        - name: ccda_association_id
+
+        - name: time_created
+          description: >
+             The time the discharge summary was created
+          tests:
+            - not_null
+
+        - name: time_updated
+          description: >
+             The time the discharge summary was last updated
+
+        - name: patient_state
+          description: >
+             The state of residence on file for the patient
+          tests:
+            - not_null

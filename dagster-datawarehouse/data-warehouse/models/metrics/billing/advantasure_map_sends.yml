@@ -1,0 +1,81 @@
+version: 2
+
+models:
+    - name: advantasure_map_sends
+
+      columns:
+          - name: mrp_visit_date
+            description: >
+                Date of visit with Cureatr clinic
+            tests:
+                - dbt_expectations.expect_column_values_to_not_be_null:
+                    row_condition: "mrp_visit_date is not null and 
+                    extract(year from mrp_visit_date) = 2023 and
+                    datediff(hour, mrp_visit_date, map_finalized_date) <= 24"
+          - name: patient_id
+            description: >
+                Cureatr generated id for each patient
+            tests:
+              - not_null
+          - name: discharge_event_id
+            description: >
+                Unique id associated with patient hospital discharge related to the MAP being sent.
+            tests:
+              - not_null
+          - name: opportunity_id
+            description: >
+              Unique id associated with patient service opportunities.
+            tests:
+              - not_null
+          - name: mrp_event_id
+            description: >
+              Salesforce generated mrp event id.
+            tests:
+              - not_null
+          - name: institution_id
+            description: >
+              Institution associated with patient
+            tests:
+              - not_null
+          - name: map_transmission_date
+            description: >
+              System-generated date and time in EST when MAP was sent to patient.
+            tests:
+              - not_null
+          - name: map_finalized_date
+            description: >
+              Date in EST of MAP finalization completed by Cureatr Clinic in Cureatr Web App (Meds360).
+            tests:
+              - not_null
+          - name: days_between_visit_and_map_finalized
+            description: >
+              Days between mrp visit and finalization of map
+            tests:
+              - not_null
+          - name: days_between_map_finalized_and_transmission
+            description: >
+              Days between map finalization and map_transmission
+            tests:
+              - not_null
+          - name: days_between_discharge_and_map_transmission
+            description: >
+              Days between patient discharge and transmission of map
+            tests:
+              - not_null
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+                  row_condition: "days_between_discharge_and_map_transmission is not null"
+          - name: days_between_discharge_and_visit
+            description: >
+              Days between patient discharge and mrp visit
+            tests:
+              - not_null
+              - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+                  row_condition: "days_between_discharge_and_visit is not null"
+      tests:
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: map_transmission_date
+            column_B: map_finalized_date
+            or_equal: True
+            row_condition: "extract(year from map_finalized_date) >= 2023"

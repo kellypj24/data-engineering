@@ -1,0 +1,475 @@
+version: 2
+
+models:
+    - name: mrp_funnel
+      description: >
+          Represents the collection of a patient's potential MRP services after the patient has been enrolled.
+
+      columns:
+
+        - name: opportunity_id
+          description: >
+            Unique id associated with patient service opportunities.
+          tests:
+            - unique
+            - dbt_utils.relationships_where:
+                 to: ref('advantasure_billing')
+                 field: opportunity_id
+                 from_condition: institution_id = 'advantasure' and map_finalized_date_est is not null and map_transmission_date is not null and date_diff('day', discharge_date, mrp_completed_date) <= 31
+
+        - name: discharge_event_id
+          description: >
+            Unique id associated with patient hospital discharge triggering service to patient.
+
+        - name: discharge_date
+          description: >
+            Date in EST of patient hospital discharge sourced from the ADT feed.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: discharge_event_type
+          description: >
+            Event type value describing the type of discharge.
+
+        - name: patient_id
+          description: >
+            Cureatr generated unique patient id.
+          tests:
+            - not_null
+
+        - name: source_patient_id
+          description: >
+            Unique patient id provided by client.
+          tests:
+            - not_null
+
+        - name: institution_id
+          description: >
+            Unique id for client institution.
+          tests:
+            - not_null
+
+        - name: plan_name
+          description: >
+            Describes patient's insurance plan coverage type.
+
+        - name: contract_id
+          description: >
+            Associated contract id for plan name.
+
+        - name: ea_1_created_date
+          description: >
+            Date of first enrollment attempt initiated.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: ea_2_created_date
+          description: >
+            Date of second enrollment attempt initiated.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: ea_3_created_date
+          description: >
+            Date of third enrollment attempt initiated.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: re_enroll_created_date
+          description: >
+            Date of re-enrollment attempt initiated.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: ea_4_created_date
+          description: >
+            Date of fourth enrollment attempt initiated.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: ea_1_task_disposition
+          description: >
+            Outcome of first enrollment attempt.
+
+        - name: ea_2_task_disposition
+          description: >
+            Outcome of second enrollment attempt.
+
+        - name: ea_3_task_disposition
+          description: >
+            Outcome of third enrollment attempt.
+
+        - name: re_enroll_task_disposition
+          description: >
+            Outcome of re-enrollment attempt.
+
+        - name: ea_4_task_disposition
+          description: >
+            Outcome of fourth enrollment attempt.
+
+        - name: ea_1_completed_date
+          description: >
+            Date of first enrollment attempt completion.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: ea_2_completed_date
+          description: >
+            Date of second enrollment attempt completion.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: ea_3_completed_date
+          description: >
+            Date of third enrollment attempt completion.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: re_enroll_completed_date
+          description: >
+            Date of re-enrollment attempt completion.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: ea_4_completed_date
+          description: >
+            Date of fourth enrollment attempt completion.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: ea_1_completion_category
+          description: >
+            Statement indicating whether first enrollment attempt completed within or more than 24 hours.
+
+        - name: ea_2_completion_category
+          description: >
+            Statement indicating whether second enrollment attempt completed within or more than 24 hours.
+
+        - name: ea_3_completion_category
+          description: >
+            Statement indicating whether third enrollment attempt completed within or more than 24 hours.
+
+        - name: re_enroll_completion_category
+          description: >
+            Statement indicating whether re-enrollment attempt completed within or more than 24 hours.
+
+        - name: ea_4_completion_category
+          description: >
+            Statement indicating whether fourth enrollment attempt completed within or more than 24 hours.
+
+        - name: ea_1_bad_phone_number
+          description: >
+            Boolean indicator whether patient phone number is unreachable during first enrollment attempt.
+
+        - name: ea_2_bad_phone_number
+          description: >
+            Boolean indicator whether patient phone number is unreachable during second enrollment attempt.
+
+        - name: ea_3_bad_phone_number
+          description: >
+            Boolean indicator whether patient phone number is unreachable during third enrollment attempt.
+
+        - name: re_enroll_bad_phone_number
+          description: >
+            Boolean indicator whether patient phone number is unreachable during re-enrollment attempt.
+
+        - name: ea_4_bad_phone_number
+          description: >
+            Boolean indicator whether patient phone number is unreachable during fourth enrollment attempt.
+
+        - name: ea_1_completed
+          description: >
+            Boolean indicator of first enrollment attempt completion.
+
+        - name: ea_2_completed
+          description: >
+            Boolean indicator of second enrollment attempt completion.
+
+        - name: ea_3_completed
+          description: >
+            Boolean indicator of third enrollment attempt completion.
+
+        - name: re_enroll_completed
+          description: >
+            Boolean indicator of re-enrollment attempt completion.
+
+        - name: ea_4_completed
+          description: >
+            Boolean indicator of fourth enrollment attempt completion.
+
+        - name: ea_1_reached
+          description: >
+            Boolean indicator of Cureatr CSS successfully speaking with patient for first enrollment attempt.
+
+        - name: ea_2_reached
+          description: >
+            Boolean indicator of Cureatr CSS successfully speaking with patient for second enrollment attempt.
+
+        - name: ea_3_reached
+          description: >
+            Boolean indicator of Cureatr CSS successfully speaking with patient for third enrollment attempt.
+
+        - name: re_enroll_reached
+          description: >
+            Boolean indicator of Cureatr CSS successfully speaking with patient for re-enrollment attempt.
+
+        - name: ea_4_reached
+          description: >
+            Boolean indicator of Cureatr CSS successfully speaking with patient for fourth enrollment attempt.
+
+        - name: ea_1_scheduled
+          description: >
+            Boolean indicator of an MRP visit scheduled within first enrollment attempt.
+
+        - name: ea_2_scheduled
+          description: >
+            Boolean indicator of an MRP visit scheduled within second enrollment attempt.
+
+        - name: ea_3_scheduled
+          description: >
+            Boolean indicator of an MRP visit scheduled within third enrollment attempt.
+
+        - name: re_enroll_scheduled
+          description: >
+            Boolean indicator of an MRP visit scheduled within re-enrollment attempt.
+
+        - name: ea_4_scheduled
+          description: >
+            Boolean indicator of an MRP visit scheduled within fourth enrollment attempt.
+
+        - name: re_enrollment_attempt_count
+          description: >
+            Count of distinct re-enrollment attempts per patient opportunity id.
+
+        - name: ea_reached
+          description: >
+            Boolean indicator of Cureatr CSS successfully speaking with patient for any enrollment or re-enrollment attempts.
+
+        - name: ea_scheduled
+          description: >
+            Boolean indicator of MRP visit scheduled during any enrollment or re-enrollment attempts.
+
+        - name: ea_completed
+          description: >
+            Boolean indicator of successful completions for any enrollment or re-enrollment attempts.
+
+        - name: ea_bad_phone_number
+          description: >
+            Boolean indicator of an unreachable patient phone number for any enrollment or re-enrollment attempts.
+
+        - name: age_at_discharge
+          description: >
+            Patient's age at time of discharge.
+
+        - name: age_at_discharge_grouped
+          description: >
+            The 10 year category the patient's age falls within.
+
+        - name: first_mrp_visit_date
+          description: >
+            Date and time in EST of the first MRP visit per patient opportunity id.
+
+        - name: first_mrp_disposition
+          description: >
+            Outcome of first MRP visit.
+
+        - name: first_mrp_status
+          description: >
+            Status of first MRP visit.
+
+        - name: first_mrp_no_show
+          description: >
+            Boolean indicator whether patient attended the first MRP visit.
+
+        - name: first_mrp_completed
+          description: >
+            Boolean indicator whether the first MRP visit has been completed.
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: "= 0 OR re_enroll_mrp_completed = 0"
+
+        - name: first_mrp_bad_phone_number
+          description: >
+            Boolean indicator whether patient phone number is unreachable.
+
+        - name: re_enroll_mrp_visit_date
+          description: >
+            Date and time in EST of the MRP visit resulting from re-enrollment per patient opportunity id.
+
+        - name: re_enroll_mrp_disposition
+          description: >
+            Outcome of MRP visit resulting from re-enrollment.
+
+        - name: re_enroll_mrp_status
+          description: >
+            Status of MRP visit resulting from re-enrollment.
+
+        - name: re_enroll_mrp_completed
+          description: >
+            Boolean indicator whether the MRP visit resulting from re-enrollment has been completed.
+
+        - name: re_enroll_no_show
+          description: >
+            Boolean indicator whether patient attended the MRP visit resulting from re-enrollment.
+
+        - name: mrp_completed
+          description: >
+            Boolean indicator whether the first MRP visit or re-enrollment MRP visit completed.
+
+        - name: mrp_completed_date
+          description: >
+            Date and time in EST of the first MRP visit or re-enrollment MRP visit completed.
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "extract(year from mrp_completed_date) >= 2023 and (map_finalized_date_est is not null or map_transmission_date is not null)"
+
+        - name: days_discharge_mrp
+          description: >
+            Day difference from the discharge date to the date the first MRP visit or re-enrollment MRP visit completed.
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: "is null or days_discharge_mrp >= 0"
+
+        - name: medlist_id
+          description: >
+            Unique id associated with specific med lists.
+
+        - name: map_finalized_date_est
+          description: >
+            The date in EST when the MAP was reviewed by the PharmD and finalized.
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "map_transmission_date is not null and extract(year from map_transmission_date) >= 2023"
+
+        - name: map_transmission_date
+          description: >
+            The date and time in EST when the task was completed signifying that the medlist was sent.
+            Some medlists were finalized out of sequence so are ignored from the test.
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "map_finalized_date_est is not null and extract(year from map_finalized_date_est) >= 2023 and datediff(day, map_finalized_date_est, current_date) >= 3"
+
+        - name: map_transmission_method
+          description: >
+            Communication method use to send MAP.
+
+        - name: map_finalized
+          description: >
+            Boolean indicator whether the MAP has been completed.
+
+        - name: map_sent
+          description: >
+            Boolean indicator whether the MAP has been sent.
+
+        - name: days_mrp_map_finalized
+          description: >
+            Day difference from the date the first MRP visit or re-enrollment MRP visit completed and the date the MAP completed.
+
+        - name: days_map_finalized_sent
+          description: >
+            Day difference from the date the MAP finalized and the date the MAP was sent.
+
+        - name: days_mrp_map_sent
+          description: >
+            Day difference from the date the first MRP visit or re-enrollment MRP visit completed and the date the MAP was sent.
+
+        - name: discharge_med_count
+          description: >
+            The count of medications a patient is prescribed sourced from the discharge summary and CSS or PharmD's phone conversation.
+
+        - name: "(patient_id || '-' || mrp_completed_date::date)"
+          tests:
+            - unique
+            - dbt_utils.relationships_where:
+                to: ref('advantasure_billing')
+                field: "(patient_id || '-' || mrp_visit_date::date)"
+                from_condition: institution_id = 'advantasure' and map_finalized_date_est is not null and map_transmission_date is not null and date_diff('day', discharge_date, mrp_completed_date) <= 31
+
+      tests:
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "opportunity_id", "first_mrp_visit_date"]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false
+            row_condition: "extract(year from first_mrp_visit_date) >= 2023"
+
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "re_enroll_mrp_visit_date" ]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false
+            row_condition: "extract(year from re_enroll_mrp_visit_date) >= 2023"
+
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "mrp_completed_date" ]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false
+            row_condition: "extract(year from mrp_completed_date) >= 2023"
+
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "discharge_date" ]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false
+            row_condition: "extract(year from discharge_date) >= 2023"
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: ea_1_created_date
+            column_B: discharge_date
+            or_equal: True
+            row_condition: "extract(year from discharge_date) >= 2023 and ea_1_completed_date = discharge_date"
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: ea_1_completed_date
+            column_B: ea_1_created_date
+            or_equal: True
+            row_condition: "extract(year from ea_1_created_date) >= 2023 and ea_1_created_date = ea_1_completed_date"
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: first_mrp_visit_date
+            column_B: discharge_date
+            or_equal: True
+            row_condition: "extract(year from discharge_date) >= 2023 and discharge_date = first_mrp_visit_date::date"
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: first_mrp_visit_date
+            column_B: ea_1_completed_date
+            or_equal: True
+            row_condition: "extract(year from ea_1_completed_date) >= 2023 and ea_1_completed_date = first_mrp_visit_date::date"
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: re_enroll_mrp_visit_date
+            column_B: first_mrp_visit_date
+            or_equal: True
+            row_condition: "extract(year from first_mrp_visit_date) >= 2023 and first_mrp_visit_date = re_enroll_mrp_visit_date"
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: map_finalized_date_est
+            column_B: mrp_completed_date
+            or_equal: True
+            row_condition: "extract(year from mrp_completed_date) >= 2023 and mrp_completed_date::date = map_finalized_date_est"
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: map_transmission_date
+            column_B: mrp_completed_date
+            or_equal: True
+            row_condition: "extract(year from mrp_completed_date) >= 2023 and mrp_completed_date = map_transmission_date::date"
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: map_transmission_date
+            column_B: map_finalized_date_est
+            or_equal: True
+            row_condition: "extract(year from map_finalized_date_est) >= 2023 
+                            and map_finalized_date_est = map_transmission_date::date 
+                            and med_list_id not in ('62d04a972da7466e97469c1f','62b61b1286d1a467add3b7d1',
+                                                    '6317b7d7e723c13252af1bbc','621e7fec209e57d1865a65ab',
+                                                    '63864b04f39fd2267b8560ca','638642827f054f9277d3faf6',
+                                                    '63dab3e3985a487e8ef6793b')"

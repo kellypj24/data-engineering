@@ -1,0 +1,87 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__desktop_mrp_events
+      description: >
+        Represents clinical staff reviewing patient history, claims, and clinical documentation to
+                reconcile their medications without directly meeting with the patient
+
+      columns:
+        - name: task_id
+          description: The primary key of the given row.
+          tests:
+            - unique
+            - not_null
+
+        - name: discharge_event_id
+          description: >
+            The discharge event related to the desktop mrp opportunity. This value can
+            currently be null
+
+        - name: opportunity_id
+          description: >
+             opportunity_id generated tied to the desktop mrp and used as uuid to tie to other tasks
+             and events in the workflow.
+
+        - name: account_id
+          description: >
+            salesforce account_id tied to the object
+
+        - name: patient_contact_id
+          description: >
+            contact id associated with the patient tying them to the salesforce_contacts table if needed
+
+        - name: institution_name
+          description: >
+            name of the cureatr customer tied to this member and service
+          tests:
+            - not_null
+
+        - name: desktop_mrp_completed_date
+          description: >
+            timestamp in utc when desktop mrp was marked completed in the system
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: timestamp without time zone
+
+        - name: desktop_mrp_completed_date_est
+          description: >
+            timestamp in est when desktop mrp was marked completed in the system
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: timestamp without time zone
+
+        - name: task_type
+          description:
+            type of salesforce task object
+          tests:
+            - accepted_values:
+                values: [ 'Desktop MRP']
+
+        - name: desktop_mrp_disposition
+          description: >
+            disposition status of the desktop mrp
+
+        - name: desktop_mrp_status
+          description: >
+            status of the desktop mrp
+          tests:
+            - not_null
+            - accepted_values:
+                values: [ 'New', 'Completed', 'In Progress' ]
+
+        - name: time_created
+          description: >
+            timestamp desktop mrp task was created
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: timestamp without time zone
+
+        - name: time_updated
+          description: >
+            timestamp desktop mrp task was last updated
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: timestamp without time zone
