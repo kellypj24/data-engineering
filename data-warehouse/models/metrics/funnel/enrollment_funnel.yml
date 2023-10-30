@@ -1,0 +1,51 @@
+version: 2
+
+models:
+    - name: enrollment_funnel
+      columns:
+        - name: opportunity_id
+          tests:
+            - unique:
+                config:
+                  error_if: "!= 0"
+        - name: discharge_date
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: "<= ea_1_created_date"
+            - dbt_utils.expression_is_true:
+                expression: "<= ea_2_created_date"
+            - dbt_utils.expression_is_true:
+                expression: "<= ea_3_created_date"
+            - dbt_utils.expression_is_true:
+                expression: "<= ea_4_created_date"
+        - name: ea_1_created_date
+          tests:
+            - not_null
+            - dbt_utils.expression_is_true:
+                expression: "<= ea_2_created_date"
+            - dbt_utils.expression_is_true:
+                expression: "<= ea_3_created_date"
+            - dbt_utils.expression_is_true:
+                expression: "<= ea_4_created_date"
+        - name: ea_2_created_date
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: "<= ea_3_created_date"
+            - dbt_utils.expression_is_true:
+                expression: "<= ea_4_created_date"
+        - name: ea_3_created_date
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: "<= ea_4_created_date"
+        - name: "(patient_id || '-' || ea_1_created_date)"
+          tests:
+            - unique
+        - name: "(patient_id || '-' || ea_2_created_date)"
+          tests:
+            - unique
+        - name: "(patient_id || '-' || ea_3_created_date)"
+          tests:
+            - unique
+        - name: "(patient_id || '-' || ea_4_created_date)"
+          tests:
+            - unique

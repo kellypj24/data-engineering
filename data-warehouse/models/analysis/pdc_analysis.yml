@@ -1,0 +1,89 @@
+version: 2
+
+models:
+    - name: pdc_analysis
+      description: >
+        Compares pdc observed for each patient in each clinical category between discharge, 30d, and 90d
+      columns:
+        - name: patient_opportunity_id
+          description: Identifier for each patient opportunity
+          tests:
+            - not_null
+
+        - name: patient_id
+          description: Unique identifier for each patient
+          tests:
+            - not_null
+
+        - name: pid
+          description: Institution-generated patient id
+          tests:
+            - not_null
+
+        - name: iid
+          description: Institution to which the patient belongs
+          tests:
+            - not_null
+
+        - name: discharge_event_id
+          description: Identifier for each discharge event
+          tests:
+            - not_null
+
+        - name: discharge_date
+          description: Date of discharge
+          tests:
+            - not_null
+
+        - name: category
+          description: Clinical category of patient's treatment
+          tests:
+            - not_null
+
+        - name: discharge_pdc
+          description: PDC calculated at discharge
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+                  max_value: 100
+
+        - name: followup_pdc_30
+          description: PDC calculated 30 days post discharge
+          tests:
+            - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+                  max_value: 100
+                  row_condition: "followup_pdc_30 is not null"
+
+        - name: followup_pdc_90
+          description: PDC calculated 90 days post discharge
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+                  max_value: 100
+
+        - name: pdc_change_30
+          description: difference between 30 day pdc and discharge pdc
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: -100
+                  max_value: 100
+
+        - name: pdc_change_90
+          description: difference between 90 day pdc and discharge pdc
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: -100
+                  max_value: 100
+
+        - name: treated
+          description: whether patient has had mrp visit or not
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_between:
+                  min_value: 0
+                  max_value: 1

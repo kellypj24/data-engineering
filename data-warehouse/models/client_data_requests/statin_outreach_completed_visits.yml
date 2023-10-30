@@ -1,0 +1,88 @@
+version: 2
+
+models:
+    - name: statin_outreach_completed_visits
+      columns:
+
+        - name: institution_id
+          description: >
+            unique id for client institution
+          tests:
+            - not_null
+
+        - name: program_name
+          description: >
+            name of the clinical program
+          tests:
+            - not_null
+
+        - name: plan_name
+          description: >
+            plan name for the patient
+          tests:
+            - not_null
+
+        - name: plan_group_id
+          description: >
+            group id associated with patient plan
+          tests:
+            - not_null
+
+        - name: source_patient_id
+          description: >
+            unique patient id provided by client
+          tests:
+            - not_null
+            - unique
+
+        - name: first_name
+          description: >
+            patient's first name
+          tests:
+            - not_null
+
+        - name: last_name
+          description: >
+            patient's last name
+          tests:
+            - not_null
+
+        - name: date_of_birth
+          description: >
+            patient's date of birth
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: visit_date
+          description: >
+            date the statin outreach was completed
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: map_finalized_date
+          description: >
+            date the MAP was finalized by a pharmacist
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: pharmacist
+          description: >
+            name of the pharmacist that signed off on the MAP
+          tests:
+            - not_null
+
+        - name: npi
+          description: >
+            NPI of the pharmacist that signed off on the MAP
+          tests:
+            - not_null
+
+      tests:
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: map_finalized_date
+            column_B: visit_date
+            or_equal: True

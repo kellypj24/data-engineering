@@ -1,0 +1,6 @@
+version: 2
+
+models:
+    - name: fact_cahps_report
+      description: >
+        Fact table capturing report information from CAHPS visits

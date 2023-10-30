@@ -1,0 +1,34 @@
+version: 2
+
+models:
+    - name: med_problems_resolved
+      columns:
+
+        - name: opportunity_id
+          tests:
+            - not_null
+
+        - name: patient_med_problems_id
+          tests:
+            - not_null
+            - unique
+
+      tests:
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "opportunity_id", "patient_med_problems_id" ]
+            quote_columns: false
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: medlist_finalized_date
+            column_B: mrp_visit_date
+            or_equal: True
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: mrp_visit_date
+            column_B: discharge_date
+            or_equal: True
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: fill_date
+            column_B: medlist_finalized_date
+            or_equal: True

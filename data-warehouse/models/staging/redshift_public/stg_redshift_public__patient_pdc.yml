@@ -1,0 +1,32 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__patient_pdc
+      description: >
+        Represents patient pdc data
+
+      columns:
+          - name: patient_id
+            description: cureatr generated id for each patient
+            tests:
+                - not_null
+
+          - name: iid
+            description: institution for each patient
+            tests:
+                - not_null
+
+          - name: pdc
+            description: pdc of a patient
+            tests:
+                - not_null
+
+          - name: category
+            description: clinical category of a patient
+            tests:
+                - not_null
+
+          - name: time_created
+            description: time that the pdc was recorded
+            tests:
+                - not_null

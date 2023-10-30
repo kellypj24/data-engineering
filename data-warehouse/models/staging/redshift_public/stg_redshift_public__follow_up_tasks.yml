@@ -1,0 +1,34 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__follow_up_tasks
+      description: >
+        Represents follow-up tasks for assigned to clinic staff
+
+      columns:
+          - name: task_id
+            description: >
+              Unique identifier for the task
+            tests:
+                - unique
+                - not_null
+
+          - name: opportunity_id
+            description: >
+              Unique identifier for the opportunity
+
+          - name: task_type
+            description: >
+                The type of task
+            tests:
+               - accepted_values:
+                  values: [ "{% for task_type in var('follow_up_task_types', []) -%}
+                                '{{ task_type }}'
+                                 {%- if not loop.last %},{{ '\n' }}{% endif %}
+                            {%- endfor %}"     ]
+                  quote: false
+
+
+          - name: task_disposition
+            description: >
+              The disposition of the task

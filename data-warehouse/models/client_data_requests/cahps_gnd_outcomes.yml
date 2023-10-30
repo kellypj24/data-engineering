@@ -1,0 +1,90 @@
+version: 2
+
+models:
+    - name: cahps_gnd_outcomes
+      description: >
+        accumulating snapshot of CAHPS outcomes to be sent weekly
+
+      columns:
+        - name: patient_id
+          description: >
+            Cureatr generated unique id for the patient
+          tests:
+            - not_null
+
+        - name: opportunity_id
+          description: >
+             unique id for the opportunity to serve the patient
+          tests:
+            - not_null
+
+        - name: member_id
+          description: >
+             Client provided unique id for the member
+          tests:
+            - not_null
+
+        - name: member_first_name
+          description: >
+             First name of the member
+          tests:
+            - not_null
+
+        - name: member_last_name
+          description: >
+             Last name of the member
+          tests:
+            - not_null
+
+        - name: contact_attempt_date
+          description: >
+             Date of the last contact attempt
+
+        - name: outcome_of_contact_attempt
+          description: >
+             Outcome of the last contact attempt
+
+        - name: visit_complete
+          description: >
+             Flag indicating whether visit was completed or not
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "medication_gpi is not null and datediff(day, scheduled_date_for_tests::date, current_date::date) > 1"
+
+        - name: scheduled_date
+          description: >
+             Date of the scheduled visit
+
+        - name: visit_completion_date
+          description: >
+             Date of the completed visit
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "visit_complete = 'Y'"
+
+        - name: drug_id
+          description: >
+             Drug id of the drug prescribed
+
+        - name: gap_detail
+          description: >
+             Details of the barriers to patient adherence
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "visit_complete = 'Y' and datediff(day, visit_completion_date_for_tests::date, current_date::date) > 1"
+
+        - name: intervention_provided
+          description: >
+             Interventions provided addressing patient gaps
+
+        - name: medication_name
+          description: >
+             Name of the medication prescribed
+
+        - name: medication_gpi
+          description: >
+             General Product Indicator of the medication prescribed
+
+      tests:
+         - dbt_expectations.expect_compound_columns_to_be_unique:
+             column_list: ["opportunity_id", "drug_id"]

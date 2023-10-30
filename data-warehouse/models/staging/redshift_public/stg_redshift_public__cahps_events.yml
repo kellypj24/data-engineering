@@ -1,0 +1,13 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__cahps_events
+      description: >
+        Represents the CAHPS events that have been created by the clinic
+
+      columns:
+          - name: cahps_event_id
+            description: The primary key of the given row.
+            tests:
+                - unique
+                - not_null

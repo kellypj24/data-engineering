@@ -1,0 +1,15 @@
+version: 2
+
+models:
+    - name: increase_days_supplied
+      #columns:
+      #
+      #  - name: opportunity_id
+      #    tests:
+      #      - not_null
+
+      #tests:
+      #  - dbt_expectations.expect_compound_columns_to_be_unique:
+      #      column_list: [ "opportunity_id", "patient_med_problems_id" ]
+      #      quote_columns: false
+

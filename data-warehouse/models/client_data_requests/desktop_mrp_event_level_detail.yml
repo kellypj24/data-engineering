@@ -1,0 +1,125 @@
+version: 2
+
+models:
+    - name: desktop_mrp_event_level_detail
+      description: >
+        Cumulative report sent weekly capturing full member roster and the unique events that bring
+        into desktop mrp service
+
+      columns:
+        - name: patient_id
+          description: >
+            Cureatr generated unique id for a patient not required for this report used for testing
+          tests:
+            - not_null
+
+        - name: opportunity_id
+          description: >
+            unique id generated for each opportunity to service a patient not required for this report used for testing
+          tests:
+            - not_null
+            - unique
+
+        - name: source_patient_id
+          description: >
+            unique patient id provided by client
+          tests:
+            - not_null
+
+        - name: secondary_patient_id
+          description: >
+            unique secondary patient id provided by client
+
+        - name: discharge_date
+          description: >
+              date patient was discharged from the hospital
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: discharge_materials_obtained
+          description:
+            indicates if we received discharge information
+          tests:
+            - not_null
+
+        - name: discharge_materials_source
+          description:
+            indicates the source of discharge information (Discharge Facility or CCDA)
+
+        - name: discharge_materials_obtained_date
+          description:
+            date when discharge information was received
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: pcp_info_available
+          description: >
+            boolean indicating if pcp information is available for the patient
+
+        - name: med_rec_successfully_performed
+          description: >
+            boolean indicating if med rec was successfully performed for the patient
+
+        - name: med_rec_performed_date
+          description: >
+              date patient's desktop MRP was completed
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: med_rec_successfully_delivered_pcp
+          description: >
+            boolean indicating if med rec was successfully delivered to pcp
+
+        - name: med_rec_transferred_pcp_date
+          description: >
+              date patient's desktop MRP was completed
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: identified_effectiveness
+          description: >
+            boolean indicating problem in the effectiveness category is found on at least one medication
+
+        - name: identified_safety
+          description: >
+            boolean indicating problem in the safety category is found on at least one medication
+
+        - name: identified_adherence
+          description: >
+            boolean indicating problem in the adherence category is found on at least one medication
+
+        - name: identified_indication
+          description: >
+            boolean indicating problem in the indication category is found on at least one medication
+
+        - name: identified_insurance_formulary
+          description: >
+            boolean indicating problem in the insurance_formulary category is found on at least one medication
+
+      tests:
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: med_rec_performed_date
+            column_B: discharge_date
+            or_equal: True
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: med_rec_transferred_pcp_date
+            column_B: med_rec_performed_date
+            or_equal: True
+
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "discharge_date" ]
+            ignore_row_if: "any_value_is_missing"
+
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "med_rec_performed_date" ]
+            ignore_row_if: "any_value_is_missing"
+
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "med_rec_transferred_pcp_date" ]
+            ignore_row_if: "any_value_is_missing"

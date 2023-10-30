@@ -1,0 +1,33 @@
+version: 2
+
+models:
+    - name: opportunity_prioritization
+      description: > 
+        Represents how each programs standby patients are to be ranked for moving to an new opportunity
+      columns:
+          - name: institution_id
+            description: >
+              id representing a unique institution
+            tests:
+              - not_null
+
+          - name: program_type
+            description: >
+              represent the product program the opportunity is a part of
+            tests:
+              - not_null
+
+          - name: opportunity_id
+            description: >
+              id representing a unique patient opportunity
+            tests:
+              - not_null
+              - unique
+
+          - name: opportunity_ranking
+            description: >
+              how the opportunity ranks in order of importance for rach institutions programs
+            tests:
+              - not_null
+
+

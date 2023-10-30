@@ -1,0 +1,19 @@
+version: 2
+
+models:
+    - name: dim_srx_application_user
+      description: >
+        User dimension providing descriptive information across all HUB users (internal/client/vendor)
+      columns:
+        - name: user_id
+          description: >
+            Unique SRx id for each HUB user.
+          tests:
+            - unique
+            - not_null
+
+        - name: department_id
+          description: >
+            SRx id for each department a HUB user can be assigned to.  Department is directly related to Organization.
+          tests:
+            - not_null

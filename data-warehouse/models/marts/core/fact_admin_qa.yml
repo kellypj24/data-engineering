@@ -1,0 +1,6 @@
+version: 2
+
+models:
+    - name: fact_admin_qa
+      description: >
+        Fact table capturing Admin QA task information

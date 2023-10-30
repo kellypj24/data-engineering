@@ -1,0 +1,41 @@
+version: 2
+
+models:
+    - name: stg_redshift_rxcompanion__qualification
+      description: Represents subscribers rosters received from clients
+      columns:
+          - name: key_id
+            description: The primary key of the given row, internally-generated id.
+            tests:
+                - unique
+                - not_null
+
+          - name: program_name
+            description: The name of the clinical program.
+            tests:
+              - not_null
+
+          - name: card_name
+            description: Internally-generated id to differentiate sponsor's customers.
+            tests:
+              - not_null
+
+          - name: card_id
+            description: Client-generated id specific to a member under a card name.
+            tests:
+              - not_null
+
+          - name: logo_id
+            description: Key for an individual client set up in contract table.
+            tests:
+              - not_null
+
+          - name: qualified_date
+            description: The date a patient qualified for a program.
+            tests:
+              - not_null
+
+          - name: method_qualified
+            description: How patient qualified for a program (client-based vs criteria-based qualification).
+            tests:
+              - not_null

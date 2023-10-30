@@ -1,0 +1,83 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__patient_opportunities
+      description: > 
+        Represents unique opportunities for Cureatr to provide services to patients
+      columns:
+          - name: patient_id
+            description: > 
+              Cureatr generated unique id for each patient
+            tests:
+              - not_null
+
+          - name: opportunity_id
+            description: >
+              id representing a unique patient opportunity
+            tests:
+              - not_null
+              - unique
+
+          - name: institution_id
+            description: >
+              id representing a unique institution
+            tests:
+              - not_null
+
+          - name: time_created
+            description: >
+              time patient opportunity created by the system
+            tests:
+              - not_null
+
+          - name: opportunity_status
+            description: >
+              status of patient opportunity
+            tests:
+              - not_null
+
+          - name: closure_status
+            description: >
+              status describing reason for the closure of a patient opportunity
+            tests:
+              - accepted_values:
+                  values: ['Opt-out', 'Ineligible', 'Rejected']
+
+          - name: closure_type
+            description: >
+              type of patient opportunity closure reason
+            tests:
+              - accepted_values:
+                  values: [
+                      'cancel-discharge-event-closure-reason',
+                      'patient-opportunity-closure-reason',
+                      'no-op-closure-reason',
+                      'hospital-admit-event-closure-reason',
+                      'patient-disabled-closure-reason',
+                      'patient-status-closure-reason',
+                      'home-discharge-event-closure-reason'
+                  ]
+
+          - name: enrollment_task_id
+            description: >
+              salesforce task id associated with enrollment attempt #1 created for opportunity
+
+          - name: discharge_event_id
+            description: >
+              unique id tied to discharge event triggering creation of opportunity
+            tests:
+              - unique
+
+          - name: time_triggered
+            description: >
+             time stamp opportunity was triggered for creation
+
+          - name: eligibility_status
+            description: >
+              field marking the opportunity as eligible for Cureatr service or not
+            tests:
+              - accepted_values:
+                  values: ['ineligible', 'eligible']
+              - not_null
+            
+

@@ -1,0 +1,14 @@
+dw:
+  outputs:
+    dev:
+      dbname: "{{ env_var('PGDATABASE') }}"
+      host: "{{ env_var('PGHOST') }}"
+      password: "{{ env_var('PGPASSWORD') }}"
+      port: "{{ env_var('PGPORT') | int }}"
+      schema: "{{ env_var('PGSCHEMA', 'datascience') }}"
+      threads: 8
+      type: redshift
+      user: "{{ env_var('PGUSER') }}"
+      ra3_node: true
+      connect_timeout: 1000
+  target: dev

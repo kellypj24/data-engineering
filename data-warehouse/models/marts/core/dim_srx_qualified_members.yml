@@ -1,0 +1,16 @@
+version: 2
+
+models:
+    - name: dim_srx_qualified_members
+      description: >
+        Subscriber dimension providing descriptive information across all patients.
+      columns:
+        - name: rxc_subscriber_id
+          description: >
+            Unique SRx id for each patient.
+          tests:
+            - not_null
+
+      tests:
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "rxc_subscriber_id", "program_name" ]

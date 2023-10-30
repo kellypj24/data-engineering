@@ -1,0 +1,45 @@
+version: 2
+
+models:
+    - name: patient_survey_results
+      description: >
+        Contains information for patient survey results by institution and program type.
+
+      columns:
+        - name: patient_id
+          description: >
+            Cureatr generated unique ID for a patient.
+          tests:
+            - not_null
+
+        - name: institution_id
+          description: >
+            ID representing a unique institution.
+          tests:
+            - not_null
+
+        - name: program_type
+          description: >
+            Program the patient is enrolled in for a respective survey response.
+
+        - name: plan_group_id
+          description: >
+            Group id associated with patient plan.
+
+        - name: call_timestamp
+          description: >
+            Time the call occurred with a patient.
+          tests:
+            - not_null
+
+        - name: survey_asked
+          description: >
+            TODO
+
+        - name: survey_understand
+          description: >
+            TODO
+
+        - name: survey_satisfied
+          description: >
+            TODO

@@ -1,0 +1,103 @@
+version: 2
+
+models:
+    - name: statin_outreach_member_level_detail
+      columns:
+
+        - name: institution_id
+          description: >
+            unique id for client institution
+          tests:
+            - not_null
+
+        - name: program_name
+          description: >
+            name of the clinical program
+          tests:
+            - not_null
+
+        - name: plan_name
+          description: >
+            plan name for the patient
+          tests:
+            - not_null
+
+        - name: plan_group_id
+          description: >
+            group id associated with patient plan
+          tests:
+            - not_null
+
+        - name: source_patient_id
+          description: >
+            unique patient id provided by client
+          tests:
+            - not_null
+            - unique
+
+        - name: first_name
+          description: >
+            patient's first name
+          tests:
+            - not_null
+
+        - name: last_name
+          description: >
+            patient's last name
+          tests:
+            - not_null
+
+        - name: date_of_birth
+          description: >
+            patient's date of birth
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: ea1_date
+          description: >
+            date the EA 1 was completed
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: ea1_outcome
+          description: >
+            event disposition of the EA 1
+          tests:
+            - dbt_expectations.expect_column_values_to_not_be_null:
+                row_condition: "ea1_date is not null"
+
+        - name: ea2_date
+          description: >
+            date the EA 2 was completed
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: ea2_outcome
+          description: >
+            event disposition of the EA 2
+
+        - name: ea3_date
+          description: >
+            date the EA 3 was completed
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: ea3_outcome
+          description: >
+            event disposition of the EA 1=3
+
+      tests:
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: ea2_date
+            column_B: ea1_date
+            or_equal: True
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: ea3_date
+            column_B: ea2_date
+            or_equal: True

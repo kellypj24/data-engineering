@@ -1,0 +1,6 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__cahps_reports
+      description: >
+        Represents the CAHPS reports that have been created by the clinic

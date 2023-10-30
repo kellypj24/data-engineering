@@ -1,0 +1,15 @@
+name: Lint
+on: push
+
+jobs:
+  lint:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 1
+    - name: Run Lint
+      run: |
+        bin/_docker-run.sh --entrypoint=/bin/bash --env=RUFF_CACHE_DIR=/tmp --command bin/lint.sh

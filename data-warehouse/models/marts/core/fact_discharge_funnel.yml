@@ -1,0 +1,22 @@
+version: 2
+
+models:
+    - name: fact_discharge_funnel
+      description: >
+        Discharge funnel is an accumulating snapshot fact table that represents
+        the workflow that Cureatr performs when an eligible patient is discharged
+        to a home care setting.
+
+        There should be one row per patient discharge.
+      columns:
+          - name: discharge_event_id
+            description: The primary key of the given row.
+            tests:
+                - unique:
+                    config:
+                      error_if: "!= 0"
+                - not_null
+
+          - name: patient_id
+            tests:
+                - not_null

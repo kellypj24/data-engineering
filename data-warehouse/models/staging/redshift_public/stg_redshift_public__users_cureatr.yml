@@ -1,0 +1,62 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__users_cureatr
+      description: >
+        Represents users within Cureatr with their user keys to tie to objects within our data infrastructure
+      columns:
+          - name: cureatr_user_id
+            description: >
+              The primary key of the given row.  maps to user_id foreign key in other tables.
+              Users represented in multiple institutions will have a separate unique key for each institution
+            tests:
+              - unique
+              - not_null
+
+          - name: user_login
+            description: >
+              login name used by the user to log into cureatr systems.  Generally linked to g-suite SSO login
+            tests:
+              - not_null
+
+          - name: institution_id
+            description: >
+              the id marking the organization the user belongs to.
+            tests:
+              - not_null
+
+          - name: first_name
+            description: >
+              first name of the user
+            tests:
+              - not_null
+
+          - name: last_name
+            description: >
+              last name of the user
+            tests:
+              - not_null
+
+          - name: specialty
+            description: >
+              user specialization within Cureatr organization
+
+          - name: title
+            description: >
+              user title within Cureatr organization
+
+          - name: time_created
+            description: >
+              time the user record was created
+            tests:
+              - not_null
+
+          - name: time_updated
+            description: >
+              time the user record was last updated
+            tests:
+              - not_null
+
+          - name: npi
+            description: >
+              national provider identifier of Cureatr staff member

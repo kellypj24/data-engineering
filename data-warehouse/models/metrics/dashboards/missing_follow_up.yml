@@ -1,0 +1,25 @@
+version: 2
+
+models:
+    - name: missing_follow_up
+      description: >
+        This model is used to identify patients who are missing a follow up.
+      columns:
+          - name: patient_id
+            description: >
+              The Cureatr generated unique identifier for the patient.
+            tests:
+                - dbt_expectations.expect_column_values_to_not_be_null:
+                    row_condition: "missing_follow_up is not null"
+
+          - name: missing_follow_up
+            description: >
+                A boolean value indicating whether the patient is missing a follow up.
+            tests:
+                - dbt_expectations.expect_column_values_to_not_be_null:
+                    row_condition: "patient_id is not null"
+      tests:
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "opportunity_id", "task_type"]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false

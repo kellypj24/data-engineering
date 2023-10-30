@@ -1,0 +1,80 @@
+version: 2
+
+models:
+    - name: dim_date
+      description: >
+        Calendar dimension that provides lookups for date related attributes.
+      columns:
+          - name: date_key
+            description: The primary key of the given row.
+            tests:
+                - unique
+                - not_null
+
+          - name: calendar_date
+            tests:
+                - not_null
+
+          - name: day_name
+            tests:
+              - not_null
+
+          - name: day_name_abbreviated
+            tests:
+              - not_null
+
+          - name: day_of_week
+            tests:
+              - not_null
+
+          - name: day_of_month
+            tests:
+              - not_null
+
+          - name: week_of_month
+            tests:
+              - not_null
+
+          - name: day_of_quarter
+            tests:
+              - not_null
+
+          - name: day_of_year
+            tests:
+              - not_null
+
+          - name: week_of_year
+            tests:
+              - not_null
+
+          - name: month_of_year
+            tests:
+              - not_null
+
+          - name: month_name
+            tests:
+              - not_null
+
+          - name: month_name_abbreviated
+            tests:
+              - not_null
+
+          - name: quarter_actual
+            tests:
+              - not_null
+
+          - name: year_actual
+            tests:
+              - not_null
+
+          - name: is_holiday
+            tests:
+              - not_null
+
+          - name: holiday_name
+            tests:
+              - not_null
+
+          - name: is_weekend
+            tests:
+              - not_null

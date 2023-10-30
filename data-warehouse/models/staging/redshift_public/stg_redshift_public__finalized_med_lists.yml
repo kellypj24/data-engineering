@@ -1,0 +1,21 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__finalized_med_lists
+      description: >
+        Represents the list of medications that a patient is currently taking
+        or is recommended taking.
+      columns:
+          - name: med_list_id
+            description: The primary key of the given row.
+            tests:
+                - unique
+                - not_null
+
+          - name: patient_id
+            tests:
+                - not_null
+
+          - name: institution_id
+            tests:
+                - not_null

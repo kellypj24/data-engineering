@@ -1,0 +1,7 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__cmr_events
+      description: >
+        Represents clinical staff meeting with a patient to 
+        provide a comprehensive medical review

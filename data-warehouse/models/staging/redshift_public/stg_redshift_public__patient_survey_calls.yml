@@ -1,0 +1,36 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__patient_survey_calls
+      description: >
+        Represents data for patient survey results.
+      columns:
+          - name: patient_id
+            description: >
+              TODO
+            tests:
+              - not_null
+
+          - name: institution_id
+            description: >
+              ID representing a unique institution.
+            tests:
+              - not_null
+
+          - name: call_timestamp
+            description: >
+              Time the call occurred with a patient.
+            tests:
+              - not_null
+
+          - name: survey_asked
+            description: >
+              TODO
+
+          - name: survey_understand
+            description: >
+              TODO
+
+          - name: survey_satisfied
+            description: >
+              TODO

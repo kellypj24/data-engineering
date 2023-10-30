@@ -1,0 +1,6 @@
+version: 2
+
+models:
+    - name: fact_hospital_admits
+      description: >
+        fact table listing patient admissions to the hospital

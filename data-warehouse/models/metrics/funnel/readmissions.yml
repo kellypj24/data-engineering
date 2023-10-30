@@ -1,0 +1,50 @@
+version: 2
+
+models:
+    - name: readmissions
+      columns:
+          - name: discharge_event_id
+            description: >
+                unique key for each row representing a unique discharge event
+            tests:
+                - unique
+                - not_null
+
+          - name: readmit_30_day_flag
+            description: >
+              flag indicating at least one hospital readmission within 30 days of discharge
+            tests:
+              - not_null
+
+          - name: readmit_60_day_flag
+            description: >
+              flag indicating at least one hospital readmission within 60 days of discharge
+            tests:
+              - not_null
+
+          - name: readmit_90_day_flag
+            description: >
+              flag indicating at least one hospital readmission within 90 days of discharge
+            tests:
+              - not_null
+
+          - name: length_of_stay
+            description: >
+              days between admit date and discharge date
+
+          - name: treated
+            description: >
+              flag indicating if a patient has been treated or not
+
+          - name: admit_event_id
+            description: >
+              unique key for patient admission
+            tests:
+              - unique
+
+          - name: admit_date
+            description: >
+              date patient was admitted for inpatient care
+            tests:
+              - dbt_utils.expression_is_true:
+                  expression: "<= discharge_date"

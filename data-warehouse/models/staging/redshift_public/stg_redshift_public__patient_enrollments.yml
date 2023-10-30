@@ -1,0 +1,19 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__patient_enrollments
+      description: >
+        Represents attempts to reach a patient to enroll them in
+        Cureatr's services.
+      columns:
+          - name: task_id
+            description: The primary key of the given row.
+            tests:
+                - unique
+                - not_null
+
+          - name: discharge_event_id
+            description: unique key for triggering discharge event
+
+          - name: opportunity_id
+            description: unique key for patient opportunity for service

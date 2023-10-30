@@ -1,0 +1,22 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__discharge_summary
+      description: >
+        Represents a unique discharge summary for a patient.
+
+      columns:
+          - name: discharge_summary_id
+            description: >
+              The unique identifier for the discharge summary.
+            tests:
+              - not_null
+              - unique
+              - dbt_expectations.expect_column_values_to_not_be_null:
+                  row_condition: "patient_opportunity_id is not null or discharge_event_id is not null"
+
+          - name: patient_id
+            description: >
+              The Cureatr generated unique identifier for the patient.
+            tests:
+              - not_null

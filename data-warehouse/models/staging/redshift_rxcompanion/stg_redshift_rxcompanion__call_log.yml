@@ -1,0 +1,21 @@
+version: 2
+
+models:
+    - name: stg_redshift_rxcompanion__call_log
+      description: Represents individual unique calls made and received
+      columns:
+          - name: call_id
+            description: The primary key of the given row, internally-generated id.
+            tests:
+                - unique
+                - not_null
+
+          - name: call_date_ts
+            description: Date and time call was made or received
+            tests:
+                - not_null
+
+          - name: call_type
+            description: Short description of what kind of call it was or where it came from
+            tests:
+                - not_null

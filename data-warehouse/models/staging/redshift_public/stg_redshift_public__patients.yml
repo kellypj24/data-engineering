@@ -1,0 +1,53 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__patients
+      description: Represents patients rosters received from clients
+      columns:
+          - name: patient_id
+            description: The primary key of the given row.
+            tests:
+                - unique
+                - not_null
+
+          - name: source_patient_id
+            description: >
+              Unique patient id provided by client.
+            tests:
+                - not_null
+
+          - name: state
+            description: >
+              patient state of residence
+            tests:
+              - not_null
+              - accepted_values:
+                  values: [ "{% for state in var('us_states', []) -%}
+                                '{{ state }}'
+                                 {%- if not loop.last %},{{ '\n' }}{% endif %}
+                            {%- endfor %}"     ]
+                  quote: false
+
+          - name: country
+            description: >
+              patient country of residence
+            tests:
+              - not_null
+              - accepted_values:
+                  values: [ 'US' ]
+
+      tests:
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "source_patient_id"]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false
+
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "institution_id", "source_patient_id"]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false
+
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "institution_id", "patient_id"]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false

@@ -1,0 +1,85 @@
+version: 2
+
+models:
+    - name: stg_redshift_public__provider_urgent_request_tasks
+      description: >
+        Represents Provider Urgent Request Attempt tasks
+
+      columns:
+        - name: task_id
+          description: The primary key of the given row.
+          tests:
+            - unique
+            - not_null
+
+        - name: discharge_event_id
+          description: >
+            The discharge event related to the opportunity. This value can currently be null.
+
+        - name: opportunity_id
+          description: >
+             opportunity_id generated tied to the PUR task and used as uuid to tie to other tasks
+             and events in the workflow.
+
+        - name: account_id
+          description: >
+            salesforce account_id tied to the object.
+
+        - name: patient_contact_id
+          description: >
+            contact id associated with the patient tying them to the salesforce_contacts table if needed.
+
+        - name: institution_name
+          description: >
+            name of the cureatr customer tied to this member and service.
+          tests:
+            - not_null
+
+        - name: pur_completed_date
+          description: >
+            timestamp in utc when PUR task was marked completed in the system.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: timestamp without time zone
+
+        - name: pur_completed_date_est
+          description: >
+            timestamp in est when PUR task was marked completed in the system.
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: timestamp without time zone
+
+        - name: task_type
+          description:
+            type of salesforce task object.
+          tests:
+            - accepted_values:
+                values: ['Provider Urgent Request Attempt #1','Provider Urgent Request Attempt #2','Provider Urgent Request Attempt #3']
+
+        - name: pur_disposition
+          description: >
+            disposition status of the PUR task.
+
+        - name: pur_status
+          description: >
+            status of the PUR task.
+          tests:
+            - not_null
+            - accepted_values:
+                values: [ 'New', 'Completed' ]
+
+        - name: time_created
+          description: >
+            timestamp PUR task was created
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: timestamp without time zone
+
+        - name: time_updated
+          description: >
+            timestamp PUR task was last updated
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: timestamp without time zone

@@ -1,0 +1,29 @@
+version: 2
+
+models:
+    - name: cmr_funnel
+      columns:
+        - name: opportunity_id
+          tests:
+            - unique
+
+        - name: first_cmr_completed
+          tests:
+            - dbt_utils.expression_is_true:
+                expression: "= 0 OR re_enroll_cmr_completed = 0"
+
+      tests:
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "first_cmr_visit_date" ]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false
+
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "re_enroll_cmr_visit_date" ]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false
+
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "cmr_completed_date" ]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false

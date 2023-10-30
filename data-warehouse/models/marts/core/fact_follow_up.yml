@@ -1,0 +1,6 @@
+version: 2
+
+models:
+    - name: fact_follow_up
+      description: >
+        Represents follow-up tasks for assigned to clinic staff

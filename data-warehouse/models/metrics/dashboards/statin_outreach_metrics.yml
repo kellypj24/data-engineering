@@ -1,0 +1,118 @@
+version: 2
+
+models:
+    - name: statin_outreach_metrics
+      description: >
+        Dataset for Statin Education Outreach reporting metrics.
+
+      columns:
+        - name: opportunity_id
+          description: >
+              Unique id for the opportunity to serve the patient.
+          tests:
+            - unique
+            - not_null
+
+        - name: patient_id
+          description: >
+            Cureatr generated unique id for the patient.
+          tests:
+            - unique
+            - not_null
+
+        - name: plan_group_id
+          description: >
+            Group id associated with patient plan.
+          tests:
+            - not_null
+
+        - name: institution_id
+          description: >
+            ID for the client institution the patient is registered with.
+          tests:
+            - not_null
+
+        - name: opportunity_created_date
+          description: >
+            Date the patient opportunity was created.
+          tests:
+            - not_null
+
+        - name: event_disposition
+          description: >
+            Disposition of the Statin Gap event.
+
+        - name: visit_completed_date
+          description: >
+            Date the Statin Outreach visit was completed with a patient.
+
+        - name: member_enrolled
+          description: >
+            Boolean indicating if we enrolled a patient.
+          tests:
+            - not_null
+
+        - name: member_attempted
+          description: >
+            Boolean indicating if we attempted to reach a patient.
+          tests:
+            - not_null
+
+        - name: member_reached
+          description: >
+            Boolean indicating if we were able to reach a patient.
+          tests:
+            - not_null
+
+        - name: member_engaged
+          description: >
+            Boolean indicating if we completed a visit with a patient.
+          tests:
+            - not_null
+
+        - name: completed_visit_patient_map_send
+          description: >
+            Boolean indicating if we sent a MAP to a patient for a completed visit.
+          tests:
+            - not_null
+
+        - name: completed_visit_provider_map_send
+          description: >
+            Boolean indicating if we sent a MAP to a provider for a completed visit.
+          tests:
+            - not_null
+
+        - name: patient_map_send_date
+          description: >
+            Date the MAP was sent to the patient.
+
+        - name: provider_map_send_date
+          description: >
+            Date the MAP was sent to a provider (only in MI).
+
+      tests:
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "patient_id", "visit_completed_date" ]
+            ignore_row_if: "any_value_is_missing"
+            quote_columns: false
+            row_condition: "visit_complete is not null"
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: visit_completed_date
+            column_B: opportunity_created_date
+            or_equal: True
+            row_condition: "visit_complete is not null"
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: patient_map_send_date
+            column_B: visit_completed_date
+            or_equal: True
+            row_condition: "visit_complete is not null"
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: provider_map_send_date
+            column_B: visit_completed_date
+            or_equal: True
+            row_condition: "visit_complete is not null"
+
+

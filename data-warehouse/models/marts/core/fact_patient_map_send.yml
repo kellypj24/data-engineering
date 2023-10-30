@@ -1,0 +1,106 @@
+version: 2
+
+models:
+    - name: fact_patient_map_send
+      description: >
+        Fact table housing MRP task data where the Medication Action Plan has been sent to a patient.
+
+      columns:
+          - name: task_id
+            description: >
+              The task performed in Salesforce related to the MAP and primary key of given row.
+            tests:
+              - unique
+              - not_null
+
+          - name: opportunity_id
+            description: >
+              Unique id associated with patient service opportunities.
+
+          - name: account_id
+            description: >
+              Salesforce generated patient event id.
+            tests:
+              - not_null
+
+          - name: patient_contact_id
+            description: >
+              Salesforce generated unique patient id.
+            tests:
+              - not_null
+
+          - name: institution_name
+            description: >
+              Client name associated with the patient.
+            tests:
+              - not_null
+
+          - name: map_transmission_method
+            description: >
+              Communication method use to send MAP.
+            tests:
+              - not_null
+
+          - name: status
+            description: >
+              Value to represent where the MAP exists within the completion process.
+            tests:
+              - not_null
+
+          - name: map_recipient
+            description: >
+              Standard list value of recipient category to whom the MAP was sent.
+            tests:
+              - not_null
+
+          - name: map_transmission_date
+            description: >
+              Date in UTC when the MAP was sent to patient.
+            tests:
+              - not_null
+
+          - name: map_transmission_date_est
+            description: >
+              Date in EST when the MAP was sent to patient.
+            tests:
+              - not_null
+              - dbt_utils.expression_is_true:
+                  expression: "< map_transmission_date"
+
+          - name: completed_at_date_time
+            description: >
+              Date in EST when the MAP reached the status complete.
+
+          - name: completed_by_user_id
+            description: >
+              Salesforce generated unique user id of Cureatr Clinic staff member who completed the MAP.
+
+          - name: completed_by_user_name
+            description: >
+              Proper name of Cureatr Clinic staff member who completed the MAP.
+
+          - name: time_created
+            description: >
+              Date and time in EST when the MAP process began.
+            tests:
+              - not_null
+
+          - name: time_updated
+            description: >
+              Date and time in EST when the MAP reached the status complete.
+            tests:
+              - not_null
+              - dbt_utils.expression_is_true:
+                  expression: ">= time_created"
+
+          - name: map_sent
+            description: >
+              Boolean indicator whether the MAP has been sent.
+            tests:
+              - not_null
+
+          - name: map_send_sequence
+            description: >
+              Order in which the MAPs have been sent per patient opportunity.
+            tests:
+              - not_null

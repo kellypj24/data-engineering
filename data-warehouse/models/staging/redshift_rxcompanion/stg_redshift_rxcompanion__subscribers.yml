@@ -1,0 +1,26 @@
+version: 2
+
+models:
+    - name: stg_redshift_rxcompanion__subscribers
+      description: Represents subscribers rosters received from clients
+      columns:
+          - name: rxc_subscriber_id
+            description: The primary key of the given row, internally-generated id.
+            tests:
+                - unique
+                - not_null
+
+          - name: patient_id
+            description: The concatenation of card_id, card_name, and person_code.
+            tests:
+              - not_null
+
+          - name: card_name
+            description: Internally-generated id to differentiate sponsor's customers.
+            tests:
+              - not_null
+
+          - name: card_id
+            description: Client-generated id specific to a member under a card name.
+            tests:
+              - not_null

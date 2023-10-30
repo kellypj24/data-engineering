@@ -1,0 +1,48 @@
+version: 2
+
+models:
+    - name: aggregate_services_funnel
+      columns:
+        - name: opportunity_created_date
+          tests:
+            - not_null
+
+        - name: institution_id
+          tests:
+            - not_null
+
+        - name: mrp_completed_sum
+          tests:
+            - not_null
+
+        - name: cmr_completed_sum
+          tests:
+            - not_null
+
+        - name: visits_completed_sum
+          tests:
+            - not_null
+
+        - name: services_completed_sum
+          tests:
+            - not_null
+
+        - name: unique_opportunity_count
+          tests:
+            - not_null
+
+      tests:
+        - dbt_utils.unique_combination_of_columns:
+            combination_of_columns:
+              - opportunity_created_date
+              - institution_id
+
+        - dbt_expectations.expect_table_aggregation_to_equal_other_table:
+            expression: sum(mrp_completed_sum)
+            compare_model: ref("mrp_funnel")
+            compare_expression: sum(mrp_completed)
+
+        - dbt_expectations.expect_table_aggregation_to_equal_other_table:
+            expression: sum(cmr_completed_sum)
+            compare_model: ref("cmr_funnel")
+            compare_expression: sum(cmr_completed)

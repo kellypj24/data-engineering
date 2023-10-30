@@ -1,0 +1,185 @@
+version: 2
+
+models:
+    - name: bcbsm_annual_member_detail
+      columns:
+        - name: discharge_date
+          description: >
+              date patient was discharged from the hospital
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+            - dbt_expectations.expect_column_values_to_be_between:
+                min_value: "to_date((date_part('year' , current_date) - 1) || '-' || '01' || '-' || '01', 'yyyy-mm-dd')"
+                max_value: "to_date((date_part('year' , current_date) - 1) || '-' || '12' || '-' || '31', 'yyyy-mm-dd')"
+
+        - name: institution_id
+          description: >
+            unique id for client institution should always be advantasure in this model
+          tests:
+            - not_null
+            - accepted_values:
+                values: ['advantasure']
+
+        - name: source_patient_id
+          description: >
+            unique patient id provided by client
+          tests:
+            - not_null
+
+        - name: given_name
+          description: >
+            patient's given name
+          tests:
+            - not_null
+
+        - name: family_name
+          description: >
+            patient's family name
+          tests:
+            - not_null
+
+        - name: date_of_birth
+          description: >
+            patient's date of birth
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: gender
+          description: >
+            patient's gender
+          tests:
+            - not_null
+            - accepted_values:
+                values: ['f', 'm']
+
+        - name: street_address
+          description: >
+            patient's home street address
+          tests:
+            - not_null
+
+        - name: city
+          description:
+            patient's home city
+          tests:
+            - not_null
+
+        - name: state
+          description: >
+            patient's home state
+          tests:
+            - not_null
+            - accepted_values:
+                values: [ "{% for state in var('us_states', []) -%}
+                              '{{ state }}'
+                               {%- if not loop.last %},{{ '\n' }}{% endif %}
+                          {%- endfor %}" ]
+                quote: false
+
+        - name: zip
+          descriptions: >
+            patient's home zip code
+          tests:
+            - not_null
+
+        - name: country
+          description: >
+            patient's home country
+          tests:
+            - not_null
+            - accepted_values:
+                values: [ 'US' ]
+
+        - name: plan_group_id
+          description: >
+            describes patient's insurance plan coverage type
+          tests:
+            - not_null
+            - accepted_values:
+                values: ['URMBT', 'MPSERS', 'INDIVIDUAL', 'GROUP', 'SOM']
+
+        - name: sms_date
+          description: >
+            date of sms message sent to patient for scheduling if consent given
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: email_date
+          description: >
+            date of email message sent to patient for scheduling visit if consent given
+          tests:
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: total_calls
+          description: >
+            total number of calls made in enrollment attempt for patient discharge
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: bigint
+
+        - name: last_contact_date
+          description: >
+            date of last contact with patient during treatment opportunity
+          tests:
+            - not_null
+            - dbt_expectations.expect_column_values_to_be_of_type:
+                column_type: date
+
+        - name: last_contact_outcome
+          description: >
+            disposition of the last contact with patient during treatment opportunity
+          tests:
+            - not_null
+
+        - name: "(source_patient_id || '-' || mrp_visit_date::date)"
+          description: >
+            created here in the yaml for the purpose of testing unique relationships
+          tests:
+            - dbt_utils.relationships_where:
+                to: ref('advantasure_billing')
+                field: "(source_patient_id || '-' || mrp_visit_date::date)"
+                to_condition: discharge_date between to_date((date_part('year' , current_date) - 1) || '-' || '01' || '-' || '01', 'yyyy-mm-dd') and to_date((date_part('year' , current_date) - 1) || '-' || '12' || '-' || '31', 'yyyy-mm-dd')
+                from_condition: mrp_visit_date is not null and date_diff('day', discharge_date, mrp_visit_date) <= 31
+
+      tests:
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: sms_date
+            column_B: discharge_date
+            or_equal: True
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: email_date
+            column_B: discharge_date
+            or_equal: True
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: mrp_visit_date
+            column_B: discharge_date
+            or_equal: True
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: mrp_visit_date
+            column_B: sms_date
+            or_equal: True
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: mrp_visit_date
+            column_B: email_date
+            or_equal: True
+
+        - dbt_expectations.expect_column_pair_values_A_to_be_greater_than_B:
+            column_A: mrp_visit_date
+            column_B: last_contact_date
+            or_equal: True
+
+        - dbt_utils.unique_combination_of_columns:
+            combination_of_columns:
+              - source_patient_id
+              - discharge_date

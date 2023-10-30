@@ -1,0 +1,11 @@
+version: 2
+
+models:
+    - name: fact_medication_fill_event
+      description: >
+        Fact table for each medication fill in the last 12 months
+      columns:
+        - name: patient_id
+          description: Unique identifier for each patient
+          tests:
+            - not_null

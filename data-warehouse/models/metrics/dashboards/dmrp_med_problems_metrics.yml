@@ -1,0 +1,37 @@
+version: 2
+
+models:
+    - name: dmrp_med_problems_metrics
+      description: >
+        Contains information for medication problems and the categories they belong to for dMRP opportunities.
+
+      columns:
+        - name: opportunity_id
+          description: >
+            unique id generated for each opportunity to service a patient not required for this report used for testing
+          tests:
+            - not_null
+
+        - name: patient_id
+          description: >
+            Cureatr generated unique id for a patient not required for this report used for testing
+          tests:
+            - not_null
+
+        - name: desktop_mrp_completed
+          description: >
+            Boolean indicator whether the desktop MRP has been completed.
+          tests:
+            - not_null
+
+        - name: category
+          description: >
+            The category of the medication problem.
+
+        - name: medication_problem
+          description: >
+            The name of the medication problem.
+
+      tests:
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "opportunity_id", "patient_id", "desktop_mrp_completed", "category", "medication_problem" ]

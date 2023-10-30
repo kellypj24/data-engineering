@@ -1,0 +1,19 @@
+version: 2
+
+models:
+    - name: stg_redshift_rxcompanion__sponsors
+      description: Represents sponsors and their plan (card) names
+      columns:
+          - name: sponsor_name
+            description: The name of the sponsor.
+            tests:
+                - not_null
+
+          - name: plan_name
+            description: The name of the sponsor-specific plan (card).
+            tests:
+              - not_null
+
+      tests:
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+              column_list: ["sponsor_name", "plan_name"]

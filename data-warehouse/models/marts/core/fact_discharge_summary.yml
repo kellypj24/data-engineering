@@ -1,0 +1,11 @@
+version: 2
+
+models:
+    - name: fact_discharge_summary
+      description: >
+        Discharge summaries for patients.
+      columns:
+        - name: discharge_summary_id
+          tests:
+            - not_null
+            - unique

@@ -1,0 +1,29 @@
+version: 2
+
+models:
+    - name: stg_redshift_rxcompanion__contracts
+      description: Represents each individual contract we have for our plans for the current year
+      columns:
+          - name: card_name
+            description: Internally-generated id to differentiate sponsor's customers.
+            tests:
+              - not_null
+
+          - name: logo_id
+            description: Contract identifier.
+            tests:
+              - not_null
+
+          - name: program_name
+            description: Name of program
+            tests:
+              - not_null
+
+          - name: plan_name
+            description: Name of plan from the customer
+            tests:
+              - not_null
+
+      tests:
+        - dbt_expectations.expect_compound_columns_to_be_unique:
+            column_list: [ "card_name", "logo_id", "program_name" ]
