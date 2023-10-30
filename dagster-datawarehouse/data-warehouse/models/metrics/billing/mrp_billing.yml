@@ -128,14 +128,13 @@ models:
                   to: ref('mrp_funnel')
                   field: "(patient_id || '-' || mrp_completed_date::date)"
                   to_condition: institution_id = 'client1'
-                  from_condition: patient_id not in ('614e410a178515ec4863c999', '6182e25ad90ae08eb9d33f90', '6182e2cfd90ae08eb9d3c2c0')
+                  from_condition:
       tests:
         - dbt_expectations.expect_compound_columns_to_be_unique:
             column_list: [ "patient_id", "discharge_date" ]
             ignore_row_if: "any_value_is_missing"
             quote_columns: false
-            row_condition: "patient_id not in ('614e4281178515ec4865bf99','6182e25ad90ae08eb9d33f90','6182e2cfd90ae08eb9d3c2c0') 
-                          and opportunity_id not in (
+            row_condition: " 
                           {% for opportunity_id in var('opportunity_id_tied_same_discharge_date', []) -%}
                                 '{{ opportunity_id }}'
                                  {%- if not loop.last %},{{ '\n' }}{% endif %}
