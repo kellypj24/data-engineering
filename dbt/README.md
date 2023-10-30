@@ -160,7 +160,7 @@ packages:
 
 Run `dbt deps` to install 
 
-###Example Tests
+### Example Tests
 dbt-expectations provides a plethora of tests to handle common data quality issues such as incorrect data types, stale data, missing data, and duplicate values. Below are some example tests:
 
 Test 1: Table Column Count
