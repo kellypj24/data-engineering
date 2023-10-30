@@ -22,9 +22,9 @@ https://stackoverflow.com/questions/71482406/how-to-set-location-of-profiles-yml
 Command Line Flag:
 Use the --profiles-dir flag followed by the path to the directory containing the profiles.yml file when running dbt commands. The command would look something like this:
 
-bash
-Copy code
+```
 dbt run --profiles-dir /path/to/directory
+```
 Replace /path/to/directory with the path to the directory containing the profiles.yml file. This way, dbt will use the specified directory to look for the profiles.yml file each time it runs.
 
 Profiles Directory:
@@ -33,9 +33,9 @@ By default, dbt looks for the profiles.yml file in the ~/.dbt/ directory. If you
 Project Directory:
 You can also use the --project-dir flag to specify the directory to look for the dbt_project.yml file if needed, though this doesn't directly address the profiles.yml location. The flag can be used as follows:
 
-bash
-Copy code
+```
 dbt run --project-dir /path/to/project/directory
+```
 The profiles.yml file is crucial for dbt operations as it contains all the information dbt needs to connect to your data platform. When you run dbt Core from the command line, it reads the dbt_project.yml file to find the profile name, and then looks for a profile with the same name in your profiles.yml file​3​.
 
 This setup allows for more flexibility in organizing your dbt project and managing connection profiles, especially if you have multiple profiles for different data warehouses​4​.
