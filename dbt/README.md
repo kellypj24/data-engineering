@@ -143,3 +143,46 @@ convert_timezone(
     timestamp 'epoch' + document.completeddatetime::bigint / 1000 * interval '1 second'
 ) as map_transmission_date,
 ```
+
+## dbt-expectations Library Overview
+
+`dbt-expectations` is a dbt extension package aimed at allowing users to deploy tests within their data warehouse environment. This library is heavily inspired by the `Great Expectations` package for Python and is meant to provide a similar testing framework within the dbt ecosystem&#8203;``【oaicite:2】``&#8203;&#8203;``【oaicite:1】``&#8203;&#8203;``【oaicite:0】``&#8203;.
+
+### Installation
+
+Before utilizing `dbt-expectations`, ensure you have a valid dbt project setup. Add the `dbt-expectations` package to your `packages.yml` file:
+
+```yaml
+packages:
+  - package: calogica/dbt_expectations
+    version: [">=0.8.0", "<0.9.0"]
+```
+
+Run `dbt deps` to install 
+
+###Example Tests
+dbt-expectations provides a plethora of tests to handle common data quality issues such as incorrect data types, stale data, missing data, and duplicate values. Below are some example tests:
+
+Test 1: Table Column Count
+Ensure a table, model, or seed has the expected number of columns:
+
+```yaml
+models: # or seeds:
+  - name: learn_analytics_engineering
+    tests:
+      - dbt_expectations.expect_table_column_count_to_equal:
+          value: 11
+```
+
+Test 2: Column Data Type
+Assert the data type of a column. Particularly useful for columns with timestamp, date, integer, and string values:
+
+```yaml
+models:
+  - name: your_model_name
+    tests:
+      - dbt_expectations.expect_column_values_to_be_of_type:
+          column_name: your_column_name
+          type_: timestamp
+```
+
