@@ -7,7 +7,7 @@ sources:
     loader: server
 
     tables:
-      - name: dim_customer
+      - name: company_customers
         description: Represents a customer
         columns:
           - name: id
@@ -15,7 +15,7 @@ sources:
               - not_null
               - unique
 
-      - name: fact_sales
+      - name: sales_transactions
         description: Represents a sales transation
         columns:
           - name: id
