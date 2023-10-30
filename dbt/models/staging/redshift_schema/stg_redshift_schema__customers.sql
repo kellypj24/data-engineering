@@ -1,5 +1,5 @@
 with
-{{ import(source('redshift_schema', 'source_customers'), 'customers') }},
+{{ import(source('redshift_schema', 'source_company_customers'), 'customers') }},
 
 filter_customers as (
 
