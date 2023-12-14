@@ -13,7 +13,7 @@ from home.ops.file_generation_ops import (
     op_factory_from_query,
     update_column_headers,
 )
-from home.sql import FileGenerationQueries
+from home.import_sql_dataclass import FileGenerationQueries
 
 
 @asset(group_name="reports_weekly_report", io_manager_key="google_drive_io_manager")
