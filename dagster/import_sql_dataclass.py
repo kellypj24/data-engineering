@@ -11,7 +11,7 @@ class FileGenerationQuery:
     filename_pattern: str | None = None
 
 class FileGenerationQueries:
-    BCBSM_SUPPLEMENTAL = FileGenerationQuery(
+    CLIENT_SUPPLEMENTAL = FileGenerationQuery(
         name="query_name",
         query="""
         SELECT *
