@@ -11,11 +11,11 @@ class FileGenerationQuery:
     filename_pattern: str | None = None
 
 class FileGenerationQueries:
-    CLIENT_SUPPLEMENTAL = FileGenerationQuery(
+    FILE_GEN = FileGenerationQuery(
         name="query_name",
         query="""
         SELECT *
-        FROM schema.tab;e
+        FROM schema.table
     """,
         mapping={
         },
