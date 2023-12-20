@@ -13,7 +13,7 @@ from pandas.tseries.holiday import (
 from pandas.tseries.offsets import DateOffset, Day
 
 
-class CureatrHolidayCalendar(AbstractHolidayCalendar):
+class CompanyHolidayCalendar(AbstractHolidayCalendar):
     """
     US Federal Government Holiday Calendar based on rules specified by:
     https://www.opm.gov/policy-data-oversight/
