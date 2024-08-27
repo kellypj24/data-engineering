@@ -12,7 +12,7 @@ from airflow.utils.log.logging_mixin import LoggingMixin
 logger = LoggingMixin().log
 
 
-def get_secret(secret_name, region_name="us-west-2"):
+def get_secret(secret_name, region_name="us-east-1"):
     session = boto3.session.Session()
     client = session.client(service_name="secretsmanager", region_name=region_name)
     try:
