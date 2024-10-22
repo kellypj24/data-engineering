@@ -1,0 +1,84 @@
+{
+    "containerDefinitions": [
+        {
+            "name": "dev-temporal-bootstrap",
+            "image": "<bootstrap-storage_image>",
+            "cpu": 0,
+            "portMappings": [],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "POSTGRES_SEEDS",
+                    "value": "<postgres_host>"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "secrets": [
+                {
+                    "name": "POSTGRES_USER",
+                    "valueFrom": "<user_secret_arn>"
+                },
+                {
+                    "name": "POSTGRES_PWD",
+                    "valueFrom": "<user_password_arn>"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "dev-apps-temporal",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "dev-temporal-bootstrap"
+                }
+            },
+            "systemControls": []
+        }
+    ],
+    "family": "temporal-bootstrap",
+    "taskRoleArn": "<role arn>",
+    "executionRoleArn": "<role arn>",
+    "networkMode": "awsvpc",
+    "revision": 8,
+    "volumes": [],
+    "status": "ACTIVE",
+    "requiresAttributes": [
+        {
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "ecs.capability.secrets.asm.environment-variables"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.task-iam-role"
+        },
+        {
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
+        }
+    ],
+    "placementConstraints": [],
+    "compatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512"
+}
