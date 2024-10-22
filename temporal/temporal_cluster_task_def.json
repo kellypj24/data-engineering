@@ -1,0 +1,358 @@
+{
+    "containerDefinitions": [
+        {
+            "name": "frontEnd",
+            "image": "<server image>",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 7233,
+                    "hostPort": 7233,
+                    "protocol": "tcp"
+                },
+                {
+                    "containerPort": 6933,
+                    "hostPort": 6933,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "POSTGRES_SEEDS",
+                    "value": "<postgres_host>"
+                },
+                {
+                    "name": "SERVICES",
+                    "value": "frontend"
+                },
+                {
+                    "name": "BIND_ON_IP",
+                    "value": "0.0.0.0"
+                },
+                {
+                    "name": "VISIBILITY_DBNAME",
+                    "value": "temporal_visibility_db"
+                },
+                {
+                    "name": "DBNAME",
+                    "value": "temporal_db"
+                },
+                {
+                    "name": "SQL_TLS_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "LOG_LEVEL",
+                    "value": "debug,info"
+                },
+                {
+                    "name": "DB",
+                    "value": "postgres12"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "secrets": [
+                {
+                    "name": "POSTGRES_USER",
+                    "valueFrom": "<user_secret_arn>"
+                },
+                {
+                    "name": "POSTGRES_PWD",
+                    "valueFrom": "<user_password_arn"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "dev-apps-temporal",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "frontEnd"
+                }
+            },
+            "systemControls": []
+        },
+        {
+            "name": "history",
+            "image": "<server image>",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 7234,
+                    "hostPort": 7234,
+                    "protocol": "tcp"
+                },
+                {
+                    "containerPort": 6934,
+                    "hostPort": 6934,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "POSTGRES_SEEDS",
+                    "value": "<postgres_host>"
+                },
+                {
+                    "name": "SERVICES",
+                    "value": "history"
+                },
+                {
+                    "name": "VISIBILITY_DBNAME",
+                    "value": "temporal_visibility_db"
+                },
+                {
+                    "name": "DBNAME",
+                    "value": "temporal_db"
+                },
+                {
+                    "name": "SQL_TLS_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "LOG_LEVEL",
+                    "value": "debug,info"
+                },
+                {
+                    "name": "DB",
+                    "value": "postgres12"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "secrets": [
+                {
+                    "name": "POSTGRES_USER",
+                    "valueFrom": "<user_secret_arn>"
+                },
+                {
+                    "name": "POSTGRES_PWD",
+                    "valueFrom": "<user_password_arn>"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "dev-apps-temporal",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "history"
+                }
+            },
+            "systemControls": []
+        },
+        {
+            "name": "matching",
+            "image": "<server image>",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 7235,
+                    "hostPort": 7235,
+                    "protocol": "tcp"
+                },
+                {
+                    "containerPort": 6935,
+                    "hostPort": 6935,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "POSTGRES_SEEDS",
+                    "value": "<postgres_host>"
+                },
+                {
+                    "name": "SERVICES",
+                    "value": "matching"
+                },
+                {
+                    "name": "VISIBILITY_DBNAME",
+                    "value": "temporal_visibility_db"
+                },
+                {
+                    "name": "DBNAME",
+                    "value": "temporal_db"
+                },
+                {
+                    "name": "SQL_TLS_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "LOG_LEVEL",
+                    "value": "debug,info"
+                },
+                {
+                    "name": "DB",
+                    "value": "postgres12"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "secrets": [
+                {
+                    "name": "POSTGRES_USER",
+                    "valueFrom": "<user_secret_arn>"
+                },
+                {
+                    "name": "POSTGRES_PWD",
+                    "valueFrom": "<user_password_arn>"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "dev-apps-temporal",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "matching"
+                }
+            },
+            "systemControls": []
+        },
+        {
+            "name": "ui",
+            "image": "temporalio/ui:latest",
+            "cpu": 0,
+            "portMappings": [],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "TEMPORAL_CLI_ADDRESS",
+                    "value": "localhost:7233"
+                },
+                {
+                    "name": "TEMPORAL_ADDRESS",
+                    "value": "localhost:7233"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "dev-apps-temporal",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "ui"
+                }
+            },
+            "systemControls": []
+        },
+        {
+            "name": "worker",
+            "image": "<server image>",
+            "cpu": 0,
+            "portMappings": [
+                {
+                    "containerPort": 7239,
+                    "hostPort": 7239,
+                    "protocol": "tcp"
+                },
+                {
+                    "containerPort": 6939,
+                    "hostPort": 6939,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true,
+            "environment": [
+                {
+                    "name": "POSTGRES_SEEDS",
+                    "value": "<postgres_host>"
+                },
+                {
+                    "name": "SERVICES",
+                    "value": "worker"
+                },
+                {
+                    "name": "VISIBILITY_DBNAME",
+                    "value": "temporal_visibility_db"
+                },
+                {
+                    "name": "DBNAME",
+                    "value": "temporal_db"
+                },
+                {
+                    "name": "SQL_TLS_ENABLED",
+                    "value": "true"
+                },
+                {
+                    "name": "LOG_LEVEL",
+                    "value": "debug,info"
+                },
+                {
+                    "name": "DB",
+                    "value": "postgres12"
+                }
+            ],
+            "mountPoints": [],
+            "volumesFrom": [],
+            "secrets": [
+                {
+                    "name": "POSTGRES_USER",
+                    "valueFrom": "<user_secret_arn>"
+                },
+                {
+                    "name": "POSTGRES_PWD",
+                    "valueFrom": "<user_password_arn"
+                }
+            ],
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "dev-apps-temporal",
+                    "awslogs-region": "us-east-1",
+                    "awslogs-stream-prefix": "worker"
+                }
+            },
+            "systemControls": []
+        }
+    ],
+    "family": "dev-temporal-server-cluster",
+    "taskRoleArn": "<role_arn>",
+    "executionRoleArn": "<role_arn>",
+    "networkMode": "awsvpc",
+    "revision": 10,
+    "volumes": [],
+    "status": "ACTIVE",
+    "requiresAttributes": [
+        {
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "name": "ecs.capability.secrets.asm.environment-variables"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.task-iam-role"
+        },
+        {
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "name": "ecs.capability.task-eni"
+        }
+    ],
+    "placementConstraints": [],
+    "compatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "cpu": "256",
+    "memory": "512"
+}
