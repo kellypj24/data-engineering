@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+
+# Test / build artifacts
+*.duckdb
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# Dagster
+.dagster/
+
+# Airflow
+airflow.db
+airflow-webserver.pid
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+
+# Secrets
+.env
+*.pem
+credentials*.json
+!*example*.json

@@ -1,0 +1,24 @@
+[project]
+name = "temporal-orchestration"
+version = "0.1.0"
+description = "Temporal workflows for data pipeline orchestration"
+requires-python = ">=3.10"
+dependencies = [
+    "temporalio>=1.6.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-timeout>=2.0",
+    "temporalio[testing]>=1.6.0",
+    "ruff>=0.4.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["workflows*", "activities*", "workers*"]

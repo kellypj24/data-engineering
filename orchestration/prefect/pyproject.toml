@@ -1,0 +1,25 @@
+[project]
+name = "prefect-orchestration"
+version = "0.1.0"
+description = "Prefect flows for data pipeline orchestration"
+requires-python = ">=3.11"
+dependencies = [
+    "prefect>=2.14.0",
+    "boto3>=1.28,<2.0",
+    "requests>=2.31.0",
+    "prefect-snowflake>=0.3.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["flows*", "blocks*", "schedules*"]
