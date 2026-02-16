@@ -1,0 +1,55 @@
+data_warehouse:
+
+  # --- Snowflake ---
+  # Set DBT_TARGET=snowflake and supply SNOWFLAKE_* env vars.
+  snowflake:
+    target: dev
+    outputs:
+      dev:
+        type: snowflake
+        account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+        user: "{{ env_var('SNOWFLAKE_USER') }}"
+        password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
+        role: "{{ env_var('SNOWFLAKE_ROLE', 'TRANSFORMER') }}"
+        database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
+        warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
+        schema: "{{ env_var('SNOWFLAKE_SCHEMA', 'PUBLIC') }}"
+        threads: 4
+
+  # --- DuckDB ---
+  # Lightweight local development. Set DBT_TARGET=duckdb.
+  duckdb:
+    target: dev
+    outputs:
+      dev:
+        type: duckdb
+        path: "{{ env_var('DUCKDB_PATH', 'dev.duckdb') }}"
+        threads: 4
+
+  # --- PostgreSQL ---
+  # Set DBT_TARGET=postgres and supply POSTGRES_* env vars.
+  postgres:
+    target: dev
+    outputs:
+      dev:
+        type: postgres
+        host: "{{ env_var('POSTGRES_HOST', 'localhost') }}"
+        port: "{{ env_var('POSTGRES_PORT', '5432') | int }}"
+        user: "{{ env_var('POSTGRES_USER') }}"
+        password: "{{ env_var('POSTGRES_PASSWORD') }}"
+        dbname: "{{ env_var('POSTGRES_DBNAME') }}"
+        schema: "{{ env_var('POSTGRES_SCHEMA', 'public') }}"
+        threads: 4
+
+  # --- BigQuery ---
+  # Set DBT_TARGET=bigquery and supply BIGQUERY_* env vars.
+  bigquery:
+    target: dev
+    outputs:
+      dev:
+        type: bigquery
+        method: oauth
+        project: "{{ env_var('BIGQUERY_PROJECT') }}"
+        dataset: "{{ env_var('BIGQUERY_DATASET') }}"
+        threads: 4
+        location: "{{ env_var('BIGQUERY_LOCATION', 'US') }}"
