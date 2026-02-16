@@ -1,0 +1,17 @@
+Metadata-Version: 2.4
+Name: dagster-orchestration
+Version: 0.1.0
+Summary: Composable data engineering toolkit powered by Dagster
+Requires-Python: >=3.11
+Requires-Dist: dagster<2.0,>=1.6
+Requires-Dist: dagster-webserver<2.0,>=1.6
+Requires-Dist: dagster-dbt<1.0,>=0.22
+Requires-Dist: dagster-airbyte<1.0,>=0.22
+Requires-Dist: dagster-snowflake<1.0,>=0.22
+Requires-Dist: boto3<2.0,>=1.28
+Requires-Dist: dbt-core<2.0,>=1.7
+Requires-Dist: dbt-snowflake<2.0,>=1.7
+Provides-Extra: dev
+Requires-Dist: dagster-webserver<2.0,>=1.6; extra == "dev"
+Requires-Dist: pytest>=7.0; extra == "dev"
+Requires-Dist: pytest-cov>=4.0; extra == "dev"

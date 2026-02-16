@@ -7,5 +7,5 @@ from src.assets.dbt import dbt_project_assets
 # Append new asset groups here as the project grows.
 all_assets = [
     *airbyte_assets,
-    dbt_project_assets,
+    *([dbt_project_assets] if dbt_project_assets is not None else []),
 ]

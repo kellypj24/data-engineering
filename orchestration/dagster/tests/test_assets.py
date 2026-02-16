@@ -11,9 +11,14 @@ class TestAirbyteAssets:
         assert isinstance(airbyte_assets, list)
         assert len(airbyte_assets) > 0
 
-    def test_airbyte_assets_match_destination_tables(self):
-        """Each destination table should produce an asset."""
-        assert len(airbyte_assets) == len(DESTINATION_TABLES)
+    def test_airbyte_assets_cover_destination_tables(self):
+        """Asset keys should include all destination tables."""
+        all_keys = set()
+        for asset_def in airbyte_assets:
+            for key in asset_def.keys:
+                all_keys.add(key.path[-1])
+        for table in DESTINATION_TABLES:
+            assert table in all_keys, f"Table '{table}' not found in asset keys"
 
     def test_connection_id_is_placeholder(self):
         """Connection ID should be set (placeholder for now)."""

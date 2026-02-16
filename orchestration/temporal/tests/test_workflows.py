@@ -13,6 +13,7 @@ from workflows.example_workflow import DataPipelineWorkflow
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(60)
 async def test_data_pipeline_workflow():
     """Test the full data pipeline workflow with time-skipping."""
     async with await WorkflowEnvironment.start_time_skipping() as env:
@@ -35,6 +36,7 @@ async def test_data_pipeline_workflow():
 
 
 @pytest.mark.asyncio
+@pytest.mark.timeout(60)
 async def test_data_pipeline_workflow_returns_source_name():
     """Result should include the source name."""
     async with await WorkflowEnvironment.start_time_skipping() as env:

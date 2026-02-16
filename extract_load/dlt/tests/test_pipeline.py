@@ -46,8 +46,7 @@ class TestJsonPlaceholderResources:
         mock_requests.get.return_value = mock_response
 
         results = list(jsonplaceholder_posts())
-        assert len(results) == 1  # yields once (the full list)
-        assert len(results[0]) == 2
+        assert len(results) == 2
 
     @patch("pipelines.example_pipeline.requests")
     def test_comments_resource_yields_data(self, mock_requests, mock_comments):
@@ -58,8 +57,7 @@ class TestJsonPlaceholderResources:
         mock_requests.get.return_value = mock_response
 
         results = list(jsonplaceholder_comments())
-        assert len(results) == 1
-        assert len(results[0]) == 3
+        assert len(results) == 3
 
 
 class TestJsonPlaceholderPipeline:
@@ -85,7 +83,6 @@ class TestJsonPlaceholderPipeline:
             destination="duckdb",
             dataset_name="test_raw",
             pipelines_dir=str(tmp_path),
-            working_dir=str(tmp_path),
         )
 
         load_info = pipeline.run(jsonplaceholder_source())

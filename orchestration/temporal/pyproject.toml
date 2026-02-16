@@ -11,10 +11,14 @@ dependencies = [
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.23.0",
+    "pytest-timeout>=2.0",
     "temporalio[testing]>=1.6.0",
     "ruff>=0.4.0",
 ]
 
 [build-system]
 requires = ["setuptools>=68.0"]
-build-backend = "setuptools.backends._legacy:_Backend"
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["workflows*", "activities*", "workers*"]
