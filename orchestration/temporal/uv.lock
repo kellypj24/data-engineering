@@ -193,7 +193,7 @@ dependencies = [
     { name = "temporalio" },
 ]
 
-[package.optional-dependencies]
+[package.dev-dependencies]
 dev = [
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -203,15 +203,16 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.23.0" },
-    { name = "pytest-timeout", marker = "extra == 'dev'", specifier = ">=2.0" },
-    { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.4.0" },
-    { name = "temporalio", specifier = ">=1.6.0" },
-    { name = "temporalio", extras = ["testing"], marker = "extra == 'dev'", specifier = ">=1.6.0" },
+requires-dist = [{ name = "temporalio", specifier = ">=1.6.0" }]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "pytest", specifier = ">=7.0" },
+    { name = "pytest-asyncio", specifier = ">=0.23.0" },
+    { name = "pytest-timeout", specifier = ">=2.0" },
+    { name = "ruff", specifier = ">=0.4.0" },
+    { name = "temporalio", extras = ["testing"], specifier = ">=1.6.0" },
 ]
-provides-extras = ["dev"]
 
 [[package]]
 name = "temporalio"

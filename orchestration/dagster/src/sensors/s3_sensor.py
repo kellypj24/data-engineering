@@ -14,7 +14,6 @@ Customisation
 
 import boto3
 from dagster import (
-    AssetKey,
     RunRequest,
     SensorEvaluationContext,
     sensor,
