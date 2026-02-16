@@ -1,0 +1,24 @@
+[project]
+name = "airflow-orchestration"
+version = "0.1.0"
+description = "Airflow DAGs for data pipeline orchestration"
+requires-python = ">=3.11"
+dependencies = [
+    "apache-airflow>=2.8.0,<3.0",
+    "apache-airflow-providers-airbyte>=3.6.0",
+    "apache-airflow-providers-amazon>=8.0.0",
+    "apache-airflow-providers-snowflake>=5.0.0",
+    "dbt-core>=1.8.0,<2.0",
+    "dbt-snowflake>=1.7,<2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "ruff>=0.4.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._legacy:_Backend"

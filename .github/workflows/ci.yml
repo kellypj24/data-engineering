@@ -1,0 +1,176 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      dagster: ${{ steps.filter.outputs.dagster }}
+      airflow: ${{ steps.filter.outputs.airflow }}
+      prefect: ${{ steps.filter.outputs.prefect }}
+      temporal: ${{ steps.filter.outputs.temporal }}
+      dbt: ${{ steps.filter.outputs.dbt }}
+      dlt: ${{ steps.filter.outputs.dlt }}
+      airbyte: ${{ steps.filter.outputs.airbyte }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            dagster:
+              - 'orchestration/dagster/**'
+            airflow:
+              - 'orchestration/airflow/**'
+            prefect:
+              - 'orchestration/prefect/**'
+            temporal:
+              - 'orchestration/temporal/**'
+            dbt:
+              - 'transformation/dbt/**'
+            dlt:
+              - 'extract_load/dlt/**'
+            airbyte:
+              - 'extract_load/airbyte/**'
+
+  resolve-impacts:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    outputs:
+      test-dagster: ${{ steps.resolve.outputs.test-dagster }}
+      test-airflow: ${{ steps.resolve.outputs.test-airflow }}
+      test-prefect: ${{ steps.resolve.outputs.test-prefect }}
+      test-temporal: ${{ steps.resolve.outputs.test-temporal }}
+      test-dlt: ${{ steps.resolve.outputs.test-dlt }}
+    steps:
+      - id: resolve
+        run: |
+          # Direct changes
+          test_dagster="${{ needs.detect-changes.outputs.dagster }}"
+          test_airflow="${{ needs.detect-changes.outputs.airflow }}"
+          test_prefect="${{ needs.detect-changes.outputs.prefect }}"
+          test_temporal="${{ needs.detect-changes.outputs.temporal }}"
+          test_dlt="${{ needs.detect-changes.outputs.dlt }}"
+
+          # Cross-paradigm: dbt changes affect all orchestrators that wrap dbt
+          if [ "${{ needs.detect-changes.outputs.dbt }}" = "true" ]; then
+            test_dagster="true"
+            test_airflow="true"
+            test_prefect="true"
+          fi
+
+          # Cross-paradigm: airbyte changes affect orchestrators that trigger syncs
+          if [ "${{ needs.detect-changes.outputs.airbyte }}" = "true" ]; then
+            test_dagster="true"
+            test_airflow="true"
+            test_prefect="true"
+          fi
+
+          echo "test-dagster=$test_dagster" >> "$GITHUB_OUTPUT"
+          echo "test-airflow=$test_airflow" >> "$GITHUB_OUTPUT"
+          echo "test-prefect=$test_prefect" >> "$GITHUB_OUTPUT"
+          echo "test-temporal=$test_temporal" >> "$GITHUB_OUTPUT"
+          echo "test-dlt=$test_dlt" >> "$GITHUB_OUTPUT"
+
+  test-dagster:
+    runs-on: ubuntu-latest
+    needs: resolve-impacts
+    if: needs.resolve-impacts.outputs.test-dagster == 'true'
+    defaults:
+      run:
+        working-directory: orchestration/dagster
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uv sync --dev
+      - run: uv run pytest tests/ -v --tb=short
+
+  test-airflow:
+    runs-on: ubuntu-latest
+    needs: resolve-impacts
+    if: needs.resolve-impacts.outputs.test-airflow == 'true'
+    defaults:
+      run:
+        working-directory: orchestration/airflow
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uv sync --dev
+      - run: uv run pytest tests/ -v --tb=short
+
+  test-prefect:
+    runs-on: ubuntu-latest
+    needs: resolve-impacts
+    if: needs.resolve-impacts.outputs.test-prefect == 'true'
+    defaults:
+      run:
+        working-directory: orchestration/prefect
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uv sync --dev
+      - run: uv run pytest tests/ -v --tb=short
+
+  test-temporal:
+    runs-on: ubuntu-latest
+    needs: resolve-impacts
+    if: needs.resolve-impacts.outputs.test-temporal == 'true'
+    defaults:
+      run:
+        working-directory: orchestration/temporal
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uv sync --dev
+      - run: uv run pytest tests/ -v --tb=short
+
+  test-dlt:
+    runs-on: ubuntu-latest
+    needs: resolve-impacts
+    if: needs.resolve-impacts.outputs.test-dlt == 'true'
+    defaults:
+      run:
+        working-directory: extract_load/dlt
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - run: uv sync --dev
+      - run: uv run pytest tests/ -v --tb=short
+
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - tool: dagster
+            path: orchestration/dagster
+            cmd: uv run ruff check src/ tests/
+          - tool: airflow
+            path: orchestration/airflow
+            cmd: uv run ruff check dags/ tests/
+          - tool: prefect
+            path: orchestration/prefect
+            cmd: uv run ruff check flows/ blocks/ tests/
+          - tool: temporal
+            path: orchestration/temporal
+            cmd: uv run ruff check workflows/ activities/ workers/ tests/
+          - tool: dlt
+            path: extract_load/dlt
+            cmd: uv run ruff check pipelines/ tests/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v4
+      - name: Install and lint ${{ matrix.tool }}
+        working-directory: ${{ matrix.path }}
+        run: |
+          uv sync --dev
+          ${{ matrix.cmd }}

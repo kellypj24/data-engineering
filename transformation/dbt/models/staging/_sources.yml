@@ -1,0 +1,27 @@
+version: 2
+
+sources:
+  - name: raw
+    description: Raw data loaded by Airbyte or dlt
+    schema: raw
+    tables:
+      - name: orders
+        description: Raw orders from the source system
+        columns:
+          - name: id
+            description: Primary key
+            tests:
+              - unique
+              - not_null
+          - name: created_at
+            description: Order creation timestamp
+      - name: customers
+        description: Raw customer records from the source system
+        columns:
+          - name: id
+            description: Primary key
+            tests:
+              - unique
+              - not_null
+          - name: email
+            description: Customer email address

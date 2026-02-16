@@ -28,12 +28,11 @@ Data flows left to right: **Sources -> EL -> Warehouse (raw) -> Transformation -
 | EL | [dlt](extract_load/dlt/) | Code-first Python EL pipelines | Ready |
 | Orchestration | [Dagster](orchestration/dagster/) | Asset-based orchestration | Ready |
 | Orchestration | [Temporal](orchestration/temporal/) | Durable workflow execution | Ready |
-| Orchestration | [Airflow](orchestration/airflow/) | Task-based DAG orchestration | Scaffold |
-| Orchestration | [Prefect](orchestration/prefect/) | Flow-based orchestration | Scaffold |
+| Orchestration | [Airflow](orchestration/airflow/) | Task-based DAG orchestration | Ready |
+| Orchestration | [Prefect](orchestration/prefect/) | Flow-based orchestration | Ready |
 | Transformation | [dbt](transformation/dbt/) | SQL-based transformation framework | Ready |
 
-**Ready** = fully configured with working examples and documentation.
-**Scaffold** = directory structure and basic config in place, not yet production-tested.
+**Ready** = fully configured with working examples, tests, and documentation.
 
 ---
 
@@ -95,6 +94,61 @@ data-engineering/
 │   └── tool-comparison.md
 └── archive/                # Previous experiments for reference
 ```
+
+---
+
+## Task Runner
+
+The project uses [just](https://github.com/casey/just) as a command runner with [uv](https://github.com/astral-sh/uv) for Python dependency management.
+
+```bash
+# List all available commands
+just --list
+
+# Run all tests across all tools
+just test
+
+# Run tests for a specific tool
+just dagster::test
+just airflow::test
+just prefect::test
+just temporal::test
+just dlt::test
+
+# Lint all code
+just lint
+
+# Format all code
+just fmt
+```
+
+Each tool has its own `mod.just` file with tool-specific commands. Run `just --list` to see everything available.
+
+---
+
+## Testing
+
+Every tool has its own test suite using its native test framework. All tests use mocked external services — no live connections required.
+
+| Tool | Framework | Command |
+|------|-----------|---------|
+| Dagster | pytest + dagster test utilities | `just dagster::test` |
+| Airflow | pytest + DagBag validation | `just airflow::test` |
+| Prefect | pytest + prefect_test_harness | `just prefect::test` |
+| Temporal | pytest-asyncio + WorkflowEnvironment | `just temporal::test` |
+| dlt | pytest + DuckDB | `just dlt::test` |
+| Airbyte | terraform test (mock provider) | `just airbyte::test` |
+| dbt | dbt test (schema + unit tests) | `just dbt::test` |
+
+---
+
+## CI/CD
+
+GitHub Actions workflows with intelligent change detection:
+
+- **`ci.yml`** — Detects which tools changed and runs only the relevant tests. Includes cross-paradigm impact detection: dbt or Airbyte changes also trigger orchestrator tests (since Dagster, Airflow, and Prefect all wrap dbt and Airbyte).
+- **`terraform-validate.yml`** — Runs `terraform fmt`, `validate`, and `test` on Airbyte Terraform changes.
+- **`dependabot.yml`** — Weekly dependency updates for pip, Terraform, and GitHub Actions.
 
 ---
 
