@@ -1,0 +1,68 @@
+version: "3.8"
+
+# NOTE: Airbyte is managed separately via abctl (Airbyte's CLI tool),
+# not included in this compose file. See README.md for setup instructions.
+# Run `abctl local install` to start Airbyte on its default port (8000).
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: dagster
+      POSTGRES_PASSWORD: dagster
+      POSTGRES_DB: dagster
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dagster"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  dagster-daemon:
+    build:
+      context: ../../orchestration/dagster
+      dockerfile: Dockerfile
+    command: ["dagster-daemon", "run"]
+    environment:
+      DAGSTER_HOME: /opt/dagster/dagster_home
+      DAGSTER_PG_HOST: postgres
+      DAGSTER_PG_USER: dagster
+      DAGSTER_PG_PASSWORD: dagster
+      DAGSTER_PG_DB: dagster
+    volumes:
+      - ../../orchestration/dagster:/opt/dagster/app
+      - dagster-home:/opt/dagster/dagster_home
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: on-failure
+
+  dagster-webserver:
+    build:
+      context: ../../orchestration/dagster
+      dockerfile: Dockerfile
+    command: ["dagster-webserver", "-h", "0.0.0.0", "-p", "3000"]
+    environment:
+      DAGSTER_HOME: /opt/dagster/dagster_home
+      DAGSTER_PG_HOST: postgres
+      DAGSTER_PG_USER: dagster
+      DAGSTER_PG_PASSWORD: dagster
+      DAGSTER_PG_DB: dagster
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../../orchestration/dagster:/opt/dagster/app
+      - dagster-home:/opt/dagster/dagster_home
+    depends_on:
+      postgres:
+        condition: service_healthy
+      dagster-daemon:
+        condition: service_started
+    restart: on-failure
+
+volumes:
+  postgres-data:
+  dagster-home:
