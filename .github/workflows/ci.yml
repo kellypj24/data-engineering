@@ -26,7 +26,7 @@ jobs:
       dlt: ${{ steps.filter.outputs.dlt }}
       airbyte: ${{ steps.filter.outputs.airbyte }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -93,7 +93,7 @@ jobs:
       run:
         working-directory: orchestration/dagster
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v4
       - run: uv sync --dev
       - run: uv run pytest tests/ -v --tb=short
@@ -106,7 +106,7 @@ jobs:
       run:
         working-directory: orchestration/airflow
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v4
       - run: uv sync --dev
       - run: uv run pytest tests/ -v --tb=short
@@ -119,7 +119,7 @@ jobs:
       run:
         working-directory: orchestration/prefect
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v4
       - run: uv sync --dev
       - run: uv run pytest tests/ -v --tb=short
@@ -132,7 +132,7 @@ jobs:
       run:
         working-directory: orchestration/temporal
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v4
       - run: uv sync --dev
       - run: uv run pytest tests/ -v --tb=short
@@ -145,7 +145,7 @@ jobs:
       run:
         working-directory: extract_load/dlt
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v4
       - run: uv sync --dev
       - run: uv run pytest tests/ -v --tb=short
@@ -171,7 +171,7 @@ jobs:
             path: extract_load/dlt
             cmd: uv run ruff check pipelines/ tests/
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: astral-sh/setup-uv@v4
       - name: Install and lint ${{ matrix.tool }}
         working-directory: ${{ matrix.path }}
