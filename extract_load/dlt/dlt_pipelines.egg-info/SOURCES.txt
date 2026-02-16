@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-dlt_pipelines.egg-info/PKG-INFO
-dlt_pipelines.egg-info/SOURCES.txt
-dlt_pipelines.egg-info/dependency_links.txt
-dlt_pipelines.egg-info/requires.txt
-dlt_pipelines.egg-info/top_level.txt
-pipelines/example_pipeline.py
-tests/test_pipeline.py
