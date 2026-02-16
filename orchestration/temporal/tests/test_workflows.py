@@ -4,7 +4,6 @@ Uses mock activities to test workflow logic in isolation.
 """
 
 import pytest
-from temporalio.client import Client
 from temporalio.testing import WorkflowEnvironment
 from temporalio.worker import Worker
 
