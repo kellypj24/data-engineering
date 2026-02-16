@@ -3,6 +3,7 @@
 from datetime import timedelta
 
 from temporalio import workflow
+from temporalio.common import RetryPolicy
 
 with workflow.unsafe.imports_passed_through():
     from activities.example_activity import extract_data, load_data, transform_data
@@ -29,7 +30,7 @@ class DataPipelineWorkflow:
             extract_data,
             source_name,
             start_to_close_timeout=timedelta(minutes=10),
-            retry_policy=workflow.RetryPolicy(
+            retry_policy=RetryPolicy(
                 maximum_attempts=3,
                 initial_interval=timedelta(seconds=5),
             ),

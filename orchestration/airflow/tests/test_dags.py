@@ -39,8 +39,8 @@ class TestDagLoading:
     def test_no_cycles(self, dagbag, dag_id):
         """DAGs should have no cyclic dependencies."""
         dag = dagbag.dags[dag_id]
-        # test_cycle() returns False if there are no cycles
-        assert not dag.test_cycle()
+        # topological_sort() raises AirflowDagCycleException if cycles exist
+        dag.topological_sort()
 
 
 class TestDagConfigurations:

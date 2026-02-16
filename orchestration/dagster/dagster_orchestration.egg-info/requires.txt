@@ -1,0 +1,13 @@
+dagster<2.0,>=1.6
+dagster-webserver<2.0,>=1.6
+dagster-dbt<1.0,>=0.22
+dagster-airbyte<1.0,>=0.22
+dagster-snowflake<1.0,>=0.22
+boto3<2.0,>=1.28
+dbt-core<2.0,>=1.7
+dbt-snowflake<2.0,>=1.7
+
+[dev]
+dagster-webserver<2.0,>=1.6
+pytest>=7.0
+pytest-cov>=4.0

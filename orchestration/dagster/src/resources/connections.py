@@ -23,7 +23,7 @@ from dagster_dbt import DbtCliResource
 from dagster_snowflake import SnowflakeResource
 
 # ---- Relative paths ---------------------------------------------------------
-DBT_PROJECT_DIR = str(Path(__file__).resolve().parents[3] / "dbt")
+DBT_PROJECT_DIR = str(Path(__file__).resolve().parents[4] / "transformation" / "dbt")
 
 # ---- Resource map -----------------------------------------------------------
 RESOURCES: dict = {

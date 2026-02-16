@@ -1,9 +1,9 @@
 """Tests for Dagster asset check definitions."""
 
 import datetime
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
-from dagster import AssetKey
+from dagster import AssetKey, build_asset_context, DagsterInstance
 
 from src.checks.freshness import freshness_check, FRESHNESS_THRESHOLD
 
@@ -22,15 +22,14 @@ class TestFreshnessCheck:
         mock_event = MagicMock()
         mock_event.timestamp = recent_time.timestamp()
 
-        mock_instance = MagicMock()
-        mock_instance.get_latest_materialization_events.return_value = {
-            AssetKey(["airbyte", "raw_orders"]): mock_event
-        }
+        instance = DagsterInstance.ephemeral()
+        context = build_asset_context(instance=instance)
 
-        context = MagicMock()
-        context.instance = mock_instance
-
-        result = freshness_check(context)
+        with patch.object(
+            instance, "get_latest_materialization_events",
+            return_value={AssetKey(["airbyte", "raw_orders"]): mock_event},
+        ):
+            result = freshness_check(context)
         assert result.passed is True
 
     def test_fails_when_stale(self):
@@ -40,27 +39,25 @@ class TestFreshnessCheck:
         mock_event = MagicMock()
         mock_event.timestamp = stale_time.timestamp()
 
-        mock_instance = MagicMock()
-        mock_instance.get_latest_materialization_events.return_value = {
-            AssetKey(["airbyte", "raw_orders"]): mock_event
-        }
+        instance = DagsterInstance.ephemeral()
+        context = build_asset_context(instance=instance)
 
-        context = MagicMock()
-        context.instance = mock_instance
-
-        result = freshness_check(context)
+        with patch.object(
+            instance, "get_latest_materialization_events",
+            return_value={AssetKey(["airbyte", "raw_orders"]): mock_event},
+        ):
+            result = freshness_check(context)
         assert result.passed is False
 
     def test_fails_when_never_materialized(self):
         """Check should fail when asset has never been materialized."""
-        mock_instance = MagicMock()
-        mock_instance.get_latest_materialization_events.return_value = {
-            AssetKey(["airbyte", "raw_orders"]): None
-        }
+        instance = DagsterInstance.ephemeral()
+        context = build_asset_context(instance=instance)
 
-        context = MagicMock()
-        context.instance = mock_instance
-
-        result = freshness_check(context)
+        with patch.object(
+            instance, "get_latest_materialization_events",
+            return_value={AssetKey(["airbyte", "raw_orders"]): None},
+        ):
+            result = freshness_check(context)
         assert result.passed is False
-        assert "never" in result.metadata["reason"].lower()
+        assert "never" in result.metadata["reason"].text.lower()
