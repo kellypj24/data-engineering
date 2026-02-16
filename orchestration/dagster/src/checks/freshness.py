@@ -27,6 +27,7 @@ FRESHNESS_THRESHOLD = datetime.timedelta(hours=25)
 
 # ---- Check definition -------------------------------------------------------
 
+
 @asset_check(
     asset=AssetKey(["airbyte", "raw_orders"]),
     description=(

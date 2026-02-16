@@ -41,7 +41,9 @@ def mock_s3_client():
 def minimal_dbt_manifest(tmp_path):
     """Create a minimal dbt manifest.json for testing."""
     manifest = {
-        "metadata": {"dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v11.json"},
+        "metadata": {
+            "dbt_schema_version": "https://schemas.getdbt.com/dbt/manifest/v11.json"
+        },
         "nodes": {},
         "sources": {},
         "docs": {},

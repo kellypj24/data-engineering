@@ -68,7 +68,9 @@ def s3_file_sensor(
 
     for _ in range(max_polls):
         new_keys = check_s3_for_new_files(
-            bucket=bucket, prefix=prefix, last_key=last_key,
+            bucket=bucket,
+            prefix=prefix,
+            last_key=last_key,
         )
 
         if new_keys:

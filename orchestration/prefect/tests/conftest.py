@@ -24,8 +24,10 @@ def prefect_test_fixture():
 def _mock_get_run_logger():
     """Provide a stdlib logger when tasks are called via .fn() outside a flow."""
     logger = logging.getLogger("prefect.test")
-    with patch("flows.airbyte_sync.get_run_logger", return_value=logger), \
-         patch("flows.dbt_transform.get_run_logger", return_value=logger), \
-         patch("flows.full_pipeline.get_run_logger", return_value=logger), \
-         patch("flows.sensors.s3_sensor.get_run_logger", return_value=logger):
+    with (
+        patch("flows.airbyte_sync.get_run_logger", return_value=logger),
+        patch("flows.dbt_transform.get_run_logger", return_value=logger),
+        patch("flows.full_pipeline.get_run_logger", return_value=logger),
+        patch("flows.sensors.s3_sensor.get_run_logger", return_value=logger),
+    ):
         yield

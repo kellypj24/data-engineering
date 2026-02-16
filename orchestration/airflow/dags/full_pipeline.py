@@ -19,7 +19,9 @@ from airflow.operators.bash import BashOperator
 from airflow.providers.airbyte.operators.airbyte import AirbyteTriggerSyncOperator
 from airflow.utils.task_group import TaskGroup
 
-AIRBYTE_CONNECTION_ID = os.environ.get("AIRBYTE_CONNECTION_ID", "your-airbyte-connection-uuid")
+AIRBYTE_CONNECTION_ID = os.environ.get(
+    "AIRBYTE_CONNECTION_ID", "your-airbyte-connection-uuid"
+)
 DBT_PROJECT_DIR = os.environ.get("DBT_PROJECT_DIR", "/opt/dbt")
 DBT_TARGET = os.environ.get("DBT_TARGET", "prod")
 FRESHNESS_THRESHOLD_HOURS = int(os.environ.get("FRESHNESS_THRESHOLD_HOURS", "25"))

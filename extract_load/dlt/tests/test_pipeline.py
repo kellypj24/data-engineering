@@ -64,7 +64,9 @@ class TestJsonPlaceholderPipeline:
     """Tests for the full dlt pipeline."""
 
     @patch("pipelines.example_pipeline.requests")
-    def test_pipeline_creates_tables(self, mock_requests, mock_posts, mock_comments, tmp_path):
+    def test_pipeline_creates_tables(
+        self, mock_requests, mock_posts, mock_comments, tmp_path
+    ):
         """Pipeline should create posts and comments tables in DuckDB."""
 
         def side_effect(url, **kwargs):

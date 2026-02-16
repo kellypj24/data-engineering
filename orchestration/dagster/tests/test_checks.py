@@ -17,7 +17,9 @@ class TestFreshnessCheck:
 
     def test_passes_when_recently_materialized(self):
         """Check should pass when asset was materialized within threshold."""
-        recent_time = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=1)
+        recent_time = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(
+            hours=1
+        )
 
         mock_event = MagicMock()
         mock_event.timestamp = recent_time.timestamp()
@@ -26,7 +28,8 @@ class TestFreshnessCheck:
         context = build_asset_context(instance=instance)
 
         with patch.object(
-            instance, "get_latest_materialization_events",
+            instance,
+            "get_latest_materialization_events",
             return_value={AssetKey(["airbyte", "raw_orders"]): mock_event},
         ):
             result = freshness_check(context)
@@ -34,7 +37,9 @@ class TestFreshnessCheck:
 
     def test_fails_when_stale(self):
         """Check should fail when asset exceeds threshold."""
-        stale_time = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=30)
+        stale_time = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(
+            hours=30
+        )
 
         mock_event = MagicMock()
         mock_event.timestamp = stale_time.timestamp()
@@ -43,7 +48,8 @@ class TestFreshnessCheck:
         context = build_asset_context(instance=instance)
 
         with patch.object(
-            instance, "get_latest_materialization_events",
+            instance,
+            "get_latest_materialization_events",
             return_value={AssetKey(["airbyte", "raw_orders"]): mock_event},
         ):
             result = freshness_check(context)
@@ -55,7 +61,8 @@ class TestFreshnessCheck:
         context = build_asset_context(instance=instance)
 
         with patch.object(
-            instance, "get_latest_materialization_events",
+            instance,
+            "get_latest_materialization_events",
             return_value={AssetKey(["airbyte", "raw_orders"]): None},
         ):
             result = freshness_check(context)

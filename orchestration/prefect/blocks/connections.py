@@ -49,8 +49,12 @@ class DbtConfig(Block):
 if __name__ == "__main__":
     # Register example blocks — update values for your environment
     AirbyteConnection(
-        server_url=os.environ.get("AIRBYTE_SERVER_URL", "http://localhost:8006/api/public/v1"),
-        connection_id=os.environ.get("AIRBYTE_CONNECTION_ID", "your-airbyte-connection-uuid"),
+        server_url=os.environ.get(
+            "AIRBYTE_SERVER_URL", "http://localhost:8006/api/public/v1"
+        ),
+        connection_id=os.environ.get(
+            "AIRBYTE_CONNECTION_ID", "your-airbyte-connection-uuid"
+        ),
     ).save("production", overwrite=True)
 
     SnowflakeConnection(

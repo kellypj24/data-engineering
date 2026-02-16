@@ -25,6 +25,7 @@ S3_PREFIX = "inbound/"
 
 # ---- Sensor definition ------------------------------------------------------
 
+
 @sensor(
     name="s3_file_arrival_sensor",
     minimum_interval_seconds=60,
