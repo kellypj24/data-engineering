@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Airflow DAGs for data pipeline orchestration"
 requires-python = ">=3.11"
 dependencies = [
-    "apache-airflow>=2.8.0,<3.0",
+    "apache-airflow>=2.8.0,<4.0",
     "apache-airflow-providers-airbyte>=3.6.0",
     "apache-airflow-providers-amazon>=8.0.0",
     "apache-airflow-providers-snowflake>=5.0.0",
