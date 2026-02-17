@@ -48,3 +48,5 @@ airflow-webserver.pid
 *.pem
 credentials*.json
 !*example*.json
+terraform.tfvars
+!terraform.tfvars.example

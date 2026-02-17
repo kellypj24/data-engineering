@@ -1,0 +1,14 @@
+# Airbyte API credentials — retrieve with: abctl local credentials
+# Or run: just airbyte::credentials
+airbyte_client_id     = "your-client-id"
+airbyte_client_secret = "your-client-secret"
+
+# Workspace ID — find in Airbyte UI → Settings, or via the API
+workspace_id = "your-workspace-id"
+
+# Postgres source (optional overrides — defaults work for local dev)
+# postgres_host     = "host.docker.internal"
+# postgres_port     = 5432
+# postgres_database = "postgres"
+# postgres_username = "postgres"
+# postgres_password = "postgres"
