@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Prefect flows for data pipeline orchestration"
 requires-python = ">=3.11"
 dependencies = [
-    "prefect>=2.14.0",
+    "prefect>=3.6.26",
     "boto3>=1.28,<2.0",
     "requests>=2.31.0",
     "prefect-snowflake>=0.3.0",
