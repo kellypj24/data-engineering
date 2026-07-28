@@ -1,0 +1,17 @@
+packages:
+  - name: dbt_utils
+    package: dbt-labs/dbt_utils
+    version: 1.4.1
+  - name: dbt_expectations
+    package: metaplane/dbt_expectations
+    version: 0.10.10
+  - name: audit_helper
+    package: dbt-labs/audit_helper
+    version: 0.14.0
+  - name: codegen
+    package: dbt-labs/codegen
+    version: 0.14.1
+  - name: dbt_date
+    package: godatadriven/dbt_date
+    version: 0.19.0
+sha1_hash: fb639c21992b5dec540f847f6ba4c4b3042456ee

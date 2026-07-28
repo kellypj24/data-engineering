@@ -25,7 +25,7 @@ is why the status lives here rather than on the section headings.)
 **P1 — correctness**
 
 - [x] 1. [Fix the `just` module recipes (local task runner is broken)](#1-fix-the-just-module-recipes-local-task-runner-is-broken)
-- [ ] 2. [Give the dbt tool a `pyproject.toml` + dependabot entry](#2-give-the-dbt-tool-a-pyprojecttoml--dependabot-entry)
+- [x] 2. [Give the dbt tool a `pyproject.toml` + dependabot entry](#2-give-the-dbt-tool-a-pyprojecttoml--dependabot-entry)
 - [ ] 3. [Lint and test dbt in CI](#3-lint-and-test-dbt-in-ci)
 - [ ] 4. [Add a fan-in `ci-success` required check](#4-add-a-fan-in-ci-success-required-check)
 - [ ] 5. [Add a repo-wide pre-commit (or lefthook) layer so local == CI](#5-add-a-repo-wide-pre-commit-or-lefthook-layer-so-local--ci)
@@ -64,18 +64,17 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
   `working-directory:` and calls `uv` directly — CI never goes through `just`.
 - **`terraform-validate.yml`** — `fmt`/`validate`/`test`, scoped to
   `extract_load/airbyte/terraform/**` only.
-- **`dependabot.yml`** — 7 entries, weekly: 5 `uv` (dagster, airflow, prefect,
-  temporal, dlt), 1 terraform, 1 github-actions. **No entry for dbt** — it has no
-  `pyproject.toml` to update (task #2). The Python tools use the `uv` ecosystem
-  rather than `pip` so that `uv.lock` is updated alongside `pyproject.toml`; the
-  `lockfiles` job in `ci.yml` enforces that invariant.
+- **`dependabot.yml`** — 8 entries, weekly: 6 `uv` (dagster, airflow, prefect,
+  temporal, dlt, dbt), 1 terraform, 1 github-actions. The Python tools use the
+  `uv` ecosystem rather than `pip` so that `uv.lock` is updated alongside
+  `pyproject.toml`; the `lockfiles` job in `ci.yml` enforces that invariant.
 - **`CODEOWNERS`** — a single wildcard rule: `* @kellypj24`.
 - **Task runner** — `just` + `uv`; each tool has its own `mod.just`. All seven
   modules were broken until #63 — see task #1.
-- **dbt tool** — ships `.pre-commit-config.yaml` (sqlfluff, yamllint,
-  dbt-checkpoint) and `.sqlfluff`, but these are **not wired into CI**, and the
-  tool has **no `pyproject.toml`**, so nothing declares `dbt-core` or `sqlfluff`
-  as a dependency. It is the only tool missing one.
+- **dbt tool** — has a `pyproject.toml` and `uv.lock` like every other tool, and
+  runs credential-free against duckdb by default. Ships `.pre-commit-config.yaml`
+  (sqlfluff, yamllint, dbt-checkpoint) and `.sqlfluff`, but these are still
+  **not wired into CI** — that is task #3.
 - **`.claude/`** — nothing committed. (An untracked, developer-local
   `.claude/settings.local.json` exists; there is no `.cursor/` at all.)
 
@@ -84,7 +83,7 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
 | Capability | Today | Task |
 |---|---|---|
 | Working local task runner | ✅ fixed in #63 | — |
-| dbt dependency declaration | ❌ no `pyproject.toml` | #2 |
+| dbt dependency declaration | ✅ done | — |
 | dbt lint in CI | ❌ config exists, unused | #3 |
 | dbt build/test in CI | ❌ | #3 |
 | Fan-in required check | ❌ (branch protection can't be meaningful) | #4 |
@@ -196,6 +195,30 @@ rule to hold: **derive the dbt version from `pyproject.toml`, never hardcode it.
 until something declares what to install. It also closes the dependabot hole —
 dbt is currently the one tool whose pins never get bumped.
 
+> **What this actually uncovered — DONE.** Because nothing declared dbt's
+> dependencies, nobody had ever been able to run this project, and three
+> separate blockers had accumulated behind that. All are fixed:
+>
+> 1. **`profiles.yml` was structurally invalid.** The profile `data_warehouse`
+>    held four adapter blocks each with their own `target`/`outputs`, but dbt
+>    expects `target` and `outputs` directly under the profile name. `dbt parse`
+>    failed with *"outputs not specified in profile 'data_warehouse'"*. Now one
+>    profile whose `target` is `{{ env_var('DBT_TARGET', 'duckdb') }}`, with all
+>    four warehouses as `outputs` — which is what the file's own comments always
+>    described.
+> 2. **`packages.yml` named packages that don't exist.** `dbt-labs/dbt_audit_helper`
+>    is not in the index (it is `dbt-labs/audit_helper`), `calogica/dbt_expectations`
+>    now redirects to `metaplane/`, and `calogica/dbt_date` to `godatadriven/`.
+>    dbt_date must match the fork `dbt_expectations` pulls transitively, or dbt
+>    errors on a duplicate project name.
+> 3. **`.sqlfluff` configured a rule that does not exist.** `convention.count_zero`
+>    is silently ignored by sqlfluff (it warns); the real rule is CV04
+>    `convention.count_rows`.
+>
+> The default target is duckdb specifically so the whole toolchain — `dbt parse`,
+> `dbt build`, and sqlfluff's dbt templater — runs with **no credentials**, which
+> is what task #3 needs in CI.
+
 **How.**
 - Mirror the shape of `extract_load/dlt/pyproject.toml` (same `[project]` /
   `[dependency-groups]` layout, Python 3.11+).
@@ -220,7 +243,18 @@ and reports real lint results (requires task #1). `uv sync --dev` succeeds in
 
 ### 3. Lint and test dbt in CI
 
-> **Depends on #1 and #2.**
+> **Depends on #1 and #2.** #2 is done, so the lint half is now unblocked:
+> `uv run sqlfluff lint models/ macros/` works credential-free against the
+> duckdb default target.
+>
+> **Known blocker for the `test-dbt` half.** `dbt build` currently fails with
+> `Catalog Error: Table with name "raw.customers" does not exist` — the example
+> models read from `{{ source('raw', ...) }}`, and nothing creates that schema.
+> Decide the shape before implementing: either add seeds under `seeds/` that
+> materialise a small `raw` fixture, or scope `test-dbt` to `dbt parse` +
+> `dbt build --empty` (schema-only, no rows), which validates compilation and
+> DDL without needing fixture data. The latter is probably the right fit for a
+> toolkit — it demonstrates the CI pattern without pretending to have a dataset.
 
 **What.** The dbt tool is a first-class `Ready` tool in this repo, yet `ci.yml`
 never lints or tests it. dbt changes today only trigger the *orchestrator*

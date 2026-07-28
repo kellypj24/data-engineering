@@ -19,4 +19,5 @@ renamed AS (
 
 )
 
-SELECT * FROM renamed;
+SELECT * FROM renamed
+;

@@ -29,6 +29,10 @@ htmlcov/
 target/
 dbt_packages/
 logs/
+# Local dbt user id -- machine-specific, not shared.
+# NOTE: package-lock.yml is deliberately NOT ignored; it pins resolved dbt
+# package versions and belongs in version control, like uv.lock.
+.user.yml
 
 # Dagster
 .dagster/
