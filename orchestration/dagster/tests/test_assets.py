@@ -1,6 +1,6 @@
 """Tests for Dagster asset definitions."""
 
-from src.assets.airbyte import airbyte_assets, AIRBYTE_CONNECTION_ID, DESTINATION_TABLES
+from src.assets.airbyte import AIRBYTE_CONNECTION_ID, DESTINATION_TABLES, airbyte_assets
 
 
 class TestAirbyteAssets:

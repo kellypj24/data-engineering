@@ -11,7 +11,7 @@ Mirrors the Dagster full pipeline pattern.
 """
 
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pendulum
 from airflow.decorators import dag, task
@@ -64,7 +64,7 @@ def full_pipeline():
         """Verify that the pipeline completed within the SLA threshold."""
         dag_run = context["dag_run"]
         start_time = dag_run.start_date
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         elapsed = now - start_time
 
         threshold = timedelta(hours=FRESHNESS_THRESHOLD_HOURS)

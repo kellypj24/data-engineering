@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from dagster import build_sensor_context
 
-from src.sensors.s3_sensor import s3_file_arrival_sensor, S3_BUCKET, S3_PREFIX
+from src.sensors.s3_sensor import S3_BUCKET, S3_PREFIX, s3_file_arrival_sensor
 
 
 class TestS3FileArrivalSensor:

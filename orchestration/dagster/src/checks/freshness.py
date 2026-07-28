@@ -52,9 +52,9 @@ def freshness_check(context) -> AssetCheckResult:
 
     last_materialized = datetime.datetime.fromtimestamp(
         latest_event.timestamp,
-        tz=datetime.timezone.utc,
+        tz=datetime.UTC,
     )
-    age = datetime.datetime.now(datetime.timezone.utc) - last_materialized
+    age = datetime.datetime.now(datetime.UTC) - last_materialized
 
     passed = age <= FRESHNESS_THRESHOLD
     return AssetCheckResult(
