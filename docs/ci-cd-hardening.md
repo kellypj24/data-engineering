@@ -71,7 +71,7 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
   `lockfiles` job in `ci.yml` enforces that invariant.
 - **`CODEOWNERS`** — a single wildcard rule: `* @kellypj24`.
 - **Task runner** — `just` + `uv`; each tool has its own `mod.just`. All seven
-  modules were broken until #44 — see task #1.
+  modules were broken until #63 — see task #1.
 - **dbt tool** — ships `.pre-commit-config.yaml` (sqlfluff, yamllint,
   dbt-checkpoint) and `.sqlfluff`, but these are **not wired into CI**, and the
   tool has **no `pyproject.toml`**, so nothing declares `dbt-core` or `sqlfluff`
@@ -83,7 +83,7 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
 
 | Capability | Today | Task |
 |---|---|---|
-| Working local task runner | ✅ fixed in #44 | — |
+| Working local task runner | ✅ fixed in #63 | — |
 | dbt dependency declaration | ❌ no `pyproject.toml` | #2 |
 | dbt lint in CI | ❌ config exists, unused | #3 |
 | dbt build/test in CI | ❌ | #3 |
@@ -107,7 +107,7 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
 
 ### 1. Fix the `just` module recipes (local task runner is broken) — DONE
 
-> Landed in PR #44. Kept here with its original framing because tasks #3 and #5
+> Landed in PR #63. Kept here with its original framing because tasks #3 and #5
 > reference it, and the correction below is worth recording.
 
 **What.** Every recipe in all seven `mod.just` files —
