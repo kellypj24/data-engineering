@@ -37,7 +37,7 @@ is why the status lives here rather than on the section headings.)
 
 **P3 — Claude skills & agent tooling**
 
-- [ ] 8. [Bootstrap a `.claude/skills/` library for the toolkit's core workflows](#8-bootstrap-a-claudeskills-library-for-the-toolkits-core-workflows)
+- [x] 8. [Bootstrap a `.claude/skills/` library for the toolkit's core workflows](#8-bootstrap-a-claudeskills-library-for-the-toolkits-core-workflows)
 - [ ] 9. [Add a `block-no-verify` agent hook](#9-add-a-block-no-verify-agent-hook)
 
 **P4 — AI-assisted CI quality**
@@ -52,6 +52,7 @@ is why the status lives here rather than on the section headings.)
 - [ ] 14. [Broaden Terraform validation beyond Airbyte](#14-broaden-terraform-validation-beyond-airbyte)
 - [ ] 15. [Consider ARM runners for cost/speed](#15-consider-arm-runners-for-costspeed)
 - [ ] 16. [Make the shipped dbt tests executable](#16-make-the-shipped-dbt-tests-executable)
+- [ ] 17. [Add stack-usage skills for downstream projects](#17-add-stack-usage-skills-for-downstream-projects)
 
 ---
 
@@ -77,8 +78,9 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
   yamllint) and `test-dbt` (`dbt parse` + `dbt compile`) run in CI, gated on the
   `dbt` paths-filter. The `dbt-checkpoint` hooks in `.pre-commit-config.yaml`
   are **not** in CI — that tool is pre-commit-only and is picked up by task #5.
-- **`.claude/`** — nothing committed. (An untracked, developer-local
-  `.claude/settings.local.json` exists; there is no `.cursor/` at all.)
+- **`.claude/`** — ships `skills/` (`add-tool`, `add-stack`, `verify-tool`) plus
+  the skill-writing guide in `skills/CLAUDE.md`. `settings.local.json` is
+  gitignored as per-developer. There is no `.cursor/`.
 
 ### The gaps, at a glance
 
@@ -94,7 +96,8 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
 | Lockfiles kept in sync with `pyproject.toml` | ✅ `lockfiles` job + `uv` dependabot ecosystem | — |
 | Dependency/CVE scan | ❌ | #6 |
 | Secret scanning | ❌ | #7 |
-| Claude scaffolding skills (`.claude/skills/`) | ❌ | #8 |
+| Claude scaffolding skills (`.claude/skills/`) | ✅ add-tool, add-stack, verify-tool | — |
+| Stack-usage skills (for downstream projects) | ❌ | #17 |
 | Agent-behavior hooks (`.claude/hooks/`) | ❌ | #9 |
 | AI-assisted PR review | ❌ | #10 |
 | AI scheduled codebase review | ❌ | #11 |
@@ -107,7 +110,7 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
 
 ## P1 — Correctness gaps (do these first)
 
-### 1. Fix the `just` module recipes (local task runner is broken) — DONE
+### 1. Fix the `just` module recipes (local task runner is broken)
 
 > Landed in PR #63. Kept here with its original framing because tasks #3 and #5
 > reference it, and the correction below is worth recording.
@@ -462,11 +465,12 @@ skipped.
 mirror the operations this repo already documents in prose (README "Adding a New
 Tool", per-tool READMEs). Start with the two highest-frequency ones:
 
-- **`add-tool`** — scaffolds a new tool from the correct `_template/`. All four
-  role directories already ship one (`orchestration/_template/`,
-  `extract_load/_template/`, `transformation/_template/`, `stacks/_template/`).
-  `CLAUDE.md` already lists the manual steps: copy the template, add
-  `pyproject.toml` / `README.md` / `Dockerfile` / `CLAUDE.md` / `mod.just`, add
+- **`add-tool`** — creates a new tool and wires it in. Note that
+  `<role>/_template/` is a **specification README** describing what a tool of
+  that role must provide — it is *not* a code skeleton, and there is nothing to
+  copy. The skill reads it as a requirements checklist and generates the files,
+  modelled on `extract_load/dlt/` (the smallest complete tool). The steps: add
+  `pyproject.toml` / `uv.lock` / `README.md` / `CLAUDE.md` / `mod.just`, add
   tests, update the root README table + justfile module imports, add the CI
   paths-filter entry. A phased skill fits well — scaffold → wire into
   `justfile`/CI → verify.
@@ -499,10 +503,10 @@ self-verifying — and it *demonstrates* the pattern to downstream teams.
   ignore rules land don't accidentally exclude the committed skills.
 
 **Acceptance.** In a Claude Code session opened here, "add a new dlt pipeline
-tool" (or similar) triggers the skill by description, scaffolds from the right
-`_template/`, wires the tool into the `justfile` + CI paths-filter + README
-table, and the result passes `just --list` and its own test job with no manual
-cleanup.
+tool" (or similar) triggers the skill by description, generates the tool against
+its role's requirements, wires it into the `justfile` + CI paths-filter +
+dependabot + README table, and the result passes `just --list` and its own test
+job with no manual cleanup.
 
 ### 9. Add a `block-no-verify` agent hook
 
@@ -624,8 +628,8 @@ patterns, this is a durable quality flywheel.
 
 **How.** One reusable workflow plus three wrappers, with prompts adapted to this
 repo:
-- `architecture` — do tools stay independent? do stacks compose cleanly? is the
-  `_template/` contract honored?
+- `architecture` — do tools stay independent? do stacks compose cleanly? does
+  each tool provide what its role's `_template/README.md` specifies?
 - `documentation` — are tool READMEs, the root README table, and `CLAUDE.md` in
   sync with the code? (This plan's own baseline section is a good example of
   what goes stale.)
@@ -692,6 +696,39 @@ create the raw relations with a small `on-run-start` hook.
 Once sources resolve, extend `test-dbt` in `ci.yml` from `dbt parse` + `dbt
 compile` to a full `dbt build`, which then covers both the data tests and the
 unit test.
+
+### 17. Add stack-usage skills for downstream projects
+
+Task #8 shipped skills for working **on** the toolkit. This is the other half:
+skills for working **with** a stack after someone has chosen one and copied it
+into a real project. That is the toolkit's actual product — the skills are how a
+downstream team writes correct code against these patterns instead of
+re-deriving them.
+
+The critical constraint, stated in `.claude/skills/CLAUDE.md`: these must **not**
+assume this repo's directory layout. They run in the downstream project, where
+the tool sits at some other path. Take the tool root as an argument or infer it
+from `dbt_project.yml` / `pyproject.toml`. A skill that hardcodes
+`transformation/dbt/` is useless the moment it is copied.
+
+Candidates, in rough order of how often they are needed:
+
+- **`dbt-model`** — scaffold a staging / intermediate / mart model plus its
+  `.yml`, honouring this project's macro conventions (`audit_columns`,
+  `clean_string`, `limit_data_in_dev`) and the layer materialisations in
+  `dbt_project.yml`. Must emit a description and at least one test per model, or
+  the `dbt-checkpoint` hooks reject it.
+- **`dbt-source`** — add a source table to a `_sources.yml` with tests, and
+  generate the matching staging model.
+- **`dagster-asset`** — scaffold an asset, wire it into `Definitions`, and add
+  the resource keys it needs.
+- **`dlt-pipeline`** — scaffold a dlt source and pipeline with a mocked test.
+- **`run-stack`** — bring a chosen stack up locally and prove it end to end:
+  EL loads, dbt builds, the orchestrator sees the assets.
+
+Ship them a couple at a time, each with the **Verify** and **Common mistakes**
+sections that `.claude/skills/CLAUDE.md` requires. Ground every one in a real
+file in this repo rather than an invented example.
 
 ---
 

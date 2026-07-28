@@ -1,5 +1,11 @@
 # Stack Template
 
+> **This is a specification, not a skeleton.** It states what a stack of this
+> repo must provide. There are no files here to `cp -r` — read it as a
+> requirements checklist, then create the files. `stacks/dlt-dagster-dbt/` is the best
+> model of what "finished" looks like.
+
+
 How to compose a new stack from the toolkit's components.
 
 ## Overview

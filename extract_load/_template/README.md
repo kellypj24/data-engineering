@@ -1,5 +1,11 @@
 # EL (Extract & Load) Component Template
 
+> **This is a specification, not a skeleton.** It states what a tool of this
+> role must provide. There are no files here to `cp -r` — read it as a
+> requirements checklist, then create the files. `extract_load/dlt/` is the best
+> model of what "finished" looks like.
+
+
 ## What This Role Does
 
 The EL component is responsible for **extracting** data from source systems and **loading** it into a destination (typically a data warehouse or data lake). It handles:

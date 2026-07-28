@@ -1,5 +1,11 @@
 # Transformation Component Template
 
+> **This is a specification, not a skeleton.** It states what a tool of this
+> role must provide. There are no files here to `cp -r` — read it as a
+> requirements checklist, then create the files. `transformation/dbt/` is the best
+> model of what "finished" looks like.
+
+
 ## What This Role Does
 
 The transformation component takes **raw data** that has been loaded into the warehouse and transforms it into **clean, tested, documented models** ready for analytics and downstream consumption. It handles:
