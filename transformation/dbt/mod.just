@@ -1,3 +1,7 @@
+# profiles.yml lives here in the project directory rather than ~/.dbt, so every
+# dbt command needs to be pointed at it. CI sets the same variable.
+export DBT_PROFILES_DIR := source_directory()
+
 # Run dbt tests (schema + unit)
 test:
     uv run dbt test
