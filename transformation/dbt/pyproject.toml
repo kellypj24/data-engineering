@@ -1,0 +1,34 @@
+[project]
+name = "dbt-transformation"
+version = "0.1.0"
+description = "dbt models transforming raw data into staging, intermediate, and mart layers"
+requires-python = ">=3.11"
+dependencies = [
+    # Floors match `require-dbt-version` in dbt_project.yml (>=1.8.0, needed for
+    # unit tests) and the pins in .pre-commit-config.yaml. Keep the three in step.
+    "dbt-core>=1.8.0,<2.0",
+    # Production warehouse; also the dialect .sqlfluff lints against.
+    "dbt-snowflake>=1.11.4,<2.0",
+    # Credential-free target for local dev and CI. profiles.yml defaults to it,
+    # so `dbt parse` / sqlfluff's dbt templater work with no secrets present.
+    "dbt-duckdb>=1.8.0,<2.0",
+]
+
+# The other warehouses profiles.yml can address. Not installed by default --
+# they are alternatives to Snowflake, not companions to it.
+[project.optional-dependencies]
+postgres = ["dbt-postgres>=1.8.0,<2.0"]
+bigquery = ["dbt-bigquery>=1.8.0,<2.0"]
+
+[dependency-groups]
+dev = [
+    "sqlfluff>=3.0.0",
+    "sqlfluff-templater-dbt>=3.0.0",
+    "yamllint>=1.35.1",
+    "pre-commit>=3.7.0",
+]
+
+# This is a dbt project, not an importable Python package -- there is no module
+# to build or install, so uv should manage the environment without packaging it.
+[tool.uv]
+package = false

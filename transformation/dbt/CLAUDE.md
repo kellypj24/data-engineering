@@ -5,9 +5,10 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 
 ## Key Files
 
+- `pyproject.toml` — Dependencies: dbt-core, dbt-snowflake, dbt-duckdb; dev: sqlfluff + dbt templater, yamllint, pre-commit. Extras: `postgres`, `bigquery`
 - `dbt_project.yml` — Project config: name=data_warehouse, models materialization by layer
-- `profiles.yml` — Multi-warehouse: snowflake, duckdb, postgres, bigquery (all env-var driven)
-- `packages.yml` — dbt_utils, dbt_expectations, dbt-audit-helper, codegen, dbt-date
+- `profiles.yml` — One profile, four outputs (duckdb, snowflake, postgres, bigquery), selected by `DBT_TARGET`. **Defaults to duckdb** so everything runs without credentials
+- `packages.yml` / `package-lock.yml` — dbt_utils, dbt_expectations (metaplane), audit_helper, codegen, dbt_date (godatadriven). The lock file is committed
 - `.sqlfluff` — SQL linting: Snowflake dialect, uppercase keywords, trailing commas forbidden
 - `.pre-commit-config.yaml` — sqlfluff, yamllint, dbt-checkpoint hooks
 - `macros/overrides/generate_schema_name.sql` — Dev/prod schema routing
@@ -22,12 +23,20 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 ## Commands
 
 ```bash
+uv sync --dev          # install dbt + sqlfluff (first time)
+uv run dbt deps        # install packages.yml dependencies (first time)
+
 just dbt::run          # dbt run
 just dbt::test         # dbt test (includes unit tests, requires >=1.8)
 just dbt::lint         # sqlfluff lint
 just dbt::fix          # sqlfluff fix
 just dbt::docs         # dbt docs generate + serve
 ```
+
+All of the above run against duckdb by default — no warehouse credentials
+needed. Set `DBT_TARGET=snowflake` (plus the `SNOWFLAKE_*` env vars) to point at
+the real warehouse. `postgres` and `bigquery` need their extra installed first,
+e.g. `uv sync --extra postgres`.
 
 ## Patterns
 

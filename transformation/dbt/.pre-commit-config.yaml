@@ -1,3 +1,11 @@
+# NOTE: `additional_dependencies` below duplicates the floors declared in
+# pyproject.toml. pre-commit installs each hook in its own isolated environment
+# and cannot read pyproject.toml, so the versions have to be restated here.
+# When you bump pyproject.toml, bump these to match -- dependabot updates
+# pyproject.toml/uv.lock only and will not touch this file.
+#
+# dbt-duckdb is required because profiles.yml defaults to the duckdb target, so
+# sqlfluff's dbt templater needs that adapter to compile the project.
 repos:
   - repo: https://github.com/sqlfluff/sqlfluff
     rev: 3.0.0
@@ -5,12 +13,14 @@ repos:
       - id: sqlfluff-lint
         additional_dependencies:
           - dbt-core>=1.8.0
-          - dbt-snowflake>=1.7.0
+          - dbt-snowflake>=1.11.4
+          - dbt-duckdb>=1.8.0
           - sqlfluff-templater-dbt>=3.0.0
       - id: sqlfluff-fix
         additional_dependencies:
           - dbt-core>=1.8.0
-          - dbt-snowflake>=1.7.0
+          - dbt-snowflake>=1.11.4
+          - dbt-duckdb>=1.8.0
           - sqlfluff-templater-dbt>=3.0.0
 
   - repo: https://github.com/adrienverge/yamllint

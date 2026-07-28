@@ -53,7 +53,7 @@ min_alias_length = 2
 [sqlfluff:rules:convention.select_trailing_comma]
 select_clause_trailing_comma = forbid
 
-[sqlfluff:rules:convention.count_zero]
+[sqlfluff:rules:convention.count_rows]
 prefer_count_1 = false
 prefer_count_0 = false
 
