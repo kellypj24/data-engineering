@@ -1,5 +1,11 @@
 # Orchestration Component Template
 
+> **This is a specification, not a skeleton.** It states what a tool of this
+> role must provide. There are no files here to `cp -r` — read it as a
+> requirements checklist, then create the files. `orchestration/dagster/` is the best
+> model of what "finished" looks like.
+
+
 ## What This Role Does
 
 The orchestration component is the **control plane** of the data pipeline. It is responsible for:

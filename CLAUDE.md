@@ -48,12 +48,21 @@ GitHub Actions with cross-paradigm impact detection:
 
 ## Adding a New Tool
 
-1. Copy `<role>/_template/` to `<role>/new-tool/`
-2. Add pyproject.toml, README.md, Dockerfile, CLAUDE.md
-3. Add `mod.just` for task runner integration
-4. Add tests in `tests/` directory
-5. Update root README table and Justfile module imports
-6. Add a paths-filter entry in `.github/workflows/ci.yml`
+Use the `add-tool` skill in `.claude/skills/` — it does all of this and verifies it.
+
+`<role>/_template/` is a **specification README** stating what a tool of that
+role must provide. It is not a code skeleton; there is nothing to copy.
+
+1. Read `<role>/_template/README.md` for the role's requirements
+2. Create `<role>/<tool-name>/` with pyproject.toml, uv.lock, README.md,
+   CLAUDE.md, `mod.just`, and `tests/` — model it on `extract_load/dlt/`
+3. Wire into the root `justfile`: the `mod` import and the aggregate recipes
+4. Wire into `.github/workflows/ci.yml`: paths-filter entry, `test-<tool>` job,
+   `lint` matrix row
+5. Wire into `.github/dependabot.yml` with `package-ecosystem: uv` (not `pip` —
+   `pip` leaves `uv.lock` untouched and the `lockfiles` job will fail)
+6. Update the root README tool table
+7. Verify: `just --list`, `just <tool>::test`, `uv lock --check`
 
 ## Claude Skills
 

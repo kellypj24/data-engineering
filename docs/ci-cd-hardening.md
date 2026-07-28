@@ -465,11 +465,12 @@ skipped.
 mirror the operations this repo already documents in prose (README "Adding a New
 Tool", per-tool READMEs). Start with the two highest-frequency ones:
 
-- **`add-tool`** — scaffolds a new tool from the correct `_template/`. All four
-  role directories already ship one (`orchestration/_template/`,
-  `extract_load/_template/`, `transformation/_template/`, `stacks/_template/`).
-  `CLAUDE.md` already lists the manual steps: copy the template, add
-  `pyproject.toml` / `README.md` / `Dockerfile` / `CLAUDE.md` / `mod.just`, add
+- **`add-tool`** — creates a new tool and wires it in. Note that
+  `<role>/_template/` is a **specification README** describing what a tool of
+  that role must provide — it is *not* a code skeleton, and there is nothing to
+  copy. The skill reads it as a requirements checklist and generates the files,
+  modelled on `extract_load/dlt/` (the smallest complete tool). The steps: add
+  `pyproject.toml` / `uv.lock` / `README.md` / `CLAUDE.md` / `mod.just`, add
   tests, update the root README table + justfile module imports, add the CI
   paths-filter entry. A phased skill fits well — scaffold → wire into
   `justfile`/CI → verify.
@@ -502,10 +503,10 @@ self-verifying — and it *demonstrates* the pattern to downstream teams.
   ignore rules land don't accidentally exclude the committed skills.
 
 **Acceptance.** In a Claude Code session opened here, "add a new dlt pipeline
-tool" (or similar) triggers the skill by description, scaffolds from the right
-`_template/`, wires the tool into the `justfile` + CI paths-filter + README
-table, and the result passes `just --list` and its own test job with no manual
-cleanup.
+tool" (or similar) triggers the skill by description, generates the tool against
+its role's requirements, wires it into the `justfile` + CI paths-filter +
+dependabot + README table, and the result passes `just --list` and its own test
+job with no manual cleanup.
 
 ### 9. Add a `block-no-verify` agent hook
 
@@ -627,8 +628,8 @@ patterns, this is a durable quality flywheel.
 
 **How.** One reusable workflow plus three wrappers, with prompts adapted to this
 repo:
-- `architecture` — do tools stay independent? do stacks compose cleanly? is the
-  `_template/` contract honored?
+- `architecture` — do tools stay independent? do stacks compose cleanly? does
+  each tool provide what its role's `_template/README.md` specifies?
 - `documentation` — are tool READMEs, the root README table, and `CLAUDE.md` in
   sync with the code? (This plan's own baseline section is a good example of
   what goes stale.)

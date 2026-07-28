@@ -154,12 +154,20 @@ GitHub Actions workflows with intelligent change detection:
 
 ## Adding a New Tool
 
-Each role directory contains a `_template/` subdirectory with the standard structure for that role. To add a new tool:
+Each role directory contains a `_template/` subdirectory. It holds a **README that specifies what a tool of that role must provide** — it is a requirements checklist, not a code skeleton, so there is nothing to `cp -r`. Read it, then create the tool's files.
 
-1. Copy the template: `cp -r extract_load/_template extract_load/new-tool`
-2. Follow the template's README to fill in tool-specific configuration
-3. Add the tool to the table in this README
-4. If the tool participates in a new stack, create a stack directory under `stacks/`
+1. Read `<role>/_template/README.md` for what that role requires
+2. Create `<role>/<tool-name>/` with `pyproject.toml`, `uv.lock`, `README.md`, `CLAUDE.md`, `mod.just`, and `tests/`. Model it on `extract_load/dlt/`, the smallest complete tool
+3. Wire it into all five shared surfaces, or it will be invisible to part of the system:
+   - root `justfile` — the `mod` import plus the aggregate `test` / `lint` / `fmt` recipes
+   - `.github/workflows/ci.yml` — a `paths-filter` entry, a `test-<tool>` job, and a `lint` matrix row
+   - `.github/dependabot.yml` — a `package-ecosystem: uv` entry (never `pip`; it skips `uv.lock`)
+   - this README's tool table
+   - root `CLAUDE.md`, only if the tool introduces a new convention
+4. Verify: `just --list`, `just <tool>::test`, `just <tool>::lint`, and `uv lock --check`
+5. If the tool participates in a new stack, create a stack directory under `stacks/`
+
+Working with Claude Code? The `add-tool` skill in `.claude/skills/` does all of the above, and `verify-tool` runs the checks.
 
 ---
 
