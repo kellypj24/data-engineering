@@ -24,7 +24,7 @@ is why the status lives here rather than on the section headings.)
 
 **P1 — correctness**
 
-- [ ] 1. [Fix the `just` module recipes (local task runner is broken)](#1-fix-the-just-module-recipes-local-task-runner-is-broken)
+- [x] 1. [Fix the `just` module recipes (local task runner is broken)](#1-fix-the-just-module-recipes-local-task-runner-is-broken)
 - [ ] 2. [Give the dbt tool a `pyproject.toml` + dependabot entry](#2-give-the-dbt-tool-a-pyprojecttoml--dependabot-entry)
 - [ ] 3. [Lint and test dbt in CI](#3-lint-and-test-dbt-in-ci)
 - [ ] 4. [Add a fan-in `ci-success` required check](#4-add-a-fan-in-ci-success-required-check)
@@ -64,11 +64,14 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
   `working-directory:` and calls `uv` directly — CI never goes through `just`.
 - **`terraform-validate.yml`** — `fmt`/`validate`/`test`, scoped to
   `extract_load/airbyte/terraform/**` only.
-- **`dependabot.yml`** — 7 entries, weekly: 5 pip (dagster, airflow, prefect,
-  temporal, dlt), 1 terraform, 1 github-actions. **No entry for dbt.**
+- **`dependabot.yml`** — 7 entries, weekly: 5 `uv` (dagster, airflow, prefect,
+  temporal, dlt), 1 terraform, 1 github-actions. **No entry for dbt** — it has no
+  `pyproject.toml` to update (task #2). The Python tools use the `uv` ecosystem
+  rather than `pip` so that `uv.lock` is updated alongside `pyproject.toml`; the
+  `lockfiles` job in `ci.yml` enforces that invariant.
 - **`CODEOWNERS`** — a single wildcard rule: `* @kellypj24`.
-- **Task runner** — `just` + `uv`; each tool has its own `mod.just`. **Every
-  module recipe except airbyte's is broken** — see task #1.
+- **Task runner** — `just` + `uv`; each tool has its own `mod.just`. All seven
+  modules were broken until #44 — see task #1.
 - **dbt tool** — ships `.pre-commit-config.yaml` (sqlfluff, yamllint,
   dbt-checkpoint) and `.sqlfluff`, but these are **not wired into CI**, and the
   tool has **no `pyproject.toml`**, so nothing declares `dbt-core` or `sqlfluff`
@@ -80,7 +83,7 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
 
 | Capability | Today | Task |
 |---|---|---|
-| Working local task runner | ❌ broken (`just <tool>::<recipe>`) | #1 |
+| Working local task runner | ✅ fixed in #44 | — |
 | dbt dependency declaration | ❌ no `pyproject.toml` | #2 |
 | dbt lint in CI | ❌ config exists, unused | #3 |
 | dbt build/test in CI | ❌ | #3 |
@@ -102,10 +105,14 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
 
 ## P1 — Correctness gaps (do these first)
 
-### 1. Fix the `just` module recipes (local task runner is broken)
+### 1. Fix the `just` module recipes (local task runner is broken) — DONE
 
-**What.** Every recipe in `orchestration/{dagster,airflow,prefect,temporal}/mod.just`,
-`extract_load/dlt/mod.just`, and `transformation/dbt/mod.just` is prefixed with
+> Landed in PR #44. Kept here with its original framing because tasks #3 and #5
+> reference it, and the correction below is worth recording.
+
+**What.** Every recipe in all seven `mod.just` files —
+`orchestration/{dagster,airflow,prefect,temporal}`, `extract_load/{dlt,airbyte}`,
+and `transformation/dbt` — is prefixed with
 `cd {{justfile_directory()}} &&`. Inside a `just` *module*, `justfile_directory()`
 resolves to the **root** justfile's directory, not the module's — so every recipe
 cd's to the repo root and then runs a command against paths that only exist in
@@ -122,8 +129,13 @@ error: Failed to spawn: `sqlfluff`
 ```
 
 The aggregate root recipes (`just test`, `just lint`, `just fmt`) fail for the
-same reason. `just airbyte::*` is the sole exception — it correctly uses
-`source_directory()`.
+same reason.
+
+> **Correction.** An earlier draft of this task claimed `just airbyte::*` was
+> the sole exception because it used `source_directory()`. That is true only on
+> the unmerged `feature/airbyte-terraform-setup` branch. On `main`,
+> `extract_load/airbyte/mod.just` has the same bug in the form
+> `cd {{justfile_directory()}}/terraform`. All seven modules were affected.
 
 **Why.** This is the largest correctness gap in the repo and it invalidates
 several tasks below. CI is green only because it bypasses `just` entirely with
@@ -149,9 +161,13 @@ test:
 
 Verified against `just 1.46.0` — a probe recipe in `transformation/dbt/mod.just`
 reports `cwd=<repo>/transformation/dbt` while `justfile_directory()` reports
-`<repo>`. Where a recipe needs a *sub*directory, use `source_directory()`, as
-`extract_load/airbyte/mod.just:1` already does. Six files change; `airbyte`
-needs no edit.
+`<repo>`. Where a recipe needs a *sub*directory, a plain relative path is enough
+(`cd terraform && …` in airbyte's case), since cwd is already the module
+directory. All seven files change.
+
+Keep the leading four-space indentation when removing the prefix — deleting it
+along with the `cd` un-indents the recipe body, and `just` then fails to parse
+the file at all (`error: Unknown start of token '-'`).
 
 **Acceptance.** `just dagster::test`, `just airflow::test`, `just prefect::test`,
 `just temporal::test`, and `just dlt::test` each run that tool's suite from that
