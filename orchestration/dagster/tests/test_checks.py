@@ -3,9 +3,9 @@
 import datetime
 from unittest.mock import MagicMock, patch
 
-from dagster import AssetKey, build_asset_context, DagsterInstance
+from dagster import AssetKey, DagsterInstance, build_asset_context
 
-from src.checks.freshness import freshness_check, FRESHNESS_THRESHOLD
+from src.checks.freshness import FRESHNESS_THRESHOLD, freshness_check
 
 
 class TestFreshnessCheck:
@@ -17,7 +17,7 @@ class TestFreshnessCheck:
 
     def test_passes_when_recently_materialized(self):
         """Check should pass when asset was materialized within threshold."""
-        recent_time = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=1)
+        recent_time = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=1)
 
         mock_event = MagicMock()
         mock_event.timestamp = recent_time.timestamp()
@@ -34,7 +34,7 @@ class TestFreshnessCheck:
 
     def test_fails_when_stale(self):
         """Check should fail when asset exceeds threshold."""
-        stale_time = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(hours=30)
+        stale_time = datetime.datetime.now(datetime.UTC) - datetime.timedelta(hours=30)
 
         mock_event = MagicMock()
         mock_event.timestamp = stale_time.timestamp()

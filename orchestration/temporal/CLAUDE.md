@@ -9,7 +9,7 @@ Durable workflow execution for long-running, fault-tolerant data pipelines.
 - `activities/example_activity.py` — `extract_data`, `transform_data`, `load_data` activities
 - `workers/worker.py` — Worker connecting to Temporal server, registers workflows + activities
 - `docker-compose.yml` — Temporal server + PostgreSQL + UI
-- `pyproject.toml` — Dependencies: temporalio>=1.6.0, dev: pytest-asyncio, temporalio[testing]
+- `pyproject.toml` — Dependencies: temporalio>=1.25.0, dev: pytest-asyncio, temporalio[testing]
 
 ## Testing
 

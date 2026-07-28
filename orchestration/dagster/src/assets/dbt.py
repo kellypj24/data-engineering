@@ -16,7 +16,7 @@ import os
 from pathlib import Path
 
 from dagster import AssetExecutionContext
-from dagster_dbt import DbtCliResource, dbt_assets, DagsterDbtTranslator
+from dagster_dbt import DagsterDbtTranslator, DbtCliResource, dbt_assets
 
 # ---- Configuration ---------------------------------------------------------
 # Relative path from the repo root to the dbt project.
