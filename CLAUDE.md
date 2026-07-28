@@ -53,3 +53,14 @@ GitHub Actions with cross-paradigm impact detection:
 3. Add `mod.just` for task runner integration
 4. Add tests in `tests/` directory
 5. Update root README table and Justfile module imports
+6. Add a paths-filter entry in `.github/workflows/ci.yml`
+
+## CI/CD & Tooling Roadmap
+
+`docs/ci-cd-hardening.md` is a Claude Code–executable backlog of CI/CD,
+infrastructure, and Claude-skills improvements for this repo. If asked to harden
+CI, add agent skills/hooks, or "make improvements," start there: pick the
+highest-priority unchecked task from its index, implement it, verify against its
+Acceptance criteria, and tick the box. One task per PR.
+
+Each task is self-contained — everything needed to do the work is in that file.
