@@ -217,7 +217,7 @@ requires-dist = [
     { name = "apache-airflow", specifier = ">=2.8.0,<4.0" },
     { name = "apache-airflow-providers-airbyte", specifier = ">=3.6.0" },
     { name = "apache-airflow-providers-amazon", specifier = ">=9.24.0" },
-    { name = "apache-airflow-providers-snowflake", specifier = ">=5.0.0" },
+    { name = "apache-airflow-providers-snowflake", specifier = ">=6.14.0" },
     { name = "dbt-core", specifier = ">=1.8.0,<2.0" },
     { name = "dbt-snowflake", specifier = ">=1.11.4,<2.0" },
 ]
@@ -505,7 +505,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-snowflake"
-version = "6.9.1"
+version = "6.14.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -518,9 +518,9 @@ dependencies = [
     { name = "snowflake-snowpark-python", marker = "python_full_version < '3.14'" },
     { name = "snowflake-sqlalchemy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/55/07/314b7c348a475f8a6cda83997eda8cd26f66094453a0414c96b165665ab0/apache_airflow_providers_snowflake-6.9.1.tar.gz", hash = "sha256:4108a2f2fbed1abd4a7c810d6795e9f9e405fd2a7b712cf18b2d47bedd30cdf2", size = 109121, upload-time = "2026-02-14T13:23:40.923Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/89/5f/0d63979cfe65891f68059b28e3515d2446154590d0125e6da222b1d1772e/apache_airflow_providers_snowflake-6.14.0.tar.gz", hash = "sha256:1dd6aef0d2e7f452061b9262e6edf800d8bbfd5dfb2c4b904122607f3b5460e6", size = 120624, upload-time = "2026-06-22T20:00:00.428Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/0b/37/b862fe8f907d2a517425acb1b6f751846c7dd7b1b51bfa5b6e90bd818e9a/apache_airflow_providers_snowflake-6.9.1-py3-none-any.whl", hash = "sha256:88a6977a86e33095d2b18522d56785891438c887ccc4c3e22ac785ec9aa3b32c", size = 58788, upload-time = "2026-02-14T13:23:05.399Z" },
+    { url = "https://files.pythonhosted.org/packages/9a/1a/1c30a663140f708262f327624cabe1e685607b6fd3e6e8099cf9b994701a/apache_airflow_providers_snowflake-6.14.0-py3-none-any.whl", hash = "sha256:f5399b72c757df6727c0a2495dbd44c97fcd2ec524254d03722888bf4a0ca24f", size = 64008, upload-time = "2026-06-22T19:59:23.006Z" },
 ]
 
 [[package]]
