@@ -215,7 +215,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "apache-airflow", specifier = ">=2.8.0,<4.0" },
-    { name = "apache-airflow-providers-airbyte", specifier = ">=3.6.0" },
+    { name = "apache-airflow-providers-airbyte", specifier = ">=5.5.2" },
     { name = "apache-airflow-providers-amazon", specifier = ">=9.24.0" },
     { name = "apache-airflow-providers-snowflake", specifier = ">=6.14.0" },
     { name = "dbt-core", specifier = ">=1.8.0,<2.0" },
@@ -346,7 +346,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-airbyte"
-version = "5.3.2"
+version = "5.5.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "airbyte-api" },
@@ -354,9 +354,9 @@ dependencies = [
     { name = "apache-airflow-providers-common-compat" },
     { name = "requests" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/18/52/db0a312e8ce534843b1d4ddd79371c84c4c128e0889ce5bbd88a5538fbf5/apache_airflow_providers_airbyte-5.3.2.tar.gz", hash = "sha256:ce726facf773c8a281f8f0e591b4c1f78c7c803e3d986ec17a888baa2020ed63", size = 35175, upload-time = "2026-01-17T10:47:55.178Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/1c/89/a98ff3976ad974612c774e9475f0086be1470f02e5178945f7066aeaa9a1/apache_airflow_providers_airbyte-5.5.2.tar.gz", hash = "sha256:6353570a272b9ab8ba6e755cf8a348b40e4f243761ca586d40820ae8a550702b", size = 38312, upload-time = "2026-07-10T16:28:21.532Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/3c/f2/e966a60c32dc629b504e45c852e33c72081089cff83dc684e5dc2f83d601/apache_airflow_providers_airbyte-5.3.2-py3-none-any.whl", hash = "sha256:15e2e9509207f7c058a5596bb99849a3b99c809203c36b50e30583387c32cc34", size = 22435, upload-time = "2026-01-17T10:45:51.281Z" },
+    { url = "https://files.pythonhosted.org/packages/a2/24/07624a49f0a499dd150b13e1642b1ba9b92b5ea4e18a6db95c7ec1e1ea88/apache_airflow_providers_airbyte-5.5.2-py3-none-any.whl", hash = "sha256:2ab8ae947decc271a81c315635a1dbb39219423f9f5aee7bbb5ee854c24c319b", size = 23549, upload-time = "2026-07-10T16:27:48.561Z" },
 ]
 
 [[package]]
