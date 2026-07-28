@@ -1,15 +1,15 @@
 # Validate Terraform configuration
 validate:
-    cd {{justfile_directory()}}/terraform && terraform validate
+    cd terraform && terraform validate
 
 # Plan Terraform changes
 plan:
-    cd {{justfile_directory()}}/terraform && terraform plan
+    cd terraform && terraform plan
 
 # Apply Terraform changes
 apply:
-    cd {{justfile_directory()}}/terraform && terraform apply
+    cd terraform && terraform apply
 
 # Run Terraform tests
 test:
-    cd {{justfile_directory()}}/terraform && terraform test
+    cd terraform && terraform test
