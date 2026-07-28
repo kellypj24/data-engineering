@@ -25,6 +25,12 @@ htmlcov/
 .vscode/
 *.swp
 
+# Claude Code -- per-developer settings and local state.
+# `.claude/skills/` and `.claude/settings.json` ARE tracked: they are part of
+# what this toolkit ships.
+.claude/settings.local.json
+.claude/local/
+
 # dbt
 target/
 dbt_packages/

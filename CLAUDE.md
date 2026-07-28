@@ -55,6 +55,20 @@ GitHub Actions with cross-paradigm impact detection:
 5. Update root README table and Justfile module imports
 6. Add a paths-filter entry in `.github/workflows/ci.yml`
 
+## Claude Skills
+
+`.claude/skills/` holds repo-local skills for working **on** the toolkit:
+
+- `add-tool` — add a new tool under a role and wire it into the justfile, CI,
+  dependabot, and the README table
+- `add-stack` — compose existing tools into a new `stacks/<name>/`
+- `verify-tool` — run the local gauntlet CI does not cover (CI never goes
+  through `just`)
+
+`.claude/skills/CLAUDE.md` states the rules for writing them — chiefly that
+skills are *procedure* and `CLAUDE.md` files are *convention*, and that a skill
+references conventions rather than restating them.
+
 ## CI/CD & Tooling Roadmap
 
 `docs/ci-cd-hardening.md` is a Claude Code–executable backlog of CI/CD,
