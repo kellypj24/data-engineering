@@ -1,0 +1,30 @@
+# yamllint config for the dbt project.
+# Runs in CI (`lint-dbt`) and via .pre-commit-config.yaml.
+extends: default
+
+ignore: |
+  .venv/
+  dbt_packages/
+  target/
+  logs/
+  .user.yml
+
+rules:
+  # dbt's own YAML (dbt_project.yml, schema files, packages.yml) conventionally
+  # omits the `---` document start, and dbt docs show it that way throughout.
+  document-start: disable
+
+  # Match the 120-char limit already set in .sqlfluff, so SQL and YAML agree.
+  line-length:
+    max: 120
+
+  # Schema files legitimately nest deeply (sources -> tables -> columns -> tests).
+  indentation:
+    spaces: 2
+    indent-sequences: consistent
+
+  # `on:` in GitHub-style YAML and dbt's `+enabled: true` both trip the default
+  # truthy rule without being ambiguous in practice.
+  truthy:
+    allowed-values: ["true", "false"]
+    check-keys: false

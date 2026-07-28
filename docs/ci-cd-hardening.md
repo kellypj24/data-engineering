@@ -26,7 +26,7 @@ is why the status lives here rather than on the section headings.)
 
 - [x] 1. [Fix the `just` module recipes (local task runner is broken)](#1-fix-the-just-module-recipes-local-task-runner-is-broken)
 - [x] 2. [Give the dbt tool a `pyproject.toml` + dependabot entry](#2-give-the-dbt-tool-a-pyprojecttoml--dependabot-entry)
-- [ ] 3. [Lint and test dbt in CI](#3-lint-and-test-dbt-in-ci)
+- [x] 3. [Lint and test dbt in CI](#3-lint-and-test-dbt-in-ci)
 - [ ] 4. [Add a fan-in `ci-success` required check](#4-add-a-fan-in-ci-success-required-check)
 - [ ] 5. [Add a repo-wide pre-commit (or lefthook) layer so local == CI](#5-add-a-repo-wide-pre-commit-or-lefthook-layer-so-local--ci)
 
@@ -51,6 +51,7 @@ is why the status lives here rather than on the section headings.)
 - [ ] 13. [Add a semantic PR title check](#13-add-a-semantic-pr-title-check)
 - [ ] 14. [Broaden Terraform validation beyond Airbyte](#14-broaden-terraform-validation-beyond-airbyte)
 - [ ] 15. [Consider ARM runners for cost/speed](#15-consider-arm-runners-for-costspeed)
+- [ ] 16. [Make the shipped dbt tests executable](#16-make-the-shipped-dbt-tests-executable)
 
 ---
 
@@ -72,9 +73,10 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
 - **Task runner** — `just` + `uv`; each tool has its own `mod.just`. All seven
   modules were broken until #63 — see task #1.
 - **dbt tool** — has a `pyproject.toml` and `uv.lock` like every other tool, and
-  runs credential-free against duckdb by default. Ships `.pre-commit-config.yaml`
-  (sqlfluff, yamllint, dbt-checkpoint) and `.sqlfluff`, but these are still
-  **not wired into CI** — that is task #3.
+  runs credential-free against duckdb by default. `lint-dbt` (sqlfluff +
+  yamllint) and `test-dbt` (`dbt parse` + `dbt compile`) run in CI, gated on the
+  `dbt` paths-filter. The `dbt-checkpoint` hooks in `.pre-commit-config.yaml`
+  are **not** in CI — that tool is pre-commit-only and is picked up by task #5.
 - **`.claude/`** — nothing committed. (An untracked, developer-local
   `.claude/settings.local.json` exists; there is no `.cursor/` at all.)
 
@@ -84,8 +86,9 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
 |---|---|---|
 | Working local task runner | ✅ fixed in #63 | — |
 | dbt dependency declaration | ✅ done | — |
-| dbt lint in CI | ❌ config exists, unused | #3 |
-| dbt build/test in CI | ❌ | #3 |
+| dbt lint in CI | ✅ `lint-dbt` (sqlfluff + yamllint) | — |
+| dbt parse/compile in CI | ✅ `test-dbt` | — |
+| dbt data tests + unit tests runnable | ❌ no source fixtures | #16 |
 | Fan-in required check | ❌ (branch protection can't be meaningful) | #4 |
 | Root pre-commit / hooks | ❌ (dbt tool only) | #5 |
 | Lockfiles kept in sync with `pyproject.toml` | ✅ `lockfiles` job + `uv` dependabot ecosystem | — |
@@ -255,6 +258,19 @@ and reports real lint results (requires task #1). `uv sync --dev` succeeds in
 > `dbt build --empty` (schema-only, no rows), which validates compilation and
 > DDL without needing fixture data. The latter is probably the right fit for a
 > toolkit — it demonstrates the CI pattern without pretending to have a dataset.
+>
+> **Resolved — DONE.** `--empty` turned out **not** to work: it limits rows for
+> *models*, but the tests declared on `_sources.yml` still query `raw.orders`
+> and `raw.customers`, so `dbt build --empty` fails identically. The shipped
+> **unit test cannot run either** — dbt introspects the source relation to infer
+> column types and errors with *"Not able to get columns for unit test 'orders'
+> from relation `dev.raw.orders` because the relation doesn't exist."*
+>
+> `test-dbt` therefore runs **`dbt parse` + `dbt compile`**, which validates
+> schema YAML, `ref()`/`source()` resolution, macro syntax, and full Jinja
+> rendering of every model — all credential-free. See task #16 for making the
+> data tests and unit tests executable, which needs source fixtures and is a
+> change to the example project's design, not to CI.
 
 **What.** The dbt tool is a first-class `Ready` tool in this repo, yet `ci.yml`
 never lints or tests it. dbt changes today only trigger the *orchestrator*
@@ -318,6 +334,8 @@ full job list as new jobs are added:
       - test-temporal
       - test-dlt
       - lint
+      - lint-dbt
+      - test-dbt
       - lockfiles
     steps:
       - name: Fail if any dependency failed or was cancelled
@@ -649,6 +667,31 @@ filter and working directories to cover `infrastructure/terraform/**`, and add
 
 `ubuntu-24.04-arm` runners are cheaper and often faster. Low-effort swap for the
 pure-Python/lint jobs here. Verify each tool's deps have arm64 wheels first.
+
+### 16. Make the shipped dbt tests executable
+
+The dbt project ships 7 data tests and 1 unit test that **cannot run**, because
+the sources they depend on (`raw.orders`, `raw.customers`) do not exist anywhere.
+`dbt build` fails with `Catalog Error: ... schema "raw" does not exist`, and the
+unit test fails earlier still — dbt introspects the source relation to infer
+column types before it can substitute the mock rows.
+
+For a toolkit this matters more than it would in a working repo: the unit test is
+there to *demonstrate* dbt's `>=1.8` unit-testing feature, which `dbt_project.yml`
+calls out explicitly in `require-dbt-version`. A demonstration that errors on
+first run teaches the wrong thing.
+
+Standing the sources up needs a design decision, which is why it is not folded
+into #3: seeds land in the schema chosen by `macros/overrides/generate_schema_name.sql`,
+which prefixes with the target name outside prod — so a seed intended as
+`raw.orders` materialises as `main_raw.orders` against the duckdb default and no
+longer matches `source('raw', 'orders')`. Options: give the seeds an explicit
+schema config that bypasses the override, relax the override for seeds, or
+create the raw relations with a small `on-run-start` hook.
+
+Once sources resolve, extend `test-dbt` in `ci.yml` from `dbt parse` + `dbt
+compile` to a full `dbt build`, which then covers both the data tests and the
+unit test.
 
 ---
 

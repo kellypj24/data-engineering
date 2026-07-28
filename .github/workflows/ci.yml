@@ -179,6 +179,55 @@ jobs:
           uv sync --dev
           ${{ matrix.cmd }}
 
+  # dbt is kept out of the `lint` matrix above because it needs its dbt packages
+  # installed before sqlfluff can run -- the templater compiles the project, so
+  # `dbt deps` is a prerequisite for linting a single .sql file.
+  lint-dbt:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.dbt == 'true'
+    defaults:
+      run:
+        working-directory: transformation/dbt
+    env:
+      # profiles.yml lives in the project directory, not ~/.dbt.
+      DBT_PROFILES_DIR: .
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - run: uv sync --dev
+      - name: Install dbt packages
+        run: uv run dbt deps
+      - name: Lint SQL
+        run: uv run sqlfluff lint models/ macros/
+      - name: Lint YAML
+        run: uv run yamllint --strict .
+
+  test-dbt:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.dbt == 'true'
+    defaults:
+      run:
+        working-directory: transformation/dbt
+    env:
+      # Defaults to the duckdb target, so this runs with no warehouse
+      # credentials -- see profiles.yml.
+      DBT_PROFILES_DIR: .
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - run: uv sync --dev
+      - name: Install dbt packages
+        run: uv run dbt deps
+      - name: Parse project
+        # Validates schema YAML, ref()/source() resolution, and macro syntax.
+        run: uv run dbt parse
+      - name: Compile models
+        # Renders every model's Jinja to SQL. Catches broken macros and bad
+        # column references that `parse` alone does not reach.
+        run: uv run dbt compile
+
   # Deliberately unconditional: this is a guard, and a guard that skips is not a
   # guard. It is also cheap -- `uv lock --check` resolves metadata only, with no
   # package installs. See the header comment in .github/dependabot.yml.
