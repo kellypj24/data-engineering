@@ -7,7 +7,7 @@ dependencies = [
     "prefect>=3.6.26",
     "boto3>=1.42.88,<2.0",
     "requests>=2.31.0",
-    "prefect-snowflake>=0.28.7",
+    "prefect-snowflake>=0.28.8",
 ]
 
 [dependency-groups]
