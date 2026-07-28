@@ -86,6 +86,7 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
 | dbt build/test in CI | ❌ | #3 |
 | Fan-in required check | ❌ (branch protection can't be meaningful) | #4 |
 | Root pre-commit / hooks | ❌ (dbt tool only) | #5 |
+| Lockfiles kept in sync with `pyproject.toml` | ✅ `lockfiles` job + `uv` dependabot ecosystem | — |
 | Dependency/CVE scan | ❌ | #6 |
 | Secret scanning | ❌ | #7 |
 | Claude scaffolding skills (`.claude/skills/`) | ❌ | #8 |
@@ -267,6 +268,7 @@ full job list as new jobs are added:
       - test-temporal
       - test-dlt
       - lint
+      - lockfiles
     steps:
       - name: Fail if any dependency failed or was cancelled
         if: >-

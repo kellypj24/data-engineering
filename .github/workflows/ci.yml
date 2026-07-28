@@ -178,3 +178,32 @@ jobs:
         run: |
           uv sync --dev
           ${{ matrix.cmd }}
+
+  # Deliberately unconditional: this is a guard, and a guard that skips is not a
+  # guard. It is also cheap -- `uv lock --check` resolves metadata only, with no
+  # package installs. See the header comment in .github/dependabot.yml.
+  lockfiles:
+    name: Lockfiles in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - name: Verify each uv.lock matches its pyproject.toml
+        run: |
+          failed=0
+          for dir in \
+            extract_load/dlt \
+            orchestration/airflow \
+            orchestration/dagster \
+            orchestration/prefect \
+            orchestration/temporal
+          do
+            if uv lock --check --directory "$dir" >/dev/null 2>&1; then
+              echo "  in sync    $dir"
+            else
+              echo "  DRIFTED    $dir"
+              echo "::error file=$dir/uv.lock,title=Lockfile out of sync::$dir/uv.lock does not match its pyproject.toml. Run 'uv lock' in $dir and commit the result."
+              failed=1
+            fi
+          done
+          exit $failed
