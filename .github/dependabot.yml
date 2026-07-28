@@ -1,31 +1,40 @@
 version: 2
 
+# The Python tools use `package-ecosystem: uv`, NOT `pip`. The `pip` ecosystem
+# only edits pyproject.toml and leaves uv.lock untouched, so every update drifted
+# the two apart: the declared floor moved while the lock kept pinning the old
+# resolution. That had two bad effects -- any local `uv sync` rewrote the lock and
+# dirtied unrelated diffs, and dependabot's PR titles compared a stale floor
+# against latest, so routine patch bumps read as scary major upgrades.
+#
+# The `uv` ecosystem updates pyproject.toml and uv.lock together. The `lockfiles`
+# job in ci.yml enforces the invariant regardless of what opens the PR.
 updates:
-  - package-ecosystem: pip
+  - package-ecosystem: uv
     directory: /orchestration/dagster
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
 
-  - package-ecosystem: pip
+  - package-ecosystem: uv
     directory: /orchestration/airflow
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
 
-  - package-ecosystem: pip
+  - package-ecosystem: uv
     directory: /orchestration/prefect
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
 
-  - package-ecosystem: pip
+  - package-ecosystem: uv
     directory: /orchestration/temporal
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
 
-  - package-ecosystem: pip
+  - package-ecosystem: uv
     directory: /extract_load/dlt
     schedule:
       interval: weekly
