@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Temporal workflows for data pipeline orchestration"
 requires-python = ">=3.10"
 dependencies = [
-    "temporalio>=1.25.0",
+    "temporalio>=1.31.0",
 ]
 
 [dependency-groups]
