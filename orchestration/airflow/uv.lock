@@ -216,7 +216,7 @@ dev = [
 requires-dist = [
     { name = "apache-airflow", specifier = ">=2.8.0,<4.0" },
     { name = "apache-airflow-providers-airbyte", specifier = ">=5.5.2" },
-    { name = "apache-airflow-providers-amazon", specifier = ">=9.24.0" },
+    { name = "apache-airflow-providers-amazon", specifier = ">=9.33.0" },
     { name = "apache-airflow-providers-snowflake", specifier = ">=6.14.0" },
     { name = "dbt-core", specifier = ">=1.12.0,<2.0" },
     { name = "dbt-snowflake", specifier = ">=1.11.4,<2.0" },
@@ -361,7 +361,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-amazon"
-version = "9.32.0"
+version = "9.33.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -381,9 +381,9 @@ dependencies = [
     { name = "sagemaker-studio" },
     { name = "watchtower" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cf/97/01d2b8e4a2d0366304f4e80da01026ec2fa57390711e7570c86b7f8ffca2/apache_airflow_providers_amazon-9.32.0.tar.gz", hash = "sha256:0eb63b87c316c5eb6c21bb859a43df918f72655c7af4af62f3ab454cb1514ec4", size = 2248059, upload-time = "2026-07-10T16:28:24.007Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/b0/03/1331caee34cbef53b28a33e9eaab4af87e7d51f71c34e496bbf0cb9e3412/apache_airflow_providers_amazon-9.33.0.tar.gz", hash = "sha256:34f1f3494200e300be0f925163c270701f11cf473b33b342685d215b8ae5591b", size = 2265558, upload-time = "2026-07-28T06:38:25.822Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/77/12fcce413f556a9dd9f19d094a646d346935e316e95726ffd0857e206e26/apache_airflow_providers_amazon-9.32.0-py3-none-any.whl", hash = "sha256:9c963eae175cf28f13faa9255ecbbf4e1144149211833dcb6a1da92c31e566f2", size = 769224, upload-time = "2026-07-10T16:27:50.125Z" },
+    { url = "https://files.pythonhosted.org/packages/a2/19/ec72e494ec9ff1e37611a5064a841e027bd0eb51a39e69f667b74d0f437a/apache_airflow_providers_amazon-9.33.0-py3-none-any.whl", hash = "sha256:385b09f6d3dabc590d5cf8584fdb0a98f7a24ce37b28f7a4a68fe6f4c8c88dfd", size = 776200, upload-time = "2026-07-28T06:37:40.293Z" },
 ]
 
 [[package]]
