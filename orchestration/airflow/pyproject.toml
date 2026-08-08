@@ -5,7 +5,7 @@ description = "Airflow DAGs for data pipeline orchestration"
 requires-python = ">=3.11"
 dependencies = [
     "apache-airflow>=2.8.0,<4.0",
-    "apache-airflow-providers-airbyte>=5.5.2",
+    "apache-airflow-providers-airbyte>=6.0.0",
     "apache-airflow-providers-amazon>=9.33.0",
     "apache-airflow-providers-snowflake>=6.14.0",
     "dbt-core>=1.12.0,<2.0",
