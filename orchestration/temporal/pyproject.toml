@@ -12,7 +12,7 @@ dev = [
     "pytest>=9.0.3",
     "pytest-asyncio>=1.4.0",
     "pytest-timeout>=2.4.0",
-    "temporalio[testing]>=1.30.0",
+    "temporalio[testing]>=1.31.0",
     "ruff>=0.16.1",
 ]
 
