@@ -2,8 +2,7 @@ WITH source AS (
 
     SELECT *
     FROM {{ source('raw', 'orders') }}
-    WHERE 1 = 1
-    {{ limit_data_in_dev('created_at') }}
+    WHERE {{ limit_data_in_dev('created_at') }}
 
 ),
 

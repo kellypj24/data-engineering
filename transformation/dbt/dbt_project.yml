@@ -18,6 +18,14 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
+vars:
+  # Environment is deliberately independent of the target. A target says *which
+  # warehouse* (duckdb, snowflake, postgres, bigquery); this says *which
+  # environment*. Branching on `target.name` instead conflates the two, and the
+  # dev/prod branches silently never fire -- which is exactly what happened
+  # before this var existed.
+  dbt_env: "{{ env_var('DBT_ENV', 'dev') }}"
+
 models:
   data_warehouse:
     staging:

@@ -11,8 +11,8 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `packages.yml` / `package-lock.yml` — dbt_utils, dbt_expectations (metaplane), audit_helper, codegen, dbt_date (godatadriven). The lock file is committed
 - `.sqlfluff` — SQL linting: Snowflake dialect, uppercase keywords, trailing commas forbidden
 - `.pre-commit-config.yaml` — sqlfluff, yamllint, dbt-checkpoint hooks
-- `macros/overrides/generate_schema_name.sql` — Dev/prod schema routing
-- `macros/utils/limit_data_in_dev.sql` — Dev data filtering (recent N days)
+- `macros/overrides/generate_schema_name.sql` — Non-prod/prod schema routing
+- `macros/utils/limit_data_in_dev.sql` — Non-prod data filtering (recent N days), as a composable predicate
 - `macros/utils/safe_divide.sql` — Null/zero-safe division
 - `macros/staging/audit_columns.sql` — _loaded_at (EL timestamp or fallback), _dbt_updated_at columns
 - `macros/staging/clean_strings.sql` — TRIM + LOWER + NULLIF
@@ -42,6 +42,13 @@ e.g. `uv sync --extra postgres`.
 
 - `require-dbt-version: ">=1.8.0"` for unit test support
 - Macros organized: `overrides/` (built-in overrides), `utils/` (helpers), `staging/` (staging-specific)
-- Schema routing: dev prefixes with target name, prod uses custom schema directly
-- `limit_data_in_dev` appended to staging models for faster dev runs
+- **Environment is `DBT_ENV`, not the target.** A target picks a *warehouse*
+  (`duckdb`, `snowflake`, …); the `dbt_env` var in `dbt_project.yml` picks an
+  *environment* (`dev` default, `prod`). Macros branch on `var('dbt_env')`.
+  Branching on `target.name` conflates the two and the branch never fires —
+  that bug shipped once and made both macros below dead code.
+- Schema routing: non-prod prefixes with the target's schema (`main_staging`),
+  prod uses the custom schema directly (`staging`)
+- `limit_data_in_dev` is a **complete predicate** — `WHERE {{ limit_data_in_dev('created_at') }}`.
+  It returns `TRUE` in prod, so it needs no `WHERE 1 = 1` anchor and composes with `AND`
 - All env vars for connections — never hardcode credentials in profiles.yml

@@ -1,26 +1,18 @@
 # Dagster instance configuration — local development
 # See https://docs.dagster.io/deployment/dagster-instance for all options.
+#
+# Storage is deliberately left unconfigured. Dagster defaults run, event log,
+# schedule, and artifact storage to SQLite under $DAGSTER_HOME, which is what
+# these blocks were written to do by hand.
+#
+# Do not reintroduce `base_dir: ~/...`. Dagster does not expand `~` in this
+# file, so those paths create a literal directory named `~` inside whatever
+# directory the process was started from -- i.e. checked into the repo.
+#
+# Set DAGSTER_HOME to control where state lands:
+#     export DAGSTER_HOME="$HOME/.dagster-storage"
+# With it unset, `dagster dev` uses a temporary directory and discards state
+# when it exits.
 
-run_storage:
-  module: dagster.core.storage.runs
-  class: SqliteRunStorage
-  config:
-    base_dir: ~/.dagster-storage/runs
-
-event_log_storage:
-  module: dagster.core.storage.event_log
-  class: SqliteEventLogStorage
-  config:
-    base_dir: ~/.dagster-storage/event_log
-
-schedule_storage:
-  module: dagster.core.storage.schedules
-  class: SqliteScheduleStorage
-  config:
-    base_dir: ~/.dagster-storage/schedules
-
-local_artifact_storage:
-  module: dagster.core.storage.root
-  class: LocalArtifactStorage
-  config:
-    base_dir: ~/.dagster-storage/artifacts
+telemetry:
+  enabled: false

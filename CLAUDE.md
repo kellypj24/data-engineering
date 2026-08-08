@@ -84,6 +84,12 @@ layout:
   `.yml`, honouring the project's macros and sqlfluff rules
 - `dbt-source` — declare a raw table in `_sources.yml` with tests, and generate
   the staging model in front of it
+- `dagster-asset` — define an asset, walk the registration chain into
+  `Definitions`, and add the resource keys it needs
+- `dlt-pipeline` — scaffold a dlt source/resource/pipeline with an offline
+  mocked test
+- `run-stack` — bring a stack up locally and prove each hop, in the order that
+  avoids the silent dbt-manifest failure
 
 `.claude/skills/CLAUDE.md` states the rules for writing them — chiefly that
 skills are *procedure* and `CLAUDE.md` files are *convention*, and that a skill

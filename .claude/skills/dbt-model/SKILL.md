@@ -46,8 +46,7 @@ WITH source AS (
 
     SELECT *
     FROM {{ source('raw', 'orders') }}
-    WHERE 1 = 1
-    {{ limit_data_in_dev('created_at') }}
+    WHERE {{ limit_data_in_dev('created_at') }}
 
 ),
 
@@ -73,12 +72,17 @@ The project's macros, and the constraints each one puts on you:
 |---|---|---|
 | `audit_columns` | `(loaded_at_column=none)` | Emits **two** columns and **no trailing comma** — it must be the **last** entry in the `SELECT` list. Pass the EL timestamp (e.g. `'_airbyte_extracted_at'`) to preserve the real load time; bare `()` falls back to `CURRENT_TIMESTAMP()`. |
 | `clean_string` | `(column_name)` | `TRIM` + `LOWER` + empty-to-`NULL`. Returns an expression, so it still needs your `AS <name>`. |
-| `limit_data_in_dev` | `(column_name, dev_days_of_data=3)` | Emits a bare `AND …`, and only on the `dev` target. Requires a preceding predicate — hence the `WHERE 1 = 1` above. Without one the SQL is invalid in dev and *silently fine in prod*. |
+| `limit_data_in_dev` | `(column_name, dev_days_of_data=3)` | A **complete predicate**: the recency filter outside prod, `TRUE` in prod. Use it as the whole `WHERE`, or compose with `AND`. No `WHERE 1 = 1` anchor needed. |
 | `safe_divide` | `(numerator, denominator)` | Null/zero-safe division. Use it instead of `/` in marts. |
 
-Schema routing is handled by the `generate_schema_name` override — dev prefixes
-the target name (`dev_staging`), prod uses the bare schema. **Never hardcode a
-schema**; use `+schema` in `dbt_project.yml` or the model's `config()`.
+Schema routing is handled by the `generate_schema_name` override — non-prod
+prefixes with the target's schema (`main_staging`), prod uses the bare schema
+(`staging`). **Never hardcode a schema**; use `+schema` in `dbt_project.yml` or
+the model's `config()`.
+
+Environment comes from the **`dbt_env` var** (`DBT_ENV`, default `dev`), never
+from `target.name` — the target picks a warehouse, not an environment. If you
+write a macro that branches per environment, branch on `var('dbt_env')`.
 
 ### sqlfluff rules that actually bite
 
@@ -165,15 +169,15 @@ are calling `dbt` directly, export it yourself.
 
 - **Putting `{{ audit_columns() }}` mid-`SELECT`.** It emits two columns with no
   trailing comma, so anything after it is a syntax error. It goes last.
-- **Using `limit_data_in_dev` without `WHERE 1 = 1`.** The macro emits a bare
-  `AND`. It compiles to nothing on prod, so this breaks *only* in dev — the
-  reverse of the failure mode people expect, and easy to dismiss as a local
-  glitch.
-- **Copying `WHERE 1 = 1` into a model that has no `limit_data_in_dev` call.**
-  On its own it is a dead predicate that reads as if a filter went missing. It
-  exists solely to give the macro something to append to — no macro, no
-  `WHERE 1 = 1`. Incremental models are the one exception, where it keeps the
-  `{% if is_incremental() %}` block readable.
+- **Writing `WHERE 1 = 1`.** Nothing in this project needs it any more —
+  `limit_data_in_dev` returns a complete predicate. A bare `WHERE 1 = 1` reads
+  as though a filter was deleted. (Incremental models are the one place a
+  no-op anchor can earn its keep, to keep an `{% if is_incremental() %}` block
+  readable.)
+- **Branching a macro on `target.name == 'dev'` / `'prod'`.** The targets are
+  named for warehouses (`duckdb`, `snowflake`), so those comparisons are never
+  true and the branch silently vanishes. Both project macros shipped with this
+  bug. Use `var('dbt_env')`.
 - **Aliasing a column to a dialect keyword.** `AS email` fails sqlfluff `RF04`
   under the Snowflake dialect even though the source column is named `email`.
   Confirmed while writing this skill. `email_address` passes; check any alias

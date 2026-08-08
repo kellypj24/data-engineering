@@ -52,7 +52,7 @@ is why the status lives here rather than on the section headings.)
 - [ ] 14. [Broaden Terraform validation beyond Airbyte](#14-broaden-terraform-validation-beyond-airbyte)
 - [ ] 15. [Consider ARM runners for cost/speed](#15-consider-arm-runners-for-costspeed)
 - [ ] 16. [Make the shipped dbt tests executable](#16-make-the-shipped-dbt-tests-executable)
-- [ ] 17. [Add stack-usage skills for downstream projects](#17-add-stack-usage-skills-for-downstream-projects)
+- [x] 17. [Add stack-usage skills for downstream projects](#17-add-stack-usage-skills-for-downstream-projects)
 
 ---
 
