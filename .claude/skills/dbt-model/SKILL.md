@@ -1,0 +1,192 @@
+---
+name: dbt-model
+description: Use when adding or scaffolding a dbt model — "add a staging model for orders", "create an intermediate model", "build a mart", "new dbt model", "stg_/int_/fct_ model". Writes the .sql and its paired .yml, honouring the project's macros, layer materialisations, and sqlfluff rules.
+argument-hint: "<layer> <model-name>   e.g. staging stg_customers"
+---
+
+# Add a dbt model
+
+This skill runs **in whatever project the dbt tool was copied into**, not in the
+toolkit. Never assume a path like `transformation/dbt/`.
+
+## Step 0 — locate the project and read its conventions
+
+```bash
+find . -name dbt_project.yml -not -path "*/dbt_packages/*" -not -path "*/.venv/*"
+```
+
+That file's directory is the **dbt root**; every command below runs from there.
+Read it before writing anything — it is the source of truth for two things:
+
+- **Which layers exist**, and what each is materialised as. In the toolkit's
+  project that is `staging` → view, `intermediate` → view, `marts` → table, each
+  with a `+schema`. A downstream project may have renamed or added layers.
+- **Whether your layer is already configured.** Set materialisation in a model's
+  `config()` block only to *deviate* from the layer default. Restating the
+  default is noise that drifts.
+
+Then read one existing model in the target layer. It outranks anything in this
+file — match the project you are in. If the layer is empty, `models/staging/`
+in the toolkit ships `stg_example.sql` / `stg_example.yml` as the reference
+shape.
+
+## Step 1 — name it
+
+- `staging/` — `stg_<source>_<entity>`, one model per source table, 1:1.
+- `intermediate/` — `int_<entity>_<verb>`, business logic and joins.
+- `marts/` — consumer-facing. Check sibling models for the project's convention
+  before defaulting to the usual dbt `fct_` / `dim_` split.
+
+## Step 2 — write the `.sql`
+
+Staging models follow a CTE shape — source, then rename/cast:
+
+```sql
+WITH source AS (
+
+    SELECT *
+    FROM {{ source('raw', 'orders') }}
+    WHERE 1 = 1
+    {{ limit_data_in_dev('created_at') }}
+
+),
+
+renamed AS (
+
+    SELECT
+        id AS order_id,
+        {{ clean_string('status') }} AS status,
+        amount,
+        created_at,
+        {{ audit_columns() }}
+    FROM source
+
+)
+
+SELECT * FROM renamed
+;
+```
+
+The project's macros, and the constraints each one puts on you:
+
+| Macro | Signature | Constraint |
+|---|---|---|
+| `audit_columns` | `(loaded_at_column=none)` | Emits **two** columns and **no trailing comma** — it must be the **last** entry in the `SELECT` list. Pass the EL timestamp (e.g. `'_airbyte_extracted_at'`) to preserve the real load time; bare `()` falls back to `CURRENT_TIMESTAMP()`. |
+| `clean_string` | `(column_name)` | `TRIM` + `LOWER` + empty-to-`NULL`. Returns an expression, so it still needs your `AS <name>`. |
+| `limit_data_in_dev` | `(column_name, dev_days_of_data=3)` | Emits a bare `AND …`, and only on the `dev` target. Requires a preceding predicate — hence the `WHERE 1 = 1` above. Without one the SQL is invalid in dev and *silently fine in prod*. |
+| `safe_divide` | `(numerator, denominator)` | Null/zero-safe division. Use it instead of `/` in marts. |
+
+Schema routing is handled by the `generate_schema_name` override — dev prefixes
+the target name (`dev_staging`), prod uses the bare schema. **Never hardcode a
+schema**; use `+schema` in `dbt_project.yml` or the model's `config()`.
+
+### sqlfluff rules that actually bite
+
+The `.sqlfluff` in the dbt root is authoritative. The ones that reject a model
+most often:
+
+- Keywords, functions, literals, and types **UPPER**; identifiers **lower**.
+- **Trailing commas in `SELECT` are forbidden.**
+- A final semicolon is **required**, on its own line after the last statement.
+- Aliasing is **explicit** — `AS` is mandatory, and aliases are **≥2 characters**.
+- CTEs are not indented; 4-space indent; 120-char lines.
+
+## Step 3 — write the paired `.yml`
+
+**One `.yml` per model, named after the model** — `stg_orders.sql` pairs with
+`stg_orders.yml`. Do not create or append to a shared `_schema.yml`; this
+project deliberately keeps them one-to-one so a model and its contract move
+together.
+
+Every model needs a **description** and **at least one test**, because
+`.pre-commit-config.yaml` runs dbt-checkpoint's `check-model-has-description`
+and `check-model-has-tests --test-cnt 1`. A model without them is rejected
+before review.
+
+```yaml
+version: 2
+
+models:
+  - name: stg_orders
+    description: Staged orders with cleaned strings and audit columns
+    columns:
+      - name: order_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+```
+
+Describe the audit columns too — `_loaded_at` and `_dbt_updated_at` are columns
+like any other, and a bare column with no description is a review comment
+waiting to happen.
+
+If the logic is non-trivial (string cleaning, conditional joins, a
+`safe_divide`), add a `unit_tests:` block to the same file. `stg_example.yml`
+shows the shape: `given:` with `input: source(...)` rows, `expect:` with the
+result rows. Unit tests need `require-dbt-version: ">=1.8.0"`, which this
+project sets.
+
+## Step 4 — sources must exist first
+
+`{{ source('raw', 'orders') }}` resolves only if that table is declared in
+`models/staging/_sources.yml`. If it isn't, add it there (with a description and
+tests on its key) before the model will parse — or use the `dbt-source` skill,
+which does both halves.
+
+## Verify
+
+From the dbt root:
+
+```bash
+uv run dbt deps          # first run only; sqlfluff's dbt templater needs the packages
+uv run dbt parse         # the model and its yml are valid and resolve
+uv run dbt compile --select <model_name>
+uv run sqlfluff lint models/<layer>/<model_name>.sql
+```
+
+If the project has a reachable warehouse and real source data, finish with:
+
+```bash
+uv run dbt build --select <model_name>
+```
+
+`dbt build` is the real proof, but it needs the sources to exist. In the
+**toolkit's own** copy they do not — there is no `raw` schema, so `dbt test` and
+`dbt build` fail by design (tracked as task #16 in `docs/ci-cd-hardening.md`).
+There, `parse` + `compile` + `lint` is the complete gauntlet. Downstream, it is
+not — do not stop early and call a model verified.
+
+`profiles.yml` lives in the project directory here, not `~/.dbt`, so
+`DBT_PROFILES_DIR` must point at the dbt root. The `mod.just` exports it; if you
+are calling `dbt` directly, export it yourself.
+
+## Common mistakes
+
+- **Putting `{{ audit_columns() }}` mid-`SELECT`.** It emits two columns with no
+  trailing comma, so anything after it is a syntax error. It goes last.
+- **Using `limit_data_in_dev` without `WHERE 1 = 1`.** The macro emits a bare
+  `AND`. It compiles to nothing on prod, so this breaks *only* in dev — the
+  reverse of the failure mode people expect, and easy to dismiss as a local
+  glitch.
+- **Copying `WHERE 1 = 1` into a model that has no `limit_data_in_dev` call.**
+  On its own it is a dead predicate that reads as if a filter went missing. It
+  exists solely to give the macro something to append to — no macro, no
+  `WHERE 1 = 1`. Incremental models are the one exception, where it keeps the
+  `{% if is_incremental() %}` block readable.
+- **Aliasing a column to a dialect keyword.** `AS email` fails sqlfluff `RF04`
+  under the Snowflake dialect even though the source column is named `email`.
+  Confirmed while writing this skill. `email_address` passes; check any alias
+  that is a bare common noun.
+- **Creating `_schema.yml`.** One `.yml` per `.sql`, named to match.
+- **Shipping a model with no description or no test.** dbt-checkpoint blocks it.
+  This is the single most common reason a model bounces.
+- **Restating the layer's materialisation** in `config()` when it already
+  matches `dbt_project.yml`. Two sources of truth, one of which will go stale.
+- **Trailing comma before `FROM`,** or a missing final semicolon. Both are
+  sqlfluff failures, and both are invisible until you lint.
+- **Running `sqlfluff` before `dbt deps`.** The templater compiles the project to
+  lint it, so a missing package surfaces as a confusing lint error rather than a
+  missing-dependency one.
+- **Hardcoding `dev_staging` or any other schema.** That is
+  `generate_schema_name`'s job; hardcoding breaks the prod path silently.

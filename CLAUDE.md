@@ -66,13 +66,24 @@ role must provide. It is not a code skeleton; there is nothing to copy.
 
 ## Claude Skills
 
-`.claude/skills/` holds repo-local skills for working **on** the toolkit:
+`.claude/skills/` holds two families of skills.
+
+**Toolkit skills** — for working **on** this repo:
 
 - `add-tool` — add a new tool under a role and wire it into the justfile, CI,
   dependabot, and the README table
 - `add-stack` — compose existing tools into a new `stacks/<name>/`
 - `verify-tool` — run the local gauntlet CI does not cover (CI never goes
   through `just`)
+
+**Stack skills** — for working **with** a stack after it has been copied into a
+downstream project. These infer the tool root and never assume this repo's
+layout:
+
+- `dbt-model` — scaffold a staging/intermediate/mart model and its paired
+  `.yml`, honouring the project's macros and sqlfluff rules
+- `dbt-source` — declare a raw table in `_sources.yml` with tests, and generate
+  the staging model in front of it
 
 `.claude/skills/CLAUDE.md` states the rules for writing them — chiefly that
 skills are *procedure* and `CLAUDE.md` files are *convention*, and that a skill
