@@ -13,7 +13,7 @@ dev = [
     "pytest-asyncio>=1.4.0",
     "pytest-timeout>=2.4.0",
     "temporalio[testing]>=1.30.0",
-    "ruff>=0.15.10",
+    "ruff>=0.16.1",
 ]
 
 [build-system]
