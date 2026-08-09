@@ -42,11 +42,13 @@ async def transform_data(raw_data: list[dict]) -> list[dict]:
 
     transformed = []
     for record in raw_data:
-        transformed.append({
-            **record,
-            "value": record["value"].upper(),
-            "transformed": True,
-        })
+        transformed.append(
+            {
+                **record,
+                "value": record["value"].upper(),
+                "transformed": True,
+            }
+        )
 
     return transformed
 

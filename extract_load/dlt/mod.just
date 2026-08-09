@@ -13,3 +13,7 @@ lint:
 # Format Python code
 fmt:
     uv run ruff format pipelines/ tests/
+
+# Check formatting without rewriting files
+fmt-check:
+    uv run ruff format --check pipelines/ tests/

@@ -17,3 +17,7 @@ lint:
 # Format Python code
 fmt:
     uv run ruff format dags/ tests/
+
+# Check formatting without rewriting files
+fmt-check:
+    uv run ruff format --check dags/ tests/

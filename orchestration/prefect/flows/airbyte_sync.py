@@ -10,8 +10,12 @@ import time
 import requests
 from prefect import flow, get_run_logger, task
 
-AIRBYTE_SERVER_URL = os.environ.get("AIRBYTE_SERVER_URL", "http://localhost:8006/api/public/v1")
-AIRBYTE_CONNECTION_ID = os.environ.get("AIRBYTE_CONNECTION_ID", "your-airbyte-connection-uuid")
+AIRBYTE_SERVER_URL = os.environ.get(
+    "AIRBYTE_SERVER_URL", "http://localhost:8006/api/public/v1"
+)
+AIRBYTE_CONNECTION_ID = os.environ.get(
+    "AIRBYTE_CONNECTION_ID", "your-airbyte-connection-uuid"
+)
 
 
 @task(name="trigger-airbyte-sync", retries=2, retry_delay_seconds=30)
@@ -32,7 +36,9 @@ def trigger_sync(server_url: str, connection_id: str) -> str:
 
 
 @task(name="poll-airbyte-sync", retries=1, retry_delay_seconds=60)
-def poll_sync(server_url: str, job_id: str, poll_interval: int = 30, timeout: int = 3600) -> str:
+def poll_sync(
+    server_url: str, job_id: str, poll_interval: int = 30, timeout: int = 3600
+) -> str:
     """Poll the Airbyte API until the sync job completes."""
     logger = get_run_logger()
     elapsed = 0

@@ -43,7 +43,9 @@ class DataPipelineWorkflow:
             raw_data,
             start_to_close_timeout=timedelta(minutes=10),
         )
-        workflow.logger.info(f"Transformation complete: {len(transformed_data)} records")
+        workflow.logger.info(
+            f"Transformation complete: {len(transformed_data)} records"
+        )
 
         # Step 3: Load
         load_result = await workflow.execute_activity(

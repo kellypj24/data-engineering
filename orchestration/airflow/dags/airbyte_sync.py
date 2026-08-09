@@ -10,7 +10,9 @@ import pendulum
 from airflow.decorators import dag
 from airflow.providers.airbyte.operators.airbyte import AirbyteTriggerSyncOperator
 
-AIRBYTE_CONNECTION_ID = os.environ.get("AIRBYTE_CONNECTION_ID", "your-airbyte-connection-uuid")
+AIRBYTE_CONNECTION_ID = os.environ.get(
+    "AIRBYTE_CONNECTION_ID", "your-airbyte-connection-uuid"
+)
 
 
 @dag(
