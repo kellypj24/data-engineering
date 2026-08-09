@@ -33,7 +33,8 @@ This is a composable collection of data engineering tools organized by role:
 ```bash
 just test              # Run all test suites
 just lint              # Lint all code
-just fmt               # Format all code
+just fmt               # Format all code (rewrites files)
+just fmt-check         # Verify formatting without rewriting -- run this before pushing
 just dagster::test     # Run Dagster tests only
 just airflow::test     # Run Airflow tests only
 just dbt::lint         # Lint dbt SQL

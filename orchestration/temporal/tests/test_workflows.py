@@ -15,11 +15,14 @@ from workflows.example_workflow import DataPipelineWorkflow
 @pytest.mark.timeout(60)
 async def test_data_pipeline_workflow():
     """Test the full data pipeline workflow with time-skipping."""
-    async with await WorkflowEnvironment.start_time_skipping() as env, Worker(
-        env.client,
-        task_queue="test-queue",
-        workflows=[DataPipelineWorkflow],
-        activities=[extract_data, transform_data, load_data],
+    async with (
+        await WorkflowEnvironment.start_time_skipping() as env,
+        Worker(
+            env.client,
+            task_queue="test-queue",
+            workflows=[DataPipelineWorkflow],
+            activities=[extract_data, transform_data, load_data],
+        ),
     ):
         result = await env.client.execute_workflow(
             DataPipelineWorkflow.run,
@@ -37,11 +40,14 @@ async def test_data_pipeline_workflow():
 @pytest.mark.timeout(60)
 async def test_data_pipeline_workflow_returns_source_name():
     """Result should include the source name."""
-    async with await WorkflowEnvironment.start_time_skipping() as env, Worker(
-        env.client,
-        task_queue="test-queue",
-        workflows=[DataPipelineWorkflow],
-        activities=[extract_data, transform_data, load_data],
+    async with (
+        await WorkflowEnvironment.start_time_skipping() as env,
+        Worker(
+            env.client,
+            task_queue="test-queue",
+            workflows=[DataPipelineWorkflow],
+            activities=[extract_data, transform_data, load_data],
+        ),
     ):
         result = await env.client.execute_workflow(
             DataPipelineWorkflow.run,

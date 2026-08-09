@@ -154,30 +154,40 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
+        # `srcs` feeds both `ruff check` and `ruff format --check` so the two
+        # can never drift apart. Keep it in sync with the tool's mod.just.
         include:
           - tool: dagster
             path: orchestration/dagster
-            cmd: uv run ruff check src/ tests/
+            srcs: src/ tests/
           - tool: airflow
             path: orchestration/airflow
-            cmd: uv run ruff check dags/ tests/
+            srcs: dags/ tests/
           - tool: prefect
             path: orchestration/prefect
-            cmd: uv run ruff check flows/ blocks/ tests/
+            srcs: flows/ blocks/ tests/
           - tool: temporal
             path: orchestration/temporal
-            cmd: uv run ruff check workflows/ activities/ workers/ tests/
+            srcs: workflows/ activities/ workers/ tests/
           - tool: dlt
             path: extract_load/dlt
-            cmd: uv run ruff check pipelines/ tests/
+            srcs: pipelines/ tests/
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
-      - name: Install and lint ${{ matrix.tool }}
+      - name: Install ${{ matrix.tool }}
         working-directory: ${{ matrix.path }}
-        run: |
-          uv sync --dev
-          ${{ matrix.cmd }}
+        run: uv sync --dev
+      - name: Lint ${{ matrix.tool }}
+        working-directory: ${{ matrix.path }}
+        run: uv run ruff check ${{ matrix.srcs }}
+      # Formatting drifted unnoticed for a long time because CI only ever ran
+      # `ruff check`, which does not look at formatting. Runs even if lint
+      # fails, so one push surfaces both.
+      - name: Check formatting ${{ matrix.tool }}
+        if: '!cancelled()'
+        working-directory: ${{ matrix.path }}
+        run: uv run ruff format --check ${{ matrix.srcs }}
 
   # dbt is kept out of the `lint` matrix above because it needs its dbt packages
   # installed before sqlfluff can run -- the templater compiles the project, so

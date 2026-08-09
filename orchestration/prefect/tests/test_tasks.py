@@ -3,7 +3,6 @@
 from unittest.mock import MagicMock, patch
 
 
-
 class TestAirbyteTasks:
     """Tests for Airbyte-related tasks."""
 
@@ -17,7 +16,9 @@ class TestAirbyteTasks:
 
         from flows.airbyte_sync import trigger_sync
 
-        trigger_sync.fn(server_url="http://test:8006/api/public/v1", connection_id="abc")
+        trigger_sync.fn(
+            server_url="http://test:8006/api/public/v1", connection_id="abc"
+        )
 
         mock_requests.post.assert_called_once_with(
             "http://test:8006/api/public/v1/jobs",
@@ -32,9 +33,7 @@ class TestDbtTasks:
     @patch("flows.dbt_transform.subprocess")
     def test_dbt_build_passes_target(self, mock_subprocess):
         """dbt_build should pass the target argument to dbt CLI."""
-        mock_subprocess.run.return_value = MagicMock(
-            returncode=0, stdout="", stderr=""
-        )
+        mock_subprocess.run.return_value = MagicMock(returncode=0, stdout="", stderr="")
 
         from flows.dbt_transform import dbt_build
 

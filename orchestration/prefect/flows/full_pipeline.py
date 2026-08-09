@@ -20,7 +20,9 @@ FRESHNESS_THRESHOLD_HOURS = int(os.environ.get("FRESHNESS_THRESHOLD_HOURS", "25"
 
 
 @task(name="freshness-check")
-def freshness_check(pipeline_start: datetime, threshold_hours: int = FRESHNESS_THRESHOLD_HOURS) -> dict:
+def freshness_check(
+    pipeline_start: datetime, threshold_hours: int = FRESHNESS_THRESHOLD_HOURS
+) -> dict:
     """Verify that the pipeline completed within the SLA threshold."""
     logger = get_run_logger()
     now = datetime.now(timezone.utc)
@@ -36,7 +38,9 @@ def freshness_check(pipeline_start: datetime, threshold_hours: int = FRESHNESS_T
 
     if not passed:
         logger.warning(f"Freshness check FAILED: {elapsed} > {threshold}")
-        raise ValueError(f"Pipeline exceeded freshness threshold: {elapsed} > {threshold}")
+        raise ValueError(
+            f"Pipeline exceeded freshness threshold: {elapsed} > {threshold}"
+        )
 
     logger.info(f"Freshness check passed: {elapsed} < {threshold}")
     return result

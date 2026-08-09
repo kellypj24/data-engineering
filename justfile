@@ -16,7 +16,10 @@ default:
 test: dagster::test airflow::test prefect::test temporal::test dlt::test
 
 # Lint all code
-lint: dagster::lint airflow::lint prefect::lint dbt::lint dlt::lint
+lint: dagster::lint airflow::lint prefect::lint temporal::lint dbt::lint dlt::lint
 
-# Format all code
-fmt: dagster::fmt airflow::fmt prefect::fmt dlt::fmt
+# Format all code -- rewrites files. Use `fmt-check` to verify without changing.
+fmt: dagster::fmt airflow::fmt prefect::fmt temporal::fmt dlt::fmt
+
+# Check formatting without rewriting. This is the one to run before pushing.
+fmt-check: dagster::fmt-check airflow::fmt-check prefect::fmt-check temporal::fmt-check dlt::fmt-check

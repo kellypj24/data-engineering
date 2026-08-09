@@ -26,7 +26,8 @@ class TestFreshnessCheck:
         context = build_asset_context(instance=instance)
 
         with patch.object(
-            instance, "get_latest_materialization_events",
+            instance,
+            "get_latest_materialization_events",
             return_value={AssetKey(["airbyte", "raw_orders"]): mock_event},
         ):
             result = freshness_check(context)
@@ -43,7 +44,8 @@ class TestFreshnessCheck:
         context = build_asset_context(instance=instance)
 
         with patch.object(
-            instance, "get_latest_materialization_events",
+            instance,
+            "get_latest_materialization_events",
             return_value={AssetKey(["airbyte", "raw_orders"]): mock_event},
         ):
             result = freshness_check(context)
@@ -55,7 +57,8 @@ class TestFreshnessCheck:
         context = build_asset_context(instance=instance)
 
         with patch.object(
-            instance, "get_latest_materialization_events",
+            instance,
+            "get_latest_materialization_events",
             return_value={AssetKey(["airbyte", "raw_orders"]): None},
         ):
             result = freshness_check(context)

@@ -18,7 +18,9 @@ class TestDagLoading:
 
     def test_no_import_errors(self, dagbag):
         """All DAGs should load without import errors."""
-        assert len(dagbag.import_errors) == 0, f"DAG import errors: {dagbag.import_errors}"
+        assert len(dagbag.import_errors) == 0, (
+            f"DAG import errors: {dagbag.import_errors}"
+        )
 
     def test_expected_dag_count(self, dagbag):
         """Should have at least 4 DAGs."""

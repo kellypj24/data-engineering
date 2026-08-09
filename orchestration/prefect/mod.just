@@ -17,3 +17,7 @@ lint:
 # Format Python code
 fmt:
     uv run ruff format flows/ blocks/ tests/
+
+# Check formatting without rewriting files
+fmt-check:
+    uv run ruff format --check flows/ blocks/ tests/
