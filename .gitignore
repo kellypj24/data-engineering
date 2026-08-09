@@ -58,3 +58,6 @@ airflow-webserver.pid
 *.pem
 credentials*.json
 !*example*.json
+
+# Dagster storage written when a base_dir path fails to expand "~"
+/**/~/

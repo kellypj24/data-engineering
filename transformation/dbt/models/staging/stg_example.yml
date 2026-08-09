@@ -24,6 +24,13 @@ unit_tests:
   - name: test_stg_example_cleans_strings
     description: Verify that string cleaning works correctly
     model: stg_example
+    # Pin the environment so limit_data_in_dev resolves to TRUE. Otherwise the
+    # model filters to the last 3 days and these fixed fixture dates fall
+    # outside the window, so the test would start failing on its own -- a unit
+    # test must not depend on the wall clock.
+    overrides:
+      vars:
+        dbt_env: prod
     given:
       - input: source('raw', 'orders')
         rows:

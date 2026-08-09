@@ -14,7 +14,9 @@ Reference orchestrator implementation. All other orchestrators (Airflow, Prefect
 - `src/resources/connections.py` — `RESOURCES` dict: airbyte, dbt, snowflake
 - `src/utils/alerts.py` — Slack failure hook factory
 - `src/utils/factories.py` — `build_source_assets()` factory pattern
-- `dagster.yaml` — Instance config (SQLite storage)
+- `dagster.yaml` — Instance config. Storage is intentionally unconfigured so it
+  defaults to SQLite under `$DAGSTER_HOME`. Never use `base_dir: ~/...` — `~` is
+  not expanded here and a literal `~` directory ends up in the repo.
 - `workspace.yaml` — Code location config
 
 ## Testing
