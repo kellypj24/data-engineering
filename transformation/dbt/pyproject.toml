@@ -23,7 +23,7 @@ bigquery = ["dbt-bigquery>=1.8.0,<2.0"]
 [dependency-groups]
 dev = [
     "sqlfluff>=3.0.0",
-    "sqlfluff-templater-dbt>=3.0.0",
+    "sqlfluff-templater-dbt>=4.3.0",
     "yamllint>=1.35.1",
     "pre-commit>=3.7.0",
 ]
