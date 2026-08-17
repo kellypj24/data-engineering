@@ -204,7 +204,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "apache-airflow", specifier = ">=2.8.0,<4.0" },
-    { name = "apache-airflow-providers-airbyte", specifier = ">=6.0.0" },
+    { name = "apache-airflow-providers-airbyte", specifier = ">=6.0.1" },
     { name = "apache-airflow-providers-amazon", specifier = ">=9.33.0" },
     { name = "apache-airflow-providers-snowflake", specifier = ">=6.15.0" },
     { name = "dbt-core", specifier = ">=1.12.0,<2.0" },
@@ -335,7 +335,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-airbyte"
-version = "6.0.0"
+version = "6.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "airbyte-api" },
@@ -343,9 +343,9 @@ dependencies = [
     { name = "apache-airflow-providers-common-compat" },
     { name = "httpx" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/77/0b/64bd06538fb2994a1ad65e314e3698ceae9227b8500fb5817ae3b4f9f9ba/apache_airflow_providers_airbyte-6.0.0.tar.gz", hash = "sha256:bbcd7b799d2be3b21106a82dbc97bd8cdc61e555b0ccaf0fd7b0c0d5288d492c", size = 38882, upload-time = "2026-07-28T06:38:22.814Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/52/07/3b653553a9948f16c1f9c29ed3ec1fa9043cd060eaae79f14eea1bafe2da/apache_airflow_providers_airbyte-6.0.1.tar.gz", hash = "sha256:a604d776d22acd644317b750dde41d392dbc5151ee4018acc7719aef5f0234ea", size = 39278, upload-time = "2026-08-08T03:16:41.219Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f2/73/0ae4c35d362d93d19d4078905013667945b7e5d48f7b95ae5aa91d41fc6d/apache_airflow_providers_airbyte-6.0.0-py3-none-any.whl", hash = "sha256:4cb413968fb9ad017d122f7262c7b2b6e1dc5c1043f7d89720e5103c7ad9e3db", size = 23699, upload-time = "2026-07-28T06:37:36.976Z" },
+    { url = "https://files.pythonhosted.org/packages/5e/2b/e135dc72479691654e819fe7481b1e0f719c29cdf947e187e8c47b171ce9/apache_airflow_providers_airbyte-6.0.1-py3-none-any.whl", hash = "sha256:90437203b64b9df09747a8ce635092ffe45f2713c8ccd63df5e2ad0e03aeeddb", size = 23782, upload-time = "2026-08-08T03:15:44.829Z" },
 ]
 
 [[package]]
