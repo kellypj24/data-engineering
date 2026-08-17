@@ -25,7 +25,7 @@ dev = [
     "sqlfluff>=3.0.0",
     "sqlfluff-templater-dbt>=3.0.0",
     "yamllint>=1.35.1",
-    "pre-commit>=3.7.0",
+    "pre-commit>=4.6.2",
 ]
 
 # This is a dbt project, not an importable Python package -- there is no module
