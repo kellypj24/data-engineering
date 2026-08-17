@@ -11,7 +11,7 @@ dependencies = [
     "dbt-snowflake>=1.11.4,<2.0",
     # Credential-free target for local dev and CI. profiles.yml defaults to it,
     # so `dbt parse` / sqlfluff's dbt templater work with no secrets present.
-    "dbt-duckdb>=1.8.0,<2.0",
+    "dbt-duckdb>=1.11.0,<2.0",
 ]
 
 # The other warehouses profiles.yml can address. Not installed by default --
