@@ -207,7 +207,7 @@ requires-dist = [
     { name = "apache-airflow-providers-airbyte", specifier = ">=6.0.0" },
     { name = "apache-airflow-providers-amazon", specifier = ">=9.33.0" },
     { name = "apache-airflow-providers-snowflake", specifier = ">=6.15.0" },
-    { name = "dbt-core", specifier = ">=1.12.0,<2.0" },
+    { name = "dbt-core", specifier = ">=1.12.2,<2.0" },
     { name = "dbt-snowflake", specifier = ">=1.11.4,<2.0" },
 ]
 
@@ -1138,7 +1138,7 @@ wheels = [
 
 [[package]]
 name = "dbt-core"
-version = "1.12.0"
+version = "1.12.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agate" },
@@ -1154,6 +1154,7 @@ dependencies = [
     { name = "mashumaro", extra = ["msgpack"] },
     { name = "metricflow" },
     { name = "networkx" },
+    { name = "opentelemetry-api" },
     { name = "packaging" },
     { name = "pathspec" },
     { name = "protobuf" },
@@ -1166,16 +1167,16 @@ dependencies = [
     { name = "sqlparse" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/50/a8/da65cff9c221b944040b35122ffcbaf0e7b583c6f0729a473c63d15536c5/dbt_core-1.12.0.tar.gz", hash = "sha256:f7d6a34f6600a371b8771e813f6b1566ab6d1fb8cea691619c791f527b1f8d7e", size = 1027023, upload-time = "2026-07-16T13:57:34.041Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/08/58/b5ba1961d9fd7ec502f3d0790a9fb4e1b951a4828c3af243264e786b4391/dbt_core-1.12.2.tar.gz", hash = "sha256:9c4d60c58ed759ceff3cc20c065420abc4d26cb092b0e142b39b8747ee43c79b", size = 1032794, upload-time = "2026-08-12T19:28:39.548Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b2/88/ebcb8fa7f2fd8e82ed1bbbd0950fe3717101f1c16d10ee3aa33fac520ed2/dbt_core-1.12.0-py3-none-any.whl", hash = "sha256:8a91ec6aabaf329efc603330b629e72551ea6be8321483d7c284c598541faaab", size = 1123180, upload-time = "2026-07-16T13:57:32.277Z" },
+    { url = "https://files.pythonhosted.org/packages/08/c5/24ce8e3ef4b72c20b5780c78ff1ce8357913ef746cebb009b94150991336/dbt_core-1.12.2-py3-none-any.whl", hash = "sha256:ecc5bc66eb09de0411658d159e973cf503bb1605589a7c2b3fb82a1637e31d32", size = 1129546, upload-time = "2026-08-12T19:28:37.791Z" },
 ]
 
 [[package]]
 name = "dbt-core-experimental-parser"
-version = "2.0.0a5"
+version = "2.0.0b1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/54/bc/d37f24f564cb32b3c13e470e5dfd8555b71c202580f701580ebd7e9cd10d/dbt_core_experimental_parser-2.0.0a5.tar.gz", hash = "sha256:1bba1807c697113a6a63a92bec3a89568c65d7168c7d17413591cbfa7d5c5375", size = 4474, upload-time = "2026-07-20T10:04:24.495Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f8/38/8a427d213b87eb2f6567840417251023196d9dd0b9a6b765ef3be7e90fdb/dbt_core_experimental_parser-2.0.0b1.tar.gz", hash = "sha256:72dda4c1269607934dc0fa24dc0495d74c508ecb3fdb3dbe01fac37d6c4b23de", size = 4469, upload-time = "2026-08-10T15:37:02.22Z" }
 
 [[package]]
 name = "dbt-extractor"
