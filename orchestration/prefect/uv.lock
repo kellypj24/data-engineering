@@ -1392,7 +1392,7 @@ dev = [
 
 [[package]]
 name = "prefect-snowflake"
-version = "0.28.8"
+version = "0.28.9"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "prefect" },
@@ -1400,9 +1400,9 @@ dependencies = [
     { name = "snowflake-connector-python" },
     { name = "tenacity" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/91/88/faf51c2d1cbe20ab0bb2773d08ba9422d197e7dc54e261bc2d0c4f8f6ed4/prefect_snowflake-0.28.8.tar.gz", hash = "sha256:0b382420487cd52fe7fa73a3be70e94ec5b4271750111ecfb4d8abc85831c6a4", size = 48715, upload-time = "2026-06-05T19:38:54.366Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fc/5b/f5d8aeee1367392ba4b0cb289f324c504cf1d0ea8f79ecbb3b71c7e1e932/prefect_snowflake-0.28.9.tar.gz", hash = "sha256:0502e1cf37b663eabfb5e0d965430fe1bb9e2886569af34e59f4bb06160cb3f5", size = 49568, upload-time = "2026-09-08T18:28:06.108Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c4/e6/ca77f8b6f970ef7e332d7915084e27a6684c802f1924cfbaf9027f3cf809/prefect_snowflake-0.28.8-py3-none-any.whl", hash = "sha256:0351dcdeafee1493cb05e42f2219cb58ba627db7882403d288b325e5622fa2a2", size = 26183, upload-time = "2026-06-05T19:38:53.125Z" },
+    { url = "https://files.pythonhosted.org/packages/be/34/00ce2e3272b0502b5e78457d69d1bccb04dbbe249da1d1a5bed38ec91490/prefect_snowflake-0.28.9-py3-none-any.whl", hash = "sha256:d104d504b6c3a8f49e813b283c2744a8c99180f1ee8bca78a9dbf9ad07fd15df", size = 26406, upload-time = "2026-09-08T18:28:04.859Z" },
 ]
 
 [[package]]
