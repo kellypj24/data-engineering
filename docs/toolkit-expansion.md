@@ -1,8 +1,9 @@
 # Toolkit Expansion Plan
 
 > **Purpose.** A Claude Code–executable backlog of *features* to add to the
-> toolkit: dbt building blocks, Dagster patterns, warehouse environment
-> management, and shippable quality tools. Its sibling,
+> toolkit: dbt building blocks, data delivery and lineage, Dagster patterns and
+> observability, warehouse environments and cost, and shippable quality tools.
+> Its sibling,
 > [`ci-cd-hardening.md`](./ci-cd-hardening.md), covers CI, supply chain, and
 > repo hygiene for this repo itself. If a task is about how *this repo* is
 > checked, it belongs there; if it is something a downstream project copies out
@@ -12,11 +13,17 @@
 > from the index, implement it, verify against its **Acceptance** criteria, tick
 > its box, and note the PR. One task, one PR.
 >
-> **Provenance.** Every task here is a pattern that has already run in a
-> production dbt + Dagster platform on Snowflake and been generalised. The
-> *why* in each task is the failure that pattern was built to prevent. Nothing
-> here should name a company, a client, a business domain, or a vendor dataset —
-> if a task needs a worked example, invent a neutral one (`orders`, `customers`).
+> **Provenance.** Tasks are patterns that have run in a production dbt + Dagster
+> platform on Snowflake, generalised. The *why* in each task is the failure the
+> pattern was built to prevent. Where a task proposes a **different mechanism**
+> from the one that ran in production, it says so in a "New mechanism" note —
+> don't treat those parts as proven. Nothing here should name a company, a
+> client, a business domain, or a vendor dataset — if a task needs a worked
+> example, invent a neutral one (`orders`, `customers`, `recipient`).
+>
+> **IDs are stable.** Tasks keep their E-number when re-prioritised, so the
+> index groups are not in numeric order. `ci-cd-hardening.md` cross-references
+> these IDs.
 >
 > **Warehouse scope.** The toolkit's dbt project defaults to duckdb and ships
 > outputs for Snowflake, Postgres, and BigQuery. Tasks in P1/P2 must run on the
@@ -33,35 +40,50 @@
 
 - [ ] E1. [Surrogate-key minting macro](#e1-surrogate-key-minting-macro)
 - [ ] E2. [In-place surrogate-key backfill operation](#e2-in-place-surrogate-key-backfill-operation)
-- [ ] E3. [Small generic tests and helpers](#e3-small-generic-tests-and-helpers)
-- [ ] E4. [Tiered-severity validation framework](#e4-tiered-severity-validation-framework)
+- [ ] E28. [Seeds drop and recreate, project-wide](#e28-seeds-drop-and-recreate-project-wide)
+- [ ] E29. [Protect durable facts that outlive their source](#e29-protect-durable-facts-that-outlive-their-source)
+- [ ] E4. [Tiered-severity validation framework with an audit log](#e4-tiered-severity-validation-framework-with-an-audit-log)
+- [ ] E3. [UTC timestamp generic test](#e3-utc-timestamp-generic-test)
 
-**P2 — Dagster patterns**
+**P1 — Data delivery & lineage**
+
+- [ ] E23. [Config-driven file export engine](#e23-config-driven-file-export-engine)
+- [ ] E24. [Generated dbt exposures for every delivered file, with a drift gate](#e24-generated-dbt-exposures-for-every-delivered-file-with-a-drift-gate)
+- [ ] E25. [Delivery reconciliation (follow-up to E23)](#e25-delivery-reconciliation-follow-up-to-e23)
+
+**P2 — Dagster patterns & observability**
 
 - [ ] E5. [Definition invariant tests](#e5-definition-invariant-tests)
+- [ ] E26. [Run-event telemetry and a run-summary model](#e26-run-event-telemetry-and-a-run-summary-model)
 - [ ] E6. [One notification model, rendered by severity](#e6-one-notification-model-rendered-by-severity)
-- [ ] E7. [Run-status sensor chaining](#e7-run-status-sensor-chaining)
 - [ ] E8. [Deployment-routed target database with a fail-safe default](#e8-deployment-routed-target-database-with-a-fail-safe-default)
+- [ ] E7. [Run-status sensor chaining](#e7-run-status-sensor-chaining)
+- [ ] E30. [Versioned dbt docs publishing with a fail-safe destination](#e30-versioned-dbt-docs-publishing-with-a-fail-safe-destination)
 
-**P3 — Warehouse environment management (Snowflake extra)**
+**P3 — Warehouse environments & cost (Snowflake extra)**
 
 - [ ] E9. [Snowflake RBAC as code](#e9-snowflake-rbac-as-code)
-- [ ] E10. [Zero-copy environment refresh](#e10-zero-copy-environment-refresh)
+- [ ] E31. [Personal development databases](#e31-personal-development-databases)
+- [ ] E10. [Zero-copy shared-environment refresh](#e10-zero-copy-shared-environment-refresh)
 - [ ] E11. [Preservation manifest for non-dbt objects](#e11-preservation-manifest-for-non-dbt-objects)
 - [ ] E12. [Ownership drift audit and repair](#e12-ownership-drift-audit-and-repair)
 - [ ] E13. [Write-boundary proof and identity probe](#e13-write-boundary-proof-and-identity-probe)
+- [ ] E27. [Query-level cost attribution reconciled to the invoice](#e27-query-level-cost-attribution-reconciled-to-the-invoice)
 
 **P4 — Shippable quality tools**
 
 - [ ] E14. [Add a `tooling/` role](#e14-add-a-tooling-role)
 - [ ] E15. [Local Claude pre-push review](#e15-local-claude-pre-push-review)
 - [ ] E16. [Configurable sensitive-data commit guard](#e16-configurable-sensitive-data-commit-guard)
+- [ ] E34. [Release-to-release dataset diff](#e34-release-to-release-dataset-diff)
 
 **P5 — Skills, docs, and optional extras**
 
 - [ ] E17. [`data-profiling` stack skill](#e17-data-profiling-stack-skill)
 - [ ] E18. [`dbt-test` stack skill](#e18-dbt-test-stack-skill)
 - [ ] E19. [`backfill-runbook` stack skill](#e19-backfill-runbook-stack-skill)
+- [ ] E33. [Three-dimensional tagging contract](#e33-three-dimensional-tagging-contract)
+- [ ] E32. [Snapshot design guide](#e32-snapshot-design-guide)
 - [ ] E20. [State migrations on promotion](#e20-state-migrations-on-promotion)
 - [ ] E21. [Architecture decision records](#e21-architecture-decision-records)
 - [ ] E22. [Semantic-view generator from dbt metadata (Snowflake extra)](#e22-semantic-view-generator-from-dbt-metadata-snowflake-extra)
@@ -86,6 +108,8 @@ Verified 2026-09-24 against `main`:
 - **Skills** — toolkit skills (`add-tool`, `add-stack`, `verify-tool`) and stack
   skills (`dbt-model`, `dbt-source`, `dagster-asset`, `dlt-pipeline`,
   `run-stack`). No profiling, testing, or backfill skill.
+- **No outbound data path.** Nothing exports files or records run history, and
+  no dbt exposures exist.
 - **No `tooling/` role.** Every tool today is EL, orchestration, or
   transformation; there is nowhere for a developer-side tool to live.
 
@@ -177,50 +201,225 @@ run updates zero rows; the dependent key differs row-to-row.
 
 ---
 
-### E3. Small generic tests and helpers
+### E28. Seeds drop and recreate, project-wide
 
-**What.** Two small additions:
-- `macros/utils/import.sql` — `import(ref, alias)` emits `alias as (select * from
-  ref)`, so models open with a uniform block of import CTEs.
-- `tests/generic/timestamp_is_utc.sql` — fails rows whose timestamp column
-  carries a non-UTC offset. Dispatch per adapter; on adapters without offset-aware
-  types, document it as a no-op rather than silently passing.
+**What.** In `dbt_project.yml`, set `+full_refresh: true` on the whole `seeds:`
+block, give seeds their own `+persist_docs` (model-level `persist_docs` does not
+apply to seeds), and require every seed to have a `.yml` with a description,
+an owner in `meta`, and at least one test.
+
+**Why.** dbt's default seed load is truncate-and-insert, and its `INSERT` names
+the CSV's columns. The first run after a CSV gains a column fails against the
+existing table with `invalid identifier <new column>` — and stays broken until
+someone remembers to pass `--full-refresh` by hand. In production this left a
+scheduled seed job red for days. A seed is fully defined by its CSV, so
+recreating one is always equivalent to reloading it; that is why the setting is
+project-wide rather than per-directory.
+
+**Acceptance.** Add a column to a seed CSV and run `dbt seed` without
+`--full-refresh`: it succeeds, and the new column is present.
+
+---
+
+### E29. Protect durable facts that outlive their source
+
+> **Pairs with E2.**
+
+**What.** A documented pattern, and one example model, for incremental facts
+whose history is **longer than their source's retention** (usage and audit views
+that keep 365 days, APIs that page back 90, CDC streams that get refreshed):
+- `full_refresh: false` in the model config, so `--full-refresh` cannot rebuild it;
+- a bounded restatement window (`var('<model>_restate_periods', 2)`) — only the
+  last N periods are ever reprocessed;
+- a control-total test that ties each complete period to an independent total,
+  and **fails when zero periods are compared**, so an empty join can't pass
+  vacuously;
+- a header comment stating the retention mismatch, so the next person knows why
+  the model refuses a rebuild.
+
+**Why.** A rebuild re-reads the source. Where the source has aged out, it
+silently replaces real history with whatever is left — no error, just less or
+coarser data.
+
+**Acceptance.** `dbt build --full-refresh --select <model>` leaves existing rows
+intact; the control test fails on an empty comparison and passes on a matching
+one.
+
+---
+
+### E4. Tiered-severity validation framework with an audit log
+
+**What.** A macro library, `macros/validation/`, for rule sets that are richer
+than dbt tests, plus the models it feeds:
+- `validate_data_source(source_model, rules)` — `rules` is a dict of
+  `{rule_name: {logic: <SQL predicate>, severity: LOW|MEDIUM|HIGH|CRITICAL}}`
+  declared in the validation model itself. It emits a pass/fail column and a
+  severity column per rule, the **maximum** severity that failed (a numeric rank
+  plus its label), and an overall `validation_result` of `PASS`, `WARN`, or `FAIL`.
+- `get_validation_config(name)` — merges a per-validation override from
+  `var('validation_configs')` over defaults (`enabled`, `lookback_days`,
+  `notification_enabled`, `notification_channel`, `retention_days`).
+- `should_send_notification(result, severity, name)` — CRITICAL always
+  notifies; HIGH notifies on `FAIL`; MEDIUM notifies on `FAIL` only for names in
+  `var('high_priority_validations')`; LOW never notifies.
+- `get_notification_channel(name, severity)` — severity→channel routing from a var.
+- A deterministic key per result row (validation, source table, record id, run
+  time), minted with E1.
+- One model per rule set, an **incremental `validation_log`** that appends every
+  failure and purges rows older than `retention_days`, and a summary model for
+  dashboards.
+
+Map the tiers onto dbt severity explicitly in the README: blocking rules use
+`error` and stop the pipeline; conditional rules use `error` or `warn` per rule;
+quality rules use `warn` and are logged only.
+
+**Why.** dbt tests are binary and ephemeral — they pass or fail and the evidence
+is gone. Operations need severities that decide whether a run stops, warns, or
+only records; notifications routed by severity; and a failure history so trends
+are visible.
+
+**Acceptance.** An example rule set with rules at three severities runs on
+duckdb. `validation_log` accumulates across two runs and purges beyond retention.
+A singular test over literal inputs covers every branch of
+`should_send_notification`. Changing `validation_configs` changes behaviour with
+no code change.
+
+---
+
+### E3. UTC timestamp generic test
+
+**What.** `tests/generic/timestamp_is_utc.sql` — fails rows whose timestamp column
+carries a non-UTC offset. Dispatch per adapter; on adapters without offset-aware
+types, document it as a no-op rather than silently passing.
 
 **Why.** Mixed-offset timestamps are the classic silent join bug between two
-sources that agree on the wall clock but not the zone. `import()` is a
-readability convention the `dbt-model` skill can then enforce.
+sources that agree on the wall clock but not the zone.
 
-**Acceptance.** Both are documented in the dbt tool's README macro table and
-used once in the example project; `dbt parse` and `dbt compile` stay green.
-
----
-
-### E4. Tiered-severity validation framework
-
-**What.** A small framework for data-quality rules that are richer than dbt
-tests: a `validation_rules` seed (rule id, target model, SQL predicate, severity
-`info`/`warn`/`error`/`block`, owner), a macro that applies every rule for a
-model and emits one row per violation, and an incremental
-`validation_results` model that logs outcomes over time.
-
-**Why.** dbt tests are binary and ephemeral: they pass or fail and then the
-evidence is gone. Real operations need (a) severities that decide whether a run
-stops, warns, or only records, and (b) a history of violations so trends are
-visible. Encoding rules as data rather than as one test file each keeps them
-reviewable and lets non-engineers own them.
-
-**How.** Keep the engine to three macros: apply-rules, log-result, and
-get-config. `block` severity raises; `error` fails the model's `dbt test`; `warn`
-and `info` only log. Ship two example rules on the example project. Write the
-decision up as an ADR once E21 exists.
-
-**Acceptance.** Adding a rule row to the seed changes behaviour with no code
-change; a `block` rule stops `dbt build`; a `warn` rule logs a row and lets the
-build pass; `validation_results` retains prior runs.
+**Acceptance.** Documented in the dbt tool's README and used once in the example
+project; `dbt parse` and `dbt compile` stay green.
 
 ---
 
-## P2 — Dagster patterns
+## P1 — Data delivery & lineage
+
+### E23. Config-driven file export engine
+
+**What.** A declarative export pipeline: one YAML per export, one engine that
+turns it into SQL, writes the files, keeps a run log, and generates its own
+schedules. Put the core (loader, SQL builder, executor) in a package with **no
+orchestrator imports**, wrapped by a CLI and a Dagster op, so the Airflow and
+Prefect tools can wrap it later.
+
+**The config contract.**
+- **Two export kinds.** *Shared*: one model serves every recipient, filtered per
+  recipient by a tenant key listed in the YAML. *Dedicated*: one model per
+  recipient with filters baked in; the YAML carries delivery settings only. Plus
+  *ad hoc*: any relation, never scheduled.
+- **Filters**: `in`, `not_in`, `ilike`, `not_null`, and range filters whose
+  boundary semantics are in the key name — `start_inclusive_end_inclusive`
+  (`[start, end]`) and `start_exclusive_end_inclusive` (`(start, end]`) — with date
+  keywords such as `today`, `last_sunday`, `max_value`, and `last_run_end`.
+- Column selection with aliases; computed columns with `{range_start}` /
+  `{range_end}` placeholders; boolean values emitted unquoted.
+- **Multiple outputs**: one query, several destinations or formats.
+- Optional post-processing: header/trailer records, and a control/manifest file
+  next to the data file.
+- An optional `schedule:` block per recipient.
+
+**The engine.**
+- **Three runner modes**: `dry-run` prints SQL and has no side effects;
+  `select-only` runs the SELECT and reports the row count; `execute` writes
+  (`COPY INTO`/`UNLOAD`, or `COPY ... TO` on duckdb).
+- **Run log and watermark.** Write a run-log row after every attempt, success or
+  failure. `last_run_end` resolves to the last successful window's end, and
+  incremental windows are `(start, end]`: the row *at* the watermark was sent
+  last time. Four edge cases to encode and document:
+  1. A 0-row run is a success and **advances** the watermark, so idle days don't
+     stall it.
+  2. A first run with no seeded watermark exports all history. Cutover from a
+     legacy job means inserting one seed row taken from the legacy job's last
+     window *at cutover time*.
+  3. Read both window bounds from the same snapshot, so a stale upstream causes
+     lag, not loss.
+  4. `max_value` ignores row filters. An incremental export with an `in` filter
+     can advance past rows it excluded — warn when both are configured.
+- **Tenant isolation fails closed.** Before the first write for a recipient of a
+  shared export, count rows outside the expected tenant keys, and nulls. Any
+  count above zero raises. No file is written, the remaining outputs for that
+  recipient are skipped (no partial delivery), and the error goes to the run log.
+  At parse time, a shared-export config without tenant keys raises before any
+  write, on every path (dry-run, CLI, and orchestrator).
+- **Schedules are generated.** Each recipient's `schedule:` block becomes one job
+  and one schedule, so adding a scheduled export is a YAML edit. Generated
+  definitions must pass E5's invariants (default `STOPPED`, UTC, unique names).
+
+**Why.** Hand-written export jobs drift: every file gets its own SQL, its own
+windowing bug, and its own idea of "incremental". One contract makes a delivery
+reviewable as data. The tenant check exists because the most expensive failure an
+export can have is sending one recipient another recipient's rows.
+
+> **New mechanism:** in production the "every config validates" test ran in a
+> non-gating job, so a broken config was caught only at runtime. Here it must
+> be a merge gate.
+
+**Acceptance.** Tests against duckdb:
+- dry-run writes nothing;
+- a three-run watermark chain, including a 0-row run, produces contiguous
+  windows;
+- a fixture with one foreign-tenant row fails closed with no file written;
+- a shared config missing tenant keys raises at parse time;
+- a test auto-discovers every YAML under the configs directory, validates it, and
+  runs in the required CI job.
+
+---
+
+### E24. Generated dbt exposures for every delivered file, with a drift gate
+
+> **Depends on E23.**
+
+**What.** A small package that reads E23's configs and writes
+`models/exports/_generated_exposures.yml`: one dbt exposure per delivered file,
+with a deterministic name and label, `depends_on` the model it reads, and an
+owner. It cross-checks the manifest: the model exists, aliases resolve, any
+columns the config pins exist in the model, and no two exposures share a name.
+The CLI has `--write` and `--check`. `--check` runs after `dbt parse` and needs no
+warehouse connection. Wire `--check` into pre-commit and a CI job.
+
+**Why.** Without it, a file sent outside the company is invisible in the DAG, and
+`dbt ls --select +exposure:*` can't answer "what does this PR change for the
+people we send files to?". The drift gate matters as much as the generator:
+a stale generated file is worse than none, because it looks authoritative.
+
+**Acceptance.**
+- Adding a config without regenerating fails `--check`.
+- A config pointing at a model that doesn't exist fails.
+- A pinned column the model lacks fails.
+- The generator's tests run offline against a fixture manifest.
+
+---
+
+### E25. Delivery reconciliation (follow-up to E23)
+
+> **Depends on E23.** Do it after E23 has real users.
+
+**What.** A model that compares **expected** deliveries (from E23's schedules and
+run log) with **confirmed** transfers (whatever the transport records: SFTP
+server logs, object-store events, API acknowledgements) and classifies each as
+`delivered`, `late`, `missing`, or `unexpected`.
+
+**Why.** A successful run-log row proves a file was *written*, not that it
+*arrived*. Recipients notice missing files before engineers do.
+
+**Not in scope:** parsing any particular transport's log format. That parsing is
+per-transport glue; the portable part is the expected-versus-confirmed
+contract.
+
+**Acceptance.** Seeded expectations and confirmations on duckdb produce each of
+the four states.
+
+---
+
+## P2 — Dagster patterns & observability
 
 ### E5. Definition invariant tests
 
@@ -266,10 +465,8 @@ layout — `success` renders as a single scannable line; `warning` and `failure`
 expand with fields, a detail block, and links. Severity→channel routing lives in
 one function.
 
-Optionally add `utils/telemetry.py`: write one event row per run outcome to a
-warehouse table, with **every telemetry error swallowed** so observability can
-never fail a pipeline, plus a safety-net sensor that emits a missing
-STARTED/FAILED event when the framework itself dies before the hook fires.
+Persisting run events to the warehouse is a separate task, E26. Keep the two
+decoupled: the notifier renders, telemetry records.
 
 **Why.** Per-job ad hoc Slack messages drift until nobody reads them. Separating
 rendering from telemetry means an Airbyte or file-transfer job reuses the same
@@ -278,8 +475,7 @@ schema. Routing in one place makes "split warnings into their own channel" a
 one-line change.
 
 **Acceptance.** Existing hook call sites use the new module; unit tests render
-each severity to Block Kit JSON and snapshot them; a raising telemetry sink does
-not fail the job under test.
+each severity to Block Kit JSON and snapshot them.
 
 ---
 
@@ -320,7 +516,59 @@ stage; `None`, `""`, and an unknown name all map to non-prod.
 
 ---
 
-## P3 — Warehouse environment management (Snowflake extra)
+### E26. Run-event telemetry and a run-summary model
+
+> **Pairs with E6.**
+
+**What.**
+- **An event table** (committed DDL): run id, job name, status (`STARTED`,
+  `SUCCESS`, `FAILURE`), trigger source (schedule, sensor, manual), dbt command,
+  warehouse, timestamp, and test counts.
+- **Writers**: success and failure hooks, plus a start event, append rows. **Every
+  telemetry error is swallowed**, so observability can never fail a pipeline.
+- **A safety-net sensor** writes the missing `STARTED` or `FAILURE` row when the
+  framework dies before a hook fires.
+- **In dbt**: a staging model over the event table, and
+  `mart_orchestrator_run_summary` with one row per run. It pairs the first
+  `STARTED` with its completion on run id. Runs without a completion yet appear as
+  `IN_PROGRESS` with null completion metrics. Columns: duration, `is_success` /
+  `is_failure` flags, test count, test failures, failure rate, and date parts
+  (day, week, month, hour, day of week). Exclude the job that refreshes the
+  monitoring models from its own summary.
+
+**Why.** The orchestrator's UI answers "what happened to this run". It does not
+answer "is this job getting slower", "which jobs fail most on Mondays", or "how
+many tests failed last month". That needs run history as data, joinable to
+everything else in the warehouse.
+
+**Acceptance.** Seeded events on duckdb produce correct rows for a success, a
+failure, an in-progress run, and a run with duplicate `STARTED` events (the first
+one wins). A raising telemetry writer does not fail the job under test.
+
+---
+
+### E30. Versioned dbt docs publishing with a fail-safe destination
+
+> **Depends on E8.**
+
+**What.** A scheduled job that runs `dbt docs generate` and packages the static
+site. It stamps each build with immutable version metadata (git SHA, build time,
+dbt version) and uploads to object storage. The destination comes from the
+deployment, E8-style: prod publishes to the live site; stage **and any unknown
+deployment** publish to a test destination. Publishing to live from anywhere else
+is refused unless an explicit allow flag is set.
+
+**Why.** Hand-published docs go stale, and nobody can tell which commit they
+describe. A process that can reach the live site from a local run will
+eventually overwrite it with a half-built branch.
+
+**Acceptance.** Unit tests cover routing for prod, stage, unknown, and missing
+deployments. The live destination is refused without the flag. The metadata file
+is present in the packaged site.
+
+---
+
+## P3 — Warehouse environments & cost (Snowflake extra)
 
 > These only make sense once a Snowflake RBAC model exists, which is why E9 comes
 > first. All macros go under `transformation/dbt/macros/snowflake/` with a
@@ -333,6 +581,11 @@ standard role hierarchy — a per-environment owner role per database, read and
 write functional roles, service users on key-pair auth — plus databases,
 warehouses, and grants. Widen `terraform-validate.yml` to cover it (this
 completes `ci-cd-hardening.md` #14 for Snowflake).
+
+> **New mechanism:** in production, roles and grants were versioned SQL DDL
+> scripts, applied by hand. Terraform is this toolkit's choice and is untested
+> in production. The precedence rule below *is* production-learned. If Terraform
+> proves awkward, ship the DDL-script form instead, with the same test.
 
 **Why and the rule to encode.** Snowflake future grants have a precedence rule
 that bites everyone once: **a schema-level future grant overrides the
@@ -351,13 +604,41 @@ matching one.
 
 ---
 
-### E10. Zero-copy environment refresh
+### E31. Personal development databases
 
-> **Depends on E9.**
+> **Depends on E10's `clone_database`.** Split out of E10 because the safety
+> rules differ: this one runs on every engineer's laptop.
+
+**What.**
+- `refresh_dev_database(username=none)` — a `run-operation` that defaults
+  `username` to `current_user()` and clones prod into `<PROD_DB>_<USERNAME>`.
+  Accept an explicit override for named experiments.
+- The dev target in `profiles.yml` defaults its database to that
+  identity-derived name, and its schema to `<USER>_DEV`, so a fresh clone
+  needs no configuration.
+- The prod target has **no defaults at all**: every connection value comes from
+  an env var with no fallback, so a missing variable fails loudly rather than
+  quietly resolving to something.
+- A `just dbt::dev-database` recipe.
+
+**Why.** Shared dev databases mean engineers overwrite each other's work, and
+"works on my branch" stops meaning anything. A personal zero-copy clone takes
+minutes, costs nothing until data diverges, and needs no ticket. Defaults are
+safe on the dev target and dangerous on the prod one.
+
+**Acceptance.** The macro's dry run prints the source and derived target. The
+prod target fails to resolve when an env var is unset. Running the recipe twice
+replaces the clone without error.
+
+---
+
+### E10. Zero-copy shared-environment refresh
+
+> **Depends on E9.** Personal clones are E31.
 
 **What.** `clone_database(source, target, copy_grants=true)` and a
 `refresh_environment(env)` wrapper, run via `dbt run-operation`, that rebuilds
-stage/dev as a zero-copy clone of prod.
+shared stage/test environments as zero-copy clones of prod, on a schedule.
 
 **Why.** Stage and dev drift from prod until tests pass for the wrong reasons. A
 clone is instant and storage-free until data diverges. `CREATE OR REPLACE`
@@ -432,6 +713,45 @@ fails.
 
 ---
 
+### E27. Query-level cost attribution reconciled to the invoice
+
+> **Depends on E29** (the monthly fact outlives its sources). Snowflake extra.
+
+**What.** Source models over `SNOWFLAKE.ACCOUNT_USAGE` / `ORGANIZATION_USAGE`,
+declared read-only, feeding a monthly cost fact by team and workload:
+- **Attribute compute by query** (query attribution history joined to query
+  history), not by warehouse name.
+- Put **idle time and cloud-services** credits in an explicit `SHARED` bucket
+  instead of spreading them across teams. Attribute storage by owning database.
+- **Two mapping seeds** hold the attribution vocabulary: user → team/workload and
+  database → team. A narrow "resolve by database" sentinel covers genuinely
+  shared service accounts only. It must not be the default for service accounts.
+- Anything unmapped lands in an explicit `NEEDS_OWNER_REVIEW` bucket, never in a
+  guess.
+- **Conformed dimensions** (month, team, workload, warehouse) are built from the
+  spine and seeds, **never from the fact**, or their relationships tests could
+  never fail. The fact's foreign keys are `not_null` even where the natural
+  column is nullable, because a NULL FK passes a relationships test silently. The
+  warehouse dimension is accumulating, because its sources keep 365 days while
+  the fact keeps months forever.
+- **A control-total test** ties every complete month to the invoiced amount in
+  currency, within a cent.
+- An optional per-unit denominator hook (`var`) gives cost per customer, order,
+  or other unit.
+
+**Why.** Warehouse-name attribution is the obvious first cut, and it's wrong in
+both directions. In production it overstated one team's share by about 1.6×. A
+shared warehouse named after a consumer can be entirely another team's work,
+while a shared service account can hide the biggest spender. Total spend doesn't
+move; only its ownership does, and ownership is the question being asked.
+Isolating ~40% as `SHARED` is honest; spreading it across teams invents precision.
+
+**Acceptance.** On a Snowflake account, every complete month ties to the invoice
+within a cent. The `NEEDS_OWNER_REVIEW` share is reported, not hidden.
+Relationship tests pass with every FK `not_null`.
+
+---
+
 ## P4 — Shippable quality tools
 
 ### E14. Add a `tooling/` role
@@ -443,7 +763,7 @@ Actions snippet, tests that need no network), wired through the `add-tool`
 skill. Update the Project Structure section of `CLAUDE.md` and the README tool
 table.
 
-**Why.** E15 and E16 have no natural home: they are not EL, orchestration, or
+**Why.** E15, E16, and E34 have no natural home: they are not EL, orchestration, or
 transformation.
 
 **Acceptance.** `add-tool` recognises the role; `just --list` shows the new
@@ -513,6 +833,35 @@ is rejected by config validation.
 
 ---
 
+### E34. Release-to-release dataset diff
+
+> **Depends on E14.**
+
+**What.** `tooling/release-diff/` — compare two captures of the same dataset (a
+vendor's monthly release, two snapshots of a reference table, prod against a
+rebuilt candidate) and report rows **added**, **removed**, and **changed**:
+- **Dataset profiles** are committed Python/YAML declaring key columns, compare
+  columns, expected headers, and sort order.
+- **A pure-logic core**, stdlib-only with no I/O, builds the SQL from a profile,
+  validates headers, resolves which pair of captures to compare, and computes
+  the summary. DuckDB executes the set difference.
+- **Invariants are asserted, not assumed**: `new_rows − old_rows = added −
+  removed`, and every changed row's key exists on both sides.
+- Output as CSV and markdown first; a workbook renderer can come later.
+- **Trust model, stated in the header**: every *identifier* interpolated into SQL
+  comes from a committed profile, and every *value* is escaped. Static analysers
+  will flag the builders, and the header explains why that's safe.
+
+**Why.** "What changed in this release?" comes up for every external dataset and
+every risky rebuild, and ends up answered by ad hoc `EXCEPT` queries that nobody
+checks for arithmetic consistency.
+
+**Acceptance.** Fixture captures produce the expected added, removed, and changed
+counts. A deliberately inconsistent fixture trips the invariant. A header
+mismatch fails before any diff runs.
+
+---
+
 ## P5 — Skills, docs, and optional extras
 
 > Stack skills follow `.claude/skills/CLAUDE.md`: they infer the tool root, never
@@ -542,6 +891,38 @@ radius (`dbt ls --select model+`), check source retention before any
 `--full-refresh` (see E2), dry-run, run in bounded batches, verify parity
 (row counts and a checksum per batch against the pre-backfill state), and write
 up what was done.
+
+### E33. Three-dimensional tagging contract
+
+Tag models along three independent axes so selections compose instead of
+multiplying:
+- **Layer**, set automatically by directory in `dbt_project.yml` (`staging`,
+  `intermediate`, `marts`, …), with no manual tagging;
+- **Workload** or business area, set manually in the model's `.yml`;
+- **Entity**, the domain object the model represents (`customer`, `order`), also
+  manual.
+
+Then `--select tag:orders,tag:staging` works, and production jobs select by
+tag instead of by path. Ship an ADR (E21), a tagging reference doc, and an
+enforcement check on `manifest.json`: every model has exactly one layer tag, and
+every tag comes from an allowed list (a var or seed). Without enforcement the
+taxonomy decays into a flat tag soup within months. **Acceptance:** a model with
+an unlisted tag or two layer tags fails the check.
+
+### E32. Snapshot design guide
+
+Add `docs/patterns/snapshots.md` and one example snapshot on the example
+project, covering:
+- **Strategy**: `timestamp` when the source has a trustworthy `updated_at`;
+  `check` with a stable, explicit `check_cols` list otherwise.
+- **Hard deletes**: the `hard_deletes` config, and what each option means
+  downstream.
+- **The point-in-time query**:
+  `valid_from <= t and (t < valid_to or valid_to is null)`.
+- **Cadence**: schedule snapshots shortly *before* the jobs that read them.
+- **The backfill expectation, stated plainly**: history begins at the first run.
+  A snapshot of a current-state source cannot reconstruct the past, so start
+  snapshotting before anyone needs the history.
 
 ### E20. State migrations on promotion
 
@@ -582,8 +963,9 @@ Reviewed and not proposed, so they are not re-derived later:
   was found; Dagster replaces it.
 - **Domain-specific macros and tests** (address formatting, phone
   normalisation, gender mapping, business-rule tests) — no generic value.
-- **Vendor reference-data release tooling.** The *pattern* — declare a dataset
-  profile, set-diff two releases in DuckDB, render a workbook — could become a
-  "release-to-release diff" tool later if a second use appears.
+- **Transport-specific log parsing** (SFTP server logs and similar). Format
+  glue, not a pattern — E25 keeps only the expected-versus-confirmed contract.
+- **Import-CTE helper macros.** Cosmetic; a `dbt-model` skill convention covers
+  it without a macro.
 - **History reconstruction from CDC landing tables.** Valuable but tied to one
   connector's landing semantics; revisit as a dlt/Airbyte pattern doc if needed.
