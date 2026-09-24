@@ -96,12 +96,21 @@ layout:
 skills are *procedure* and `CLAUDE.md` files are *convention*, and that a skill
 references conventions rather than restating them.
 
-## CI/CD & Tooling Roadmap
+## Roadmaps
 
-`docs/ci-cd-hardening.md` is a Claude Code–executable backlog of CI/CD,
-infrastructure, and Claude-skills improvements for this repo. If asked to harden
-CI, add agent skills/hooks, or "make improvements," start there: pick the
-highest-priority unchecked task from its index, implement it, verify against its
-Acceptance criteria, and tick the box. One task per PR.
+Two Claude Code–executable backlogs, same format:
 
-Each task is self-contained — everything needed to do the work is in that file.
+- `docs/ci-cd-hardening.md` — CI/CD, supply chain, repo hygiene, and agent
+  hooks: how **this repo** is checked.
+- `docs/toolkit-expansion.md` — features the toolkit **ships**: dbt macros,
+  Dagster patterns, Snowflake environment management, developer tools, and
+  further stack skills.
+
+If asked to harden CI, add agent skills/hooks, extend the toolkit, or "make
+improvements," start with the relevant file: pick the highest-priority unchecked
+task from its index, implement it, verify against its Acceptance criteria, and
+tick the box. One task per PR.
+
+Each task is self-contained — everything needed to do the work is in its file.
+Toolkit content must stay company-agnostic: no company, client, business-domain,
+or vendor-dataset names; use neutral examples (`orders`, `customers`).
