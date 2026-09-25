@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: validation_log
+    description: >
+      Every validation failure (WARN or FAIL) from every rule set, one row per
+      record per run. Incremental and append-only; rows older than a
+      validation's retention_days are purged after each run.
+    columns:
+      - name: validation_key
+        description: Deterministic key over validation, source table, record, and run time
+        tests:
+          - unique
+          - not_null
+      - name: validated_at
+        description: Start time of the dbt run that recorded the failure
+        tests:
+          - not_null
