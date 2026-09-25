@@ -148,9 +148,17 @@ The following environment variables are expected by the resources defined in
 | `SNOWFLAKE_ACCOUNT`   | Snowflake |
 | `SNOWFLAKE_USER`      | Snowflake |
 | `SNOWFLAKE_PASSWORD`  | Snowflake |
-| `SNOWFLAKE_DATABASE`  | Snowflake |
 | `SNOWFLAKE_SCHEMA`    | Snowflake |
 | `SNOWFLAKE_WAREHOUSE` | Snowflake |
+| `DAGSTER_CLOUD_DEPLOYMENT_NAME` or `DEPLOYMENT` | Target database routing |
+
+The Snowflake **database** is not an environment variable. It is chosen from
+the deployment by `src/utils/deployment.py`: `prod` → `ANALYTICS`, `stage` →
+`ANALYTICS_STAGE`, and any other value, or none, → `ANALYTICS_DEV`. So a
+misconfigured or local process cannot write production. Schedules and jobs carry
+`toolkit/deployment` and `toolkit/target_database` run tags showing the choice.
+The dbt profile still reads `SNOWFLAKE_DATABASE`; set it from the same function
+when deploying dbt through Dagster.
 
 ## Further Reading
 

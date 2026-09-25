@@ -8,6 +8,8 @@ Customisation
 
 from dagster import Config, OpExecutionContext, job, op
 
+from src.utils.deployment import current_deployment, deployment_tags
+
 
 class LandingFileConfig(Config):
     s3_bucket: str
@@ -20,6 +22,9 @@ def process_landing_file(context: OpExecutionContext, config: LandingFileConfig)
     context.log.info(f"Processing s3://{config.s3_bucket}/{config.s3_key}")
 
 
-@job(description="Processes one landed S3 object; launched by s3_file_arrival_sensor.")
+@job(
+    description="Processes one landed S3 object; launched by s3_file_arrival_sensor.",
+    tags=deployment_tags(current_deployment()),
+)
 def process_landing_file_job():
     process_landing_file()

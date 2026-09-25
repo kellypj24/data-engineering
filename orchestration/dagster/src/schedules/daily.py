@@ -16,6 +16,8 @@ from dagster import (
     ScheduleDefinition,
 )
 
+from src.utils.deployment import current_deployment, deployment_tags
+
 # ---- Schedule definition ----------------------------------------------------
 daily_asset_schedule = ScheduleDefinition(
     name="daily_asset_schedule",
@@ -26,5 +28,7 @@ daily_asset_schedule = ScheduleDefinition(
     # targeted selection (e.g. AssetSelection.keys("my_asset")) as needed.
     target=AssetSelection.all(),
     default_status=DefaultScheduleStatus.STOPPED,
+    # Shows each run's deployment and target database in the UI.
+    tags=deployment_tags(current_deployment()),
     description="Materialises all assets daily at 06:00 UTC.",
 )
