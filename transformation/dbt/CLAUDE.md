@@ -14,6 +14,8 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `macros/overrides/generate_schema_name.sql` — Non-prod/prod schema routing
 - `macros/utils/limit_data_in_dev.sql` — Non-prod data filtering (recent N days), as a composable predicate
 - `macros/utils/safe_divide.sql` — Null/zero-safe division
+- `macros/utils/mint_surrogate_key.sql` — Versioned, collision-free UUID-shaped surrogate keys (`mint_surrogate_key`, `surrogate_key_version`). Use instead of `dbt_utils.generate_surrogate_key`
+- `tests/macros/` — Singular tests over literal rows that pin macro behaviour; no sources, so they run on duckdb in CI
 - `macros/staging/audit_columns.sql` — _loaded_at (EL timestamp or fallback), _dbt_updated_at columns
 - `macros/staging/clean_strings.sql` — TRIM + LOWER + NULLIF
 - `models/staging/` — 1:1 with source tables (views)

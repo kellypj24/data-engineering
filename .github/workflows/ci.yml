@@ -237,6 +237,10 @@ jobs:
         # Renders every model's Jinja to SQL. Catches broken macros and bad
         # column references that `parse` alone does not reach.
         run: uv run dbt compile
+      - name: Run macro property tests
+        # Singular tests over literal rows (tests/macros/). They read no
+        # sources, so they run on the duckdb target with no credentials.
+        run: uv run dbt build --select path:tests/macros
 
   # Deliberately unconditional: this is a guard, and a guard that skips is not a
   # guard. It is also cheap -- `uv lock --check` resolves metadata only, with no

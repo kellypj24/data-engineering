@@ -38,7 +38,7 @@
 
 **P1 — dbt building blocks**
 
-- [ ] E1. [Surrogate-key minting macro](#e1-surrogate-key-minting-macro)
+- [x] E1. [Surrogate-key minting macro](#e1-surrogate-key-minting-macro)
 - [ ] E2. [In-place surrogate-key backfill operation](#e2-in-place-surrogate-key-backfill-operation)
 - [ ] E28. [Seeds drop and recreate, project-wide](#e28-seeds-drop-and-recreate-project-wide)
 - [ ] E29. [Protect durable facts that outlive their source](#e29-protect-durable-facts-that-outlive-their-source)
