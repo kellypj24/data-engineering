@@ -63,17 +63,17 @@ renamed AS (
 )
 
 SELECT * FROM renamed
-;
 ```
 
 The project's macros, and the constraints each one puts on you:
 
 | Macro | Signature | Constraint |
 |---|---|---|
-| `audit_columns` | `(loaded_at_column=none)` | Emits **two** columns and **no trailing comma** — it must be the **last** entry in the `SELECT` list. Pass the EL timestamp (e.g. `'_airbyte_extracted_at'`) to preserve the real load time; bare `()` falls back to `CURRENT_TIMESTAMP()`. |
+| `audit_columns` | `(loaded_at_column=none)` | Emits **two** columns and **no trailing comma** — it must be the **last** entry in the `SELECT` list. Pass the EL timestamp (e.g. `'_airbyte_extracted_at'`) to preserve the real load time; bare `()` falls back to the current timestamp (`dbt.current_timestamp()`). |
 | `clean_string` | `(column_name)` | `TRIM` + `LOWER` + empty-to-`NULL`. Returns an expression, so it still needs your `AS <name>`. |
 | `limit_data_in_dev` | `(column_name, dev_days_of_data=3)` | A **complete predicate**: the recency filter outside prod, `TRUE` in prod. Use it as the whole `WHERE`, or compose with `AND`. No `WHERE 1 = 1` anchor needed. |
 | `safe_divide` | `(numerator, denominator)` | Null/zero-safe division. Use it instead of `/` in marts. |
+| `mint_surrogate_key` | `(fields, null_as=none)` | Use for every surrogate key instead of `dbt_utils.generate_surrogate_key`. `fields` is a list of column expressions hashed in **fixed order**, so reordering them re-mints every key. Set `null_as` only for nullable foreign keys that must resolve to a "not applicable" dimension row. |
 
 Schema routing is handled by the `generate_schema_name` override — non-prod
 prefixes with the target's schema (`main_staging`), prod uses the bare schema

@@ -8,7 +8,7 @@ This is a composable collection of data engineering tools organized by role:
 - `transformation/` — Transform tools (dbt)
 - `stacks/` — Pre-assembled combinations (airbyte-dagster-dbt, dlt-dagster-dbt, dlt-temporal-dbt)
 - `infrastructure/` — Shared Docker/Terraform
-- `docs/` — Architecture patterns, tool comparison matrices
+- `docs/` — Architecture patterns, tool comparison matrices, `patterns/` write-ups, and the two roadmaps
 - `archive/` — Previous experiments (reference only, not maintained)
 
 ## Conventions
@@ -17,14 +17,15 @@ This is a composable collection of data engineering tools organized by role:
 - **Package manager**: `uv` for all Python operations (`uv run`, `uv pip install`)
 - **Task runner**: `just` (Justfile at root, per-tool `mod.just` files)
 - **Linting**: `ruff` for Python, `sqlfluff` for SQL (Snowflake dialect)
-- **Testing**: `pytest` for all Python tools, `terraform test` for Terraform
+- **Testing**: `pytest` for all Python tools, `terraform test` for Terraform. dbt: pytest drives dbt in-process, plus `dbt seed` + `dbt build` on `seeds/example_raw/` fixtures — see `transformation/dbt/CLAUDE.md`
 - **Each tool is independent**: own pyproject.toml, own Dockerfile, own README, own tests
 
 ## Key Patterns
 
 - **Dagster** is the reference implementation — fully built with assets, sensors, schedules, resources, checks
 - **Airflow** and **Prefect** mirror Dagster's feature set: Airbyte sync, dbt build, S3 sensor, daily schedule, freshness checks
-- **dbt macros** follow naming: `overrides/` for built-in overrides, `utils/` for helpers, `staging/` for staging-specific
+- **dbt macros** follow naming: `overrides/` for built-in overrides, `utils/` for helpers, `staging/` for staging-specific, `validation/` for the validation framework
+- **dbt environment is `DBT_ENV`**, not the target: the target picks a warehouse, `dbt_env` picks dev/prod behaviour
 - **Environment variables** are used for all secrets — never hardcoded
 - Resources use `EnvVar()` (Dagster), `Variable.get()` (Airflow), or `Block.load()` (Prefect)
 
@@ -37,6 +38,7 @@ just fmt               # Format all code (rewrites files)
 just fmt-check         # Verify formatting without rewriting -- run this before pushing
 just dagster::test     # Run Dagster tests only
 just airflow::test     # Run Airflow tests only
+just dbt::test         # pytest + dbt seed/build on the example fixtures
 just dbt::lint         # Lint dbt SQL
 ```
 
@@ -46,6 +48,7 @@ GitHub Actions with cross-paradigm impact detection:
 - dbt changes trigger dagster + airflow + prefect tests
 - airbyte changes trigger orchestrator tests
 - Tool-specific changes trigger only that tool's tests
+- The dbt job builds the full example project (models, data tests, unit test) on duckdb
 
 ## Adding a New Tool
 
