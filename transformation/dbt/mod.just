@@ -2,8 +2,9 @@
 # dbt command needs to be pointed at it. CI sets the same variable.
 export DBT_PROFILES_DIR := source_directory()
 
-# Run dbt tests (schema + unit)
+# Run the Python tests that drive macros via run-operation, then dbt tests (schema + unit)
 test:
+    uv run pytest tests/python
     uv run dbt test
 
 # Run dbt models
