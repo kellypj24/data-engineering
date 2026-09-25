@@ -50,6 +50,7 @@ GitHub Actions with cross-paradigm impact detection:
 - airbyte changes trigger orchestrator tests
 - Tool-specific changes trigger only that tool's tests
 - The dbt job builds the full example project (models, data tests, unit test) on duckdb
+- `CI Success` fans in every job and is the only required check (no-bypass ruleset). **Add every new job to its `needs`** — it fails if the list drifts
 
 ## Adding a New Tool
 
