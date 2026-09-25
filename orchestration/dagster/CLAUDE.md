@@ -9,8 +9,9 @@ Reference orchestrator implementation. All other orchestrators (Airflow, Prefect
 - `src/assets/airbyte.py` — Airbyte connection assets via `build_airbyte_assets()`
 - `src/assets/dbt.py` — dbt project wrapped as Dagster assets via `@dbt_assets`
 - `src/sensors/s3_sensor.py` — S3 file arrival polling sensor (boto3, cursor-based); launches `process_landing_file_job`
+- `src/jobs/chain.py`, `src/sensors/chain.py` — Worked chain: `daily_asset_schedule` → `extract_job` (Airbyte); `transform_after_extract` run-status sensor → `transform_job` (dbt). Only the head has a cron
 - `src/jobs/landing.py` — `process_landing_file_job`, one run per landed S3 object
-- `src/schedules/daily.py` — Daily 06:00 UTC `ScheduleDefinition`
+- `src/schedules/daily.py` — Daily 06:00 UTC `ScheduleDefinition` for `extract_job`, the head of the chain
 - `src/checks/freshness.py` — Asset freshness check (25h threshold)
 - `src/resources/connections.py` — `RESOURCES` dict: airbyte, dbt, snowflake, telemetry
 - `src/utils/notifier.py` — One `Notification` model rendered to Slack Block Kit by severity (success = one line; warning/failure expand). Severity→channel routing only in `channel_for`. `make_slack_on_failure_hook` builds on it. Renders are snapshot-tested (`tests/snapshots/`; `UPDATE_SNAPSHOTS=1` to rewrite)
@@ -46,7 +47,7 @@ The Snowflake database is **not** an env var: `src/utils/deployment.py` maps the
 
 - Assets export via `all_assets` list in `src/assets/__init__.py`
 - Same pattern for sensors (`all_sensors`), schedules (`all_schedules`), jobs (`all_jobs`), checks (`all_checks`)
-- `tests/test_invariants.py` enforces, for every definition: schedules and job-launching sensors default to STOPPED; schedules set `execution_timezone="UTC"`; a sensor without a job target is listed in `observing_sensors`; no duplicate names; jobs tagged `toolkit/manual_only` are never scheduled; `@dbt_assets` partition the manifest and run `dbt build`; a job selecting a dbt node selects its parent seeds
+- `tests/test_invariants.py` enforces, for every definition: schedules and job-launching sensors default to STOPPED; schedules set `execution_timezone="UTC"`; a sensor without a job target is listed in `observing_sensors`; no duplicate names; jobs tagged `toolkit/manual_only` are never scheduled; a chained job has no schedule and one upstream sensor whose monitored jobs exist; `@dbt_assets` partition the manifest and run `dbt build`; a job selecting a dbt node selects its parent seeds
 - Resources are a flat dict passed to `Definitions(resources=RESOURCES)`
 - dbt manifest loaded at import time; `@dbt_assets` rejects two dbt resources
   with one asset key (e.g. a seed in schema `raw` and source `raw.<table>`)

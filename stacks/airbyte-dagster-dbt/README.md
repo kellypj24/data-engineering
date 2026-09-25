@@ -85,6 +85,13 @@ Dagster acts as the control plane:
 2. **After syncs complete**, Dagster runs dbt models using the `dagster-dbt` integration. dbt models are also represented as Dagster assets with dependency tracking.
 3. **Scheduling and sensors** in Dagster control when pipelines run — on a cron schedule, on new data arrival, or on demand.
 
+The two stages are chained, not given two crons: `daily_asset_schedule` runs
+`extract_job` (the Airbyte assets) at 06:00 UTC, and the `transform_after_extract`
+run-status sensor launches `transform_job` (the dbt project) only when an
+extract run succeeds. A slow sync delays dbt instead of feeding it partial data,
+and a failed sync stops it. See "Chaining jobs" in
+[`docs/architecture-patterns.md`](../../docs/architecture-patterns.md).
+
 ## Local Development Workflow
 
 ```bash

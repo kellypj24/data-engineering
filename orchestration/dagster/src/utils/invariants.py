@@ -22,6 +22,9 @@ Checks
 * Cron strings parse.
 * No duplicate job, schedule, or sensor names.
 * Jobs tagged ``MANUAL_ONLY_TAG`` are never targeted by a schedule or sensor.
+* Chains (run-status sensors that launch a job): each sensor names the upstream
+  jobs it monitors, and they exist; a chained job has no schedule of its own and
+  exactly one upstream sensor.
 * ``@dbt_assets`` definitions partition the manifest's models, seeds, and
   snapshots: no node in two definitions, none in no definition. A seed in no
   definition has been excluded, which silently drops its data tests.
@@ -42,6 +45,7 @@ from dagster import (
     DefaultScheduleStatus,
     DefaultSensorStatus,
     Definitions,
+    RunStatusSensorDefinition,
     build_asset_context,
 )
 from dagster._utils.schedules import is_valid_cron_schedule
@@ -99,7 +103,41 @@ def check_definitions(
         if job is not None and job.tags.get(MANUAL_ONLY_TAG) == "true":
             problems.append(f"{source}: targets manual-only job {job_name}")
 
+    problems += _chain_problems(repo, jobs)
     problems += _dbt_problems(defs, jobs.values())
+    return problems
+
+
+def _chain_problems(repo, jobs) -> list[str]:
+    problems = []
+    scheduled = {s.job_name for s in repo.schedule_defs}
+    upstream_sensors: dict[str, list[str]] = {}
+    for sensor in repo.sensor_defs:
+        if not isinstance(sensor, RunStatusSensorDefinition) or not sensor.targets:
+            continue
+        name = f"sensor {sensor.name}"
+        # Not public API: the jobs passed as `monitored_jobs`.
+        monitored = getattr(sensor, "_monitored_jobs", None) or []
+        if not monitored:
+            problems.append(
+                f"{name}: launches a job but monitors every job; name its upstream"
+            )
+        for upstream in monitored:
+            upstream_name = getattr(upstream, "name", None) or getattr(
+                upstream, "job_name", None
+            )
+            if upstream_name not in jobs:
+                problems.append(f"{name}: upstream job {upstream_name} does not exist")
+        for target in sensor.targets:
+            upstream_sensors.setdefault(target.job_name, []).append(sensor.name)
+
+    for job_name, sensors in sorted(upstream_sensors.items()):
+        if job_name in scheduled:
+            problems.append(f"job {job_name}: chained by {sensors} and also scheduled")
+        if len(sensors) > 1:
+            problems.append(
+                f"job {job_name}: chained by more than one sensor {sensors}"
+            )
     return problems
 
 
