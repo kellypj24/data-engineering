@@ -162,7 +162,7 @@ Every tool has its own test suite using its native test framework. All tests use
 
 GitHub Actions workflows with intelligent change detection:
 
-- **`ci.yml`** — Detects which tools changed and runs only the relevant tests. Includes cross-paradigm impact detection: dbt or Airbyte changes also trigger orchestrator tests (since Dagster, Airflow, and Prefect all wrap dbt and Airbyte). Lint runs `ruff check` and `ruff format --check`; the dbt job builds the whole example project on its fixtures; a `lockfiles` job enforces `uv lock --check` for every tool; `exposures-drift` fails when the dbt exposures generated from file-export configs are stale. A fan-in `CI Success` job is the single required check, enforced by a ruleset no one can bypass.
+- **`ci.yml`** — Detects which tools changed and runs only the relevant tests. Includes cross-paradigm impact detection: dbt or Airbyte changes also trigger orchestrator tests (since Dagster, Airflow, and Prefect all wrap dbt and Airbyte). Lint runs `ruff check` and `ruff format --check`; the dbt job builds the whole example project on its fixtures; a `lockfiles` job enforces `uv lock --check` for every tool; `exposures-drift` fails when the dbt exposures generated from file-export configs are stale; `wiring` fails when a tool is missing from any shared surface. A fan-in `CI Success` job is the single required check, enforced by a ruleset no one can bypass.
 - **`terraform-validate.yml`** — Runs `terraform fmt`, `validate`, and `test` on Airbyte Terraform changes.
 - **`dependabot.yml`** — Weekly updates for Python (`uv` ecosystem, so `uv.lock` moves with `pyproject.toml`; the dbt tool is `lockfile-only`, since its floors track `require-dbt-version`), Terraform, and GitHub Actions.
 
@@ -175,12 +175,12 @@ Each role directory contains a `_template/` subdirectory. It holds a **README th
 1. Read `<role>/_template/README.md` for what that role requires
 2. Create `<role>/<tool-name>/` with `pyproject.toml`, `uv.lock`, `README.md`, `CLAUDE.md`, `mod.just`, and `tests/`. Model it on `extract_load/dlt/`, the smallest complete tool
 3. Wire it into all five shared surfaces, or it will be invisible to part of the system:
-   - root `justfile` — the `mod` import plus the aggregate `test` / `lint` / `fmt` recipes
-   - `.github/workflows/ci.yml` — a `paths-filter` entry, a `test-<tool>` job, and a `lint` matrix row
+   - root `justfile` — the `mod` import plus the aggregate `test` / `lint` / `fmt` / `fmt-check` recipes
+   - `.github/workflows/ci.yml` — a `paths-filter` entry, a `test-<tool>` job, a `lint` matrix row, and the `lockfiles` job's list
    - `.github/dependabot.yml` — a `package-ecosystem: uv` entry (never `pip`; it skips `uv.lock`)
    - this README's tool table
    - root `CLAUDE.md`, only if the tool introduces a new convention
-4. Verify: `just --list`, `just <tool>::test`, `just <tool>::lint`, and `uv lock --check`
+4. Verify: `just --list`, `just check-wiring`, `just <tool>::test`, `just <tool>::lint`, and `uv lock --check`
 5. If the tool participates in a new stack, create a stack directory under `stacks/`
 
 Working with Claude Code? The `add-tool` skill in `.claude/skills/` does all of the above, and `verify-tool` runs the checks.

@@ -327,11 +327,13 @@ jobs:
         run: |
           failed=0
           for dir in \
+            delivery/file-export \
             extract_load/dlt \
             orchestration/airflow \
             orchestration/dagster \
             orchestration/prefect \
-            orchestration/temporal
+            orchestration/temporal \
+            transformation/dbt
           do
             if uv lock --check --directory "$dir" >/dev/null 2>&1; then
               echo "  in sync    $dir"
@@ -342,6 +344,17 @@ jobs:
             fi
           done
           exit $failed
+
+  wiring:
+    name: Tools wired into every surface
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      # Each tool must be in the root justfile aggregates, ci.yml, dependabot,
+      # and the README table -- see .github/scripts/check_wiring.py.
+      - run: uv run --no-project --with pyyaml python .github/scripts/check_wiring.py
+      - run: uv run --no-project --with pyyaml --with pytest pytest .github/scripts -q
 
   # The single required status check. Every other job skips on unrelated PRs,
   # so none of them can be required directly; this one always runs and fails
@@ -366,6 +379,7 @@ jobs:
       - lint-dbt
       - test-dbt
       - lockfiles
+      - wiring
     steps:
       - uses: actions/checkout@v7
       # A job missing from `needs` would never gate a merge, and nothing else
