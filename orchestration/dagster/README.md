@@ -60,7 +60,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
     │   ├── sensors.py       # Run-status sensors that append run events
     │   └── store.py         # `telemetry` resource: where events are written
     └── utils/
-        └── invariants.py    # check_definitions(): rules every definition must follow
+        ├── invariants.py    # check_definitions(): rules every definition must follow
+        └── notifier.py      # Notification -> Slack Block Kit, routed by severity
 ```
 
 ## How to Add New Components

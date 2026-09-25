@@ -55,7 +55,7 @@
 
 - [x] E5. [Definition invariant tests](#e5-definition-invariant-tests)
 - [x] E26. [Run-event telemetry and a run-summary model](#e26-run-event-telemetry-and-a-run-summary-model)
-- [ ] E6. [One notification model, rendered by severity](#e6-one-notification-model-rendered-by-severity)
+- [x] E6. [One notification model, rendered by severity](#e6-one-notification-model-rendered-by-severity)
 - [ ] E8. [Deployment-routed target database with a fail-safe default](#e8-deployment-routed-target-database-with-a-fail-safe-default)
 - [ ] E7. [Run-status sensor chaining](#e7-run-status-sensor-chaining)
 - [ ] E30. [Versioned dbt docs publishing with a fail-safe destination](#e30-versioned-dbt-docs-publishing-with-a-fail-safe-destination)
