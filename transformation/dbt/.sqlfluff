@@ -59,7 +59,10 @@ prefer_count_0 = false
 
 [sqlfluff:rules:convention.terminator]
 multiline_newline = true
-require_final_semicolon = true
+# No final semicolon. dbt wraps every model, test, and unit test in an outer
+# statement (`create ... as (<model>)`), so a terminator inside it is a syntax
+# error on every adapter.
+require_final_semicolon = false
 
 # Ambiguous
 [sqlfluff:rules:ambiguous.column_references]
