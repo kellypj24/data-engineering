@@ -1,0 +1,25 @@
+version: 2
+
+models:
+  - name: fct_daily_order_revenue
+    description: >
+      Daily order count and revenue. A durable fact: it keeps history longer
+      than raw.orders retains it, so it refuses --full-refresh and only
+      restates the most recent days.
+    columns:
+      - name: order_date
+        description: Day the orders were created (grain)
+        tests:
+          - unique
+          - not_null
+      - name: order_count
+        description: Orders created that day
+      - name: revenue
+        description: Sum of order amounts that day
+        tests:
+          - ties_to_control_total:
+              period_column: order_date
+              control: source('raw', 'order_daily_totals')
+              control_period_column: order_date
+              control_value_column: revenue
+              tolerance: 0.01

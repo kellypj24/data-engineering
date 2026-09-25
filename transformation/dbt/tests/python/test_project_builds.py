@@ -17,4 +17,9 @@ def test_example_project_builds(project):
             "CREATE TABLE raw.customers AS SELECT * FROM (VALUES "
             "(1, 'someone@example.com')) AS t (id, email)"
         )
+        # Control totals for fct_daily_order_revenue: complete days only.
+        con.execute(
+            "CREATE TABLE raw.order_daily_totals AS SELECT * FROM (VALUES "
+            "(DATE '2026-01-01', 100.0)) AS t (order_date, revenue)"
+        )
     assert project.dbt("build", "--vars", "{dbt_env: prod}")
