@@ -20,6 +20,7 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `tests/macros/` — Singular tests over literal rows that pin macro behaviour; no sources, so they run on duckdb in CI
 - `macros/staging/audit_columns.sql` — _loaded_at (EL timestamp or fallback), _dbt_updated_at columns
 - `macros/staging/clean_strings.sql` — TRIM + LOWER + NULLIF
+- `seeds/` — CSV + one `.yml` per seed. Project-wide `+full_refresh: true` (drop and recreate every run, so a new CSV column never needs a manual `--full-refresh`) and seed-level `+persist_docs`. Every seed needs a description, `meta.owner`, and at least one test — enforced by `tests/python/test_seeds.py`
 - `models/staging/` — 1:1 with source tables (views)
 - `models/intermediate/` — Business logic joins (views)
 - `models/marts/` — Consumer-facing tables (tables)

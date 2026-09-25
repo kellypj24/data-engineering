@@ -40,7 +40,17 @@ models:
 
 seeds:
   data_warehouse:
+    # Every seed is dropped and recreated on every `dbt seed`. dbt's default is
+    # truncate-and-insert with an INSERT that names the CSV's columns, so the
+    # first run after a CSV gains a column fails with `invalid identifier` and
+    # stays failing until someone passes --full-refresh by hand. A seed is fully
+    # defined by its CSV, so recreating it is always equivalent to reloading it.
+    +full_refresh: true
     +quote_columns: true
+    # Seeds need their own persist_docs; a models-level setting does not apply.
+    +persist_docs:
+      relation: true
+      columns: true
 
 snapshots:
   data_warehouse:
