@@ -1,0 +1,90 @@
+version: 2
+
+models:
+  - name: mart_orchestrator_run_summary
+    description: >
+      One row per orchestrator run, for trends the orchestrator UI does not
+      answer: duration over time, failure rates by job and weekday, test
+      failures per month. Pairs each run's first STARTED event with its
+      completion. Runs not yet complete are IN_PROGRESS with null completion
+      metrics. A run with no STARTED event is omitted; the telemetry sensors
+      backfill STARTED on completion, so that only happens for hand-inserted
+      rows. Jobs in the `orchestrator_monitoring_jobs` var are excluded.
+    columns:
+      - name: run_id
+        description: Orchestrator run id
+        tests:
+          - unique
+          - not_null
+      - name: job_name
+        description: Job the run executed
+      - name: run_status
+        description: SUCCESS, FAILURE, or IN_PROGRESS
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["SUCCESS", "FAILURE", "IN_PROGRESS"]
+      - name: trigger_source
+        description: schedule, sensor, or manual
+      - name: trigger_name
+        description: Schedule or sensor that launched the run, if any
+      - name: dbt_command
+        description: dbt command the run invoked
+      - name: warehouse
+        description: Warehouse the run used
+      - name: started_at
+        description: First STARTED event, UTC
+        tests:
+          - not_null
+      - name: completed_at
+        description: Completion event, UTC; null while in progress
+      - name: duration_seconds
+        description: Seconds from the first STARTED event to completion; null while in progress
+      - name: is_success
+        description: True when the run succeeded
+      - name: is_failure
+        description: True when the run failed
+      - name: test_count
+        description: Tests evaluated in the run; null while in progress
+      - name: test_failures
+        description: Tests that failed; null while in progress
+      - name: test_failure_rate
+        description: test_failures / test_count; null when no tests ran
+      - name: error
+        description: Failure message, for failed runs
+      - name: run_date
+        description: Day the run started
+      - name: run_week
+        description: Week the run started
+      - name: run_month
+        description: Month the run started
+      - name: run_hour
+        description: Hour of day the run started, UTC
+      - name: run_day_of_week
+        description: Day of week the run started (0 = Sunday on duckdb and Postgres)
+
+unit_tests:
+  - name: test_run_summary_pairs_first_start_with_completion
+    description: >
+      A success, a failure, an in-progress run, and a run with duplicate
+      STARTED events (the first wins); the monitoring job is excluded.
+    model: mart_orchestrator_run_summary
+    given:
+      - input: ref('stg_orchestrator_run_events')
+        rows:
+          - {run_id: ok, job_name: daily_build, status: STARTED, event_at: "2026-01-05 06:00:00"}
+          - {run_id: ok, job_name: daily_build, status: SUCCESS, tests_total: 20, tests_failed: 0, event_at: "2026-01-05 06:10:00"}
+          - {run_id: bad, job_name: daily_build, status: STARTED, event_at: "2026-01-05 07:00:00"}
+          - {run_id: bad, job_name: daily_build, status: FAILURE, tests_total: 8, tests_failed: 2, event_at: "2026-01-05 07:02:30"}
+          - {run_id: running, job_name: daily_build, status: STARTED, event_at: "2026-01-06 06:00:00"}
+          - {run_id: dup, job_name: landing, status: STARTED, event_at: "2026-01-06 08:00:00"}
+          - {run_id: dup, job_name: landing, status: STARTED, event_at: "2026-01-06 08:00:05"}
+          - {run_id: dup, job_name: landing, status: SUCCESS, tests_total: 0, tests_failed: 0, event_at: "2026-01-06 08:05:00"}
+          - {run_id: self, job_name: refresh_monitoring, status: STARTED, event_at: "2026-01-06 09:00:00"}
+          - {run_id: self, job_name: refresh_monitoring, status: SUCCESS, event_at: "2026-01-06 09:01:00"}
+    expect:
+      rows:
+        - {run_id: ok, run_status: SUCCESS, started_at: "2026-01-05 06:00:00", duration_seconds: 600, is_success: true, is_failure: false, test_count: 20, test_failures: 0, test_failure_rate: 0.0}
+        - {run_id: bad, run_status: FAILURE, started_at: "2026-01-05 07:00:00", duration_seconds: 150, is_success: false, is_failure: true, test_count: 8, test_failures: 2, test_failure_rate: 0.25}
+        - {run_id: running, run_status: IN_PROGRESS, started_at: "2026-01-06 06:00:00", duration_seconds: null, is_success: false, is_failure: false, test_count: null, test_failures: null, test_failure_rate: null}
+        - {run_id: dup, run_status: SUCCESS, started_at: "2026-01-06 08:00:00", duration_seconds: 300, is_success: true, is_failure: false, test_count: 0, test_failures: 0, test_failure_rate: null}

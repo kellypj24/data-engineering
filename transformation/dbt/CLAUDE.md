@@ -20,7 +20,7 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `tests/macros/` — Singular tests over literal rows that pin macro behaviour; no sources, so they run on duckdb in CI
 - `macros/staging/audit_columns.sql` — _loaded_at (EL timestamp or fallback), _dbt_updated_at columns
 - `macros/staging/clean_strings.sql` — TRIM + LOWER + NULLIF
-- `seeds/example_raw/` — Fixtures standing in for `raw.orders` / `raw.customers` / `raw.order_daily_totals`, so the example project builds on duckdb with no EL tool. `+schema: example_raw`, **enabled on duckdb only**; `_sources.yml` resolves the `raw` source to wherever they land. Delete this folder in a real project
+- `seeds/example_raw/` — Fixtures standing in for `raw.orders` / `raw.customers` / `raw.order_daily_totals` / `raw.orchestrator_run_events`, so the example project builds on duckdb with no EL tool. `+schema: example_raw`, **enabled on duckdb only**; `_sources.yml` resolves the `raw` source to wherever they land. Delete this folder in a real project
 - `seeds/` — CSV + one `.yml` per seed. Project-wide `+full_refresh: true` (drop and recreate every run, so a new CSV column never needs a manual `--full-refresh`) and seed-level `+persist_docs`. Every seed needs a description, `meta.owner`, and at least one test — enforced by `tests/python/test_seeds.py`
 - `macros/validation/` — Tiered-severity validation framework: `validate_data_source`, config/notification routing via vars, `no_validation_failures` generic test. See its README
 - `models/validation/` — Rule-set models (`val_*`, one per rule set), incremental `validation_log` (purged per `retention_days`), `validation_summary`
@@ -30,6 +30,7 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `models/marts/fct_orders.sql` — One row per order; the source for the example file exports (`delivery/file-export/configs/`)
 - `models/exports/_generated_exposures.yml` — **Generated** by `just file-export::exposures-write`; one exposure per delivered file. Never hand-edit; CI fails if stale
 - `models/marts/fct_daily_order_revenue.sql` — Worked example of a **durable fact** (history outlives its source): `full_refresh=false`, bounded restatement window, control total. See `docs/patterns/durable-facts.md`
+- `models/marts/mart_orchestrator_run_summary.sql` — One row per orchestrator run from `raw.orchestrator_run_events` (written by `orchestration/dagster/src/telemetry/`): first STARTED paired with completion, `IN_PROGRESS` until then. Excludes the jobs in the `orchestrator_monitoring_jobs` var
 - `tests/generic/timestamp_is_utc.sql` — Fails non-UTC offsets on ISO-8601 strings (any adapter) and Snowflake `TIMESTAMP_TZ`; logs a no-op for types with no per-value offset. Dispatch helpers in `macros/utils/timestamp_is_utc_kind.sql` (dbt does not register plain macros under `tests/generic/`)
 - `tests/generic/ties_to_control_total.sql` — Ties a column's per-period sum to an independent control; fails when zero periods are compared
 

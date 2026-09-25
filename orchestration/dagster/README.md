@@ -55,6 +55,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
     ├── checks/
     │   ├── __init__.py
     │   └── freshness.py     # Asset freshness checks
+    ├── telemetry/
+    │   ├── run_events.sql   # Run-event table DDL
+    │   ├── sensors.py       # Run-status sensors that append run events
+    │   └── store.py         # `telemetry` resource: where events are written
     └── utils/
         └── invariants.py    # check_definitions(): rules every definition must follow
 ```
@@ -103,6 +107,23 @@ assert check_definitions(defs, observing_sensors={"my_watch_sensor"}) == []
 1. Create a new file in `src/checks/`.
 2. Use the `@asset_check` decorator targeting the relevant asset.
 3. Import and append to `all_checks` in `src/checks/__init__.py`.
+
+## Run telemetry
+
+Three run-status sensors (`telemetry_run_started`, `_success`, `_failure`)
+append one row per run event to `orchestrator_run_events`
+(`src/telemetry/run_events.sql`). The dbt project summarises it in
+`mart_orchestrator_run_summary`: duration, failure rates, and test failures over
+time, which the Dagster UI does not report.
+
+- They are sensors, not op hooks, so a run whose process dies is still recorded:
+  Dagster marks it FAILURE and the failure sensor fires. Completion writers also
+  write a missing STARTED row.
+- Telemetry errors are logged and swallowed; they never fail a run.
+- The `telemetry` resource writes to `telemetry.duckdb` by default. On a
+  warehouse, subclass `RunEventStore` and override `_connect`.
+- They only observe, so they default to RUNNING and are declared in
+  `OBSERVING_SENSORS` for the invariant suite.
 
 ## Key Concepts
 

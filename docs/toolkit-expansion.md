@@ -54,7 +54,7 @@
 **P2 — Dagster patterns & observability**
 
 - [x] E5. [Definition invariant tests](#e5-definition-invariant-tests)
-- [ ] E26. [Run-event telemetry and a run-summary model](#e26-run-event-telemetry-and-a-run-summary-model)
+- [x] E26. [Run-event telemetry and a run-summary model](#e26-run-event-telemetry-and-a-run-summary-model)
 - [ ] E6. [One notification model, rendered by severity](#e6-one-notification-model-rendered-by-severity)
 - [ ] E8. [Deployment-routed target database with a fail-safe default](#e8-deployment-routed-target-database-with-a-fail-safe-default)
 - [ ] E7. [Run-status sensor chaining](#e7-run-status-sensor-chaining)
@@ -544,6 +544,14 @@ everything else in the warehouse.
 **Acceptance.** Seeded events on duckdb produce correct rows for a success, a
 failure, an in-progress run, and a run with duplicate `STARTED` events (the first
 one wins). A raising telemetry writer does not fail the job under test.
+
+> **New mechanism:** in production the writers were op success/failure hooks
+> plus a separate safety-net sensor. The toolkit uses Dagster run-status
+> sensors as the writers instead: they fire per run rather than per op, and
+> they see a run whose process died, because Dagster marks it FAILURE. The
+> safety net becomes the completion writer backfilling a missing STARTED row.
+> Test counts come from the run's asset-check evaluations, which is how
+> dagster-dbt reports dbt tests.
 
 ---
 

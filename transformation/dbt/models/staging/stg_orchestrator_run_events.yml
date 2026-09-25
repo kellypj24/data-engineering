@@ -1,0 +1,39 @@
+version: 2
+
+models:
+  - name: stg_orchestrator_run_events
+    description: >
+      Orchestrator run lifecycle events, one row per event. Rows are appended,
+      so a run can have more than one STARTED row.
+    columns:
+      - name: run_id
+        description: Orchestrator run id
+        tests:
+          - not_null
+      - name: job_name
+        description: Job the run executed
+        tests:
+          - not_null
+      - name: status
+        description: STARTED, SUCCESS, or FAILURE
+        tests:
+          - accepted_values:
+              values: ["STARTED", "SUCCESS", "FAILURE"]
+      - name: trigger_source
+        description: schedule, sensor, or manual
+      - name: trigger_name
+        description: Name of the schedule or sensor that launched the run, if any
+      - name: dbt_command
+        description: dbt command the run invoked, e.g. `dbt build`
+      - name: warehouse
+        description: Warehouse the run used
+      - name: tests_total
+        description: Tests (asset checks) evaluated in the run; completion rows only
+      - name: tests_failed
+        description: Tests that failed; completion rows only
+      - name: error
+        description: Failure message; FAILURE rows only
+      - name: event_at
+        description: When the event happened, UTC
+        tests:
+          - not_null

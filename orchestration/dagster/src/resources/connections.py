@@ -22,6 +22,8 @@ from dagster_airbyte import AirbyteResource
 from dagster_dbt import DbtCliResource
 from dagster_snowflake import SnowflakeResource
 
+from src.telemetry.store import RunEventStore
+
 # ---- Relative paths ---------------------------------------------------------
 DBT_PROJECT_DIR = str(Path(__file__).resolve().parents[4] / "transformation" / "dbt")
 
@@ -46,4 +48,7 @@ RESOURCES: dict = {
         schema=EnvVar("SNOWFLAKE_SCHEMA"),
         warehouse=EnvVar("SNOWFLAKE_WAREHOUSE"),
     ),
+    # Run-event telemetry (src/telemetry/). A local duckdb file by default; on
+    # a warehouse, subclass RunEventStore and set `warehouse` to record it.
+    "telemetry": RunEventStore(path="telemetry.duckdb"),
 }

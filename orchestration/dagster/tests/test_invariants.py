@@ -17,6 +17,7 @@ from dagster_dbt import (
 
 from src import defs
 from src.assets.dbt import DBT_MANIFEST_PATH, DBT_PROJECT_DIR
+from src.telemetry.sensors import OBSERVING_SENSORS
 from src.utils.invariants import MANUAL_ONLY_TAG, check_definitions
 
 
@@ -38,7 +39,7 @@ def assert_flags(problems, *fragments):
 
 
 def test_code_location_passes():
-    assert check_definitions(defs) == []
+    assert check_definitions(defs, observing_sensors=OBSERVING_SENSORS) == []
 
 
 def test_running_schedule_is_flagged():
