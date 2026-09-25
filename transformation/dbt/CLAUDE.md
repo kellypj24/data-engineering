@@ -5,7 +5,7 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 
 ## Key Files
 
-- `pyproject.toml` — Dependencies: dbt-core, dbt-snowflake, dbt-duckdb; dev: sqlfluff + dbt templater, yamllint, pre-commit. Extras: `postgres`, `bigquery`
+- `pyproject.toml` — Dependencies: dbt-core, dbt-snowflake, dbt-duckdb; dev: sqlfluff + dbt templater, yamllint, pre-commit, pytest. Extras: `postgres`, `bigquery`
 - `dbt_project.yml` — Project config: name=data_warehouse, models materialization by layer
 - `profiles.yml` — One profile, four outputs (duckdb, snowflake, postgres, bigquery), selected by `DBT_TARGET`. **Defaults to duckdb** so everything runs without credentials
 - `packages.yml` / `package-lock.yml` — dbt_utils, dbt_expectations (metaplane), audit_helper, codegen, dbt_date (godatadriven). The lock file is committed
@@ -15,6 +15,8 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `macros/utils/limit_data_in_dev.sql` — Non-prod data filtering (recent N days), as a composable predicate
 - `macros/utils/safe_divide.sql` — Null/zero-safe division
 - `macros/utils/mint_surrogate_key.sql` — Versioned, collision-free UUID-shaped surrogate keys (`mint_surrogate_key`, `surrogate_key_version`). Use instead of `dbt_utils.generate_surrogate_key`
+- `macros/utils/backfill_surrogate_keys.sql` — `run-operation` that fills or upgrades key columns in place (no source reads, no `--full-refresh`). Dry run by default; dependent keys in a second UPDATE; version column written last
+- `tests/python/` — pytest suite that drives run-operation macros through `dbtRunner` on a throwaway duckdb file
 - `tests/macros/` — Singular tests over literal rows that pin macro behaviour; no sources, so they run on duckdb in CI
 - `macros/staging/audit_columns.sql` — _loaded_at (EL timestamp or fallback), _dbt_updated_at columns
 - `macros/staging/clean_strings.sql` — TRIM + LOWER + NULLIF

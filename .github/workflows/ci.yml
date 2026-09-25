@@ -241,6 +241,10 @@ jobs:
         # Singular tests over literal rows (tests/macros/). They read no
         # sources, so they run on the duckdb target with no credentials.
         run: uv run dbt build --select path:tests/macros
+      - name: Run operation tests
+        # pytest drives run-operation macros (backfill_surrogate_keys) through
+        # dbtRunner against a throwaway duckdb file.
+        run: uv run pytest tests/python
 
   # Deliberately unconditional: this is a guard, and a guard that skips is not a
   # guard. It is also cheap -- `uv lock --check` resolves metadata only, with no
