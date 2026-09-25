@@ -41,7 +41,7 @@
 - [x] E1. [Surrogate-key minting macro](#e1-surrogate-key-minting-macro)
 - [x] E2. [In-place surrogate-key backfill operation](#e2-in-place-surrogate-key-backfill-operation)
 - [x] E28. [Seeds drop and recreate, project-wide](#e28-seeds-drop-and-recreate-project-wide)
-- [ ] E29. [Protect durable facts that outlive their source](#e29-protect-durable-facts-that-outlive-their-source)
+- [x] E29. [Protect durable facts that outlive their source](#e29-protect-durable-facts-that-outlive-their-source)
 - [ ] E4. [Tiered-severity validation framework with an audit log](#e4-tiered-severity-validation-framework-with-an-audit-log)
 - [ ] E3. [UTC timestamp generic test](#e3-utc-timestamp-generic-test)
 

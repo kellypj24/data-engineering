@@ -16,7 +16,7 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `macros/utils/safe_divide.sql` — Null/zero-safe division
 - `macros/utils/mint_surrogate_key.sql` — Versioned, collision-free UUID-shaped surrogate keys (`mint_surrogate_key`, `surrogate_key_version`). Use instead of `dbt_utils.generate_surrogate_key`
 - `macros/utils/backfill_surrogate_keys.sql` — `run-operation` that fills or upgrades key columns in place (no source reads, no `--full-refresh`). Dry run by default; dependent keys in a second UPDATE; version column written last
-- `tests/python/` — pytest suite that drives run-operation macros through `dbtRunner` on a throwaway duckdb file
+- `tests/python/` — pytest suite that runs dbt in-process (`dbtRunner`) on a throwaway copy of the project and duckdb file (`conftest.py`): run-operations, seeds, the durable fact, and a whole-project `dbt build`
 - `tests/macros/` — Singular tests over literal rows that pin macro behaviour; no sources, so they run on duckdb in CI
 - `macros/staging/audit_columns.sql` — _loaded_at (EL timestamp or fallback), _dbt_updated_at columns
 - `macros/staging/clean_strings.sql` — TRIM + LOWER + NULLIF
@@ -24,6 +24,8 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `models/staging/` — 1:1 with source tables (views)
 - `models/intermediate/` — Business logic joins (views)
 - `models/marts/` — Consumer-facing tables (tables)
+- `models/marts/fct_daily_order_revenue.sql` — Worked example of a **durable fact** (history outlives its source): `full_refresh=false`, bounded restatement window, control total. See `docs/patterns/durable-facts.md`
+- `tests/generic/ties_to_control_total.sql` — Ties a column's per-period sum to an independent control; fails when zero periods are compared
 
 ## Commands
 

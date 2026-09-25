@@ -25,3 +25,13 @@ sources:
               - not_null
           - name: email
             description: Customer email address
+      - name: order_daily_totals
+        description: >
+          Independent daily revenue totals from the system of record (e.g. a
+          ledger). Contains complete days only. Used as the control total for
+          fct_daily_order_revenue.
+        columns:
+          - name: order_date
+            description: Day the total covers
+          - name: revenue
+            description: Recorded revenue for the day

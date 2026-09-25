@@ -1,42 +1,15 @@
 """Acceptance tests for the project-wide seed contract (E28).
 
-Each test runs dbt in-process on a copy of the project against a throwaway
-duckdb file, so the real seeds are never modified. Requires `dbt deps`.
+Runs on a throwaway copy of the project (see conftest.py), so the real seeds
+are never modified.
 """
 
 import json
-import shutil
 from pathlib import Path
 
 import duckdb
-import pytest
-from dbt.cli.main import dbtRunner
 
-PROJECT_DIR = Path(__file__).resolve().parents[2]
 SEED = "order_status_codes"
-
-
-@pytest.fixture
-def project(tmp_path, monkeypatch):
-    copy = tmp_path / "project"
-    shutil.copytree(
-        PROJECT_DIR,
-        copy,
-        ignore=shutil.ignore_patterns(
-            ".venv", "target", "logs", "dbt_packages", "*.duckdb", "tests"
-        ),
-    )
-    (copy / "dbt_packages").symlink_to(PROJECT_DIR / "dbt_packages")
-    monkeypatch.setenv("DBT_PROFILES_DIR", str(copy))
-    monkeypatch.setenv("DBT_TARGET", "duckdb")
-    monkeypatch.setenv("DUCKDB_PATH", str(tmp_path / "seeds.duckdb"))
-    monkeypatch.setenv("DBT_TARGET_PATH", str(tmp_path / "target"))
-    monkeypatch.setenv("DBT_LOG_PATH", str(tmp_path / "logs"))
-    return copy
-
-
-def dbt(project: Path, *args: str) -> bool:
-    return dbtRunner().invoke([*args, "--project-dir", str(project)]).success
 
 
 def add_column(project: Path) -> None:
@@ -57,25 +30,25 @@ def seed_columns(db_path: str) -> set[str]:
     return {name for (name,) in rows}
 
 
-def test_new_csv_column_loads_without_full_refresh(project, tmp_path):
-    assert dbt(project, "seed", "--select", SEED)
-    add_column(project)
-    assert dbt(project, "seed", "--select", SEED)
-    assert "sort_order" in seed_columns(str(tmp_path / "seeds.duckdb"))
+def test_new_csv_column_loads_without_full_refresh(project):
+    assert project.dbt("seed", "--select", SEED)
+    add_column(project.path)
+    assert project.dbt("seed", "--select", SEED)
+    assert "sort_order" in seed_columns(str(project.db_path))
 
 
 def test_control_without_full_refresh_setting_fails(project):
     """Proves the test above exercises the failure +full_refresh prevents."""
-    config = project / "dbt_project.yml"
+    config = project.path / "dbt_project.yml"
     config.write_text(config.read_text().replace("+full_refresh: true", ""))
-    assert dbt(project, "seed", "--select", SEED)
-    add_column(project)
-    assert not dbt(project, "seed", "--select", SEED)
+    assert project.dbt("seed", "--select", SEED)
+    add_column(project.path)
+    assert not project.dbt("seed", "--select", SEED)
 
 
-def test_every_seed_has_description_owner_and_a_test(project, tmp_path):
-    assert dbt(project, "parse")
-    manifest = json.loads((tmp_path / "target" / "manifest.json").read_text())
+def test_every_seed_has_description_owner_and_a_test(project):
+    assert project.dbt("parse")
+    manifest = json.loads((project.target_path / "manifest.json").read_text())
     nodes = manifest["nodes"].values()
     tested = {
         dep
