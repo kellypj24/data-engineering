@@ -22,12 +22,14 @@ Reference orchestrator implementation. All other orchestrators (Airflow, Prefect
 ## Testing
 
 ```bash
-just dagster::test     # or: cd orchestration/dagster && uv run pytest
+just dagster::test     # runs `dbt parse` in transformation/dbt, then pytest
 ```
 
 - Tests in `tests/` use `unittest.mock` — no live services
 - `conftest.py` provides mock fixtures for airbyte, dbt, s3
-- dbt assets require mocking `Path.exists()` or providing a minimal manifest fixture
+- `tests/test_dbt_assets.py` loads the real dbt project as assets. With
+  `DAGSTER_REQUIRE_DBT_MANIFEST=1` (set by `just dagster::test` and CI) a missing
+  manifest fails; bare `uv run pytest` without one skips those tests
 - Use `build_asset_context()`, `build_sensor_context()` from dagster for test contexts
 
 ## Environment Variables
@@ -39,4 +41,5 @@ AIRBYTE_USERNAME, AIRBYTE_PASSWORD, SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE
 - Assets export via `all_assets` list in `src/assets/__init__.py`
 - Same pattern for sensors (`all_sensors`), schedules (`all_schedules`), checks (`all_checks`)
 - Resources are a flat dict passed to `Definitions(resources=RESOURCES)`
-- dbt manifest loaded at import time — must exist or tests must mock it
+- dbt manifest loaded at import time; `@dbt_assets` rejects two dbt resources
+  with one asset key (e.g. a seed in schema `raw` and source `raw.<table>`)

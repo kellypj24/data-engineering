@@ -34,7 +34,7 @@ is why the status lives here rather than on the section headings.)
 - [x] 4. [Add a fan-in `ci-success` required check](#4-add-a-fan-in-ci-success-required-check)
 - [ ] 5. [Add a repo-wide pre-commit (or lefthook) layer so local == CI](#5-add-a-repo-wide-pre-commit-or-lefthook-layer-so-local--ci)
 - [ ] 18. [Compile dbt after every merge to `main`, and raise an alarm issue](#18-compile-dbt-after-every-merge-to-main-and-raise-an-alarm-issue)
-- [ ] 25. [Load the real dbt manifest in the Dagster CI job](#25-load-the-real-dbt-manifest-in-the-dagster-ci-job)
+- [x] 25. [Load the real dbt manifest in the Dagster CI job](#25-load-the-real-dbt-manifest-in-the-dagster-ci-job)
 - [ ] 26. [Test that every tool is wired into every shared surface](#26-test-that-every-tool-is-wired-into-every-shared-surface)
 
 **P2 — security & supply chain**

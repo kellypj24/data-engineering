@@ -101,8 +101,20 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: astral-sh/setup-uv@v7
+      - name: Parse the dbt project
+        # src/assets/dbt.py builds @dbt_assets from target/manifest.json and
+        # skips without it; parse so the dbt assets are actually loaded.
+        working-directory: transformation/dbt
+        env:
+          DBT_PROFILES_DIR: .
+        run: |
+          uv sync --dev
+          uv run dbt deps
+          uv run dbt parse
       - run: uv sync --dev
       - run: uv run pytest tests/ -v --tb=short
+        env:
+          DAGSTER_REQUIRE_DBT_MANIFEST: "1"
 
   test-airflow:
     runs-on: ubuntu-latest
