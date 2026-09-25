@@ -162,8 +162,7 @@ Every tool has its own test suite using its native test framework. All tests use
 
 GitHub Actions workflows with intelligent change detection:
 
-- **`ci.yml`** — Detects which tools changed and runs only the relevant tests. Includes cross-paradigm impact detection: dbt or Airbyte changes also trigger orchestrator tests (since Dagster, Airflow, and Prefect all wrap dbt and Airbyte). Lint runs `ruff check` and `ruff format --check`; the dbt job builds the whole example project on its fixtures; a `lockfiles` job enforces `uv lock --check` for every tool; `exposures-drift` fails when the dbt exposures generated from file-export configs are stale; `wiring` fails when a tool is missing from any shared surface. A fan-in `CI Success` job is the single required check, enforced by a ruleset no one can bypass.
-- **`terraform-validate.yml`** — Runs `terraform fmt`, `validate`, and `test` on Airbyte Terraform changes.
+- **`ci.yml`** — Detects which tools changed and runs only the relevant tests. Includes cross-paradigm impact detection: dbt or Airbyte changes also trigger orchestrator tests (since Dagster, Airflow, and Prefect all wrap dbt and Airbyte). `test-airbyte` runs `terraform fmt -check`, `validate`, and `test`. Lint runs `ruff check` and `ruff format --check`; the dbt job builds the whole example project on its fixtures; a `lockfiles` job enforces `uv lock --check` for every tool; `exposures-drift` fails when the dbt exposures generated from file-export configs are stale; `wiring` fails when a tool is missing from any shared surface. A fan-in `CI Success` job is the single required check, enforced by a ruleset no one can bypass.
 - **`dependabot.yml`** — Weekly updates for Python (`uv` ecosystem, so `uv.lock` moves with `pyproject.toml`; the dbt tool is `lockfile-only`, since its floors track `require-dbt-version`), Terraform, and GitHub Actions.
 
 ---

@@ -11,9 +11,9 @@ uv tools must appear in:
   - dependabot.yml: a `uv` entry for its directory;
   - the README tool table.
 
-Terraform tools must appear in a workflow job that runs `terraform fmt -check`
-and `terraform test` under their directory, in a `terraform` dependabot entry,
-and in the README tool table. They are not in the root `just` aggregates,
+Terraform tools must appear in the ci.yml paths-filter, in a ci.yml
+`test-<tool>` job that runs `terraform fmt -check` and `terraform test` under
+their directory, in a `terraform` dependabot entry, and in the README table. They are not in the root `just` aggregates,
 which would make the terraform CLI a prerequisite for `just test`.
 
 Run from anywhere: `python .github/scripts/check_wiring.py [--root DIR]`.
@@ -55,11 +55,7 @@ def step_text(job: dict) -> str:
 
 def check(root: Path) -> list[str]:
     justfile = (root / "justfile").read_text()
-    workflows = {
-        p.name: yaml.safe_load(p.read_text())
-        for p in sorted((root / ".github/workflows").glob("*.yml"))
-    }
-    ci_jobs = workflows["ci.yml"]["jobs"]
+    ci_jobs = yaml.safe_load((root / ".github/workflows/ci.yml").read_text())["jobs"]
     dependabot = yaml.safe_load((root / ".github/dependabot.yml").read_text())
     readme = (root / "README.md").read_text()
 
@@ -118,17 +114,17 @@ def check(root: Path) -> list[str]:
                 missing("dependabot.yml (package-ecosystem: uv)")
 
         elif any(path.rglob("*.tf")):
-            jobs = [
-                job
-                for workflow in workflows.values()
-                for job in workflow["jobs"].values()
-                if (job_dir(job) or "").startswith(directory)
-            ]
-            scripts = "\n".join(step_text(job) for job in jobs)
-            if "terraform test" not in scripts:
-                missing("a workflow job running `terraform test`")
-            if "terraform fmt -check" not in scripts:
-                missing("a workflow job running `terraform fmt -check`")
+            if f"{directory}/**" not in filter_patterns:
+                missing("the ci.yml paths-filter")
+            test_job = ci_jobs.get(f"test-{tool}")
+            if test_job is None or not (job_dir(test_job) or "").startswith(directory):
+                missing(
+                    f"ci.yml job `test-{tool}` (working-directory under {directory})"
+                )
+            else:
+                for command in ("terraform fmt -check", "terraform test"):
+                    if command not in step_text(test_job):
+                        missing(f"ci.yml job `test-{tool}` running `{command}`")
             if not any(
                 eco == "terraform" and d.startswith(directory) for eco, d in updates
             ):

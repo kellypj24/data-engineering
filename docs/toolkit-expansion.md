@@ -579,7 +579,7 @@ is present in the packaged site.
 **What.** Fill `infrastructure/terraform/snowflake/` with a module for the
 standard role hierarchy — a per-environment owner role per database, read and
 write functional roles, service users on key-pair auth — plus databases,
-warehouses, and grants. Widen `terraform-validate.yml` to cover it (this
+warehouses, and grants. Add a `ci.yml` Terraform job for it, like `test-airbyte`, (this
 completes `ci-cd-hardening.md` #14 for Snowflake).
 
 > **New mechanism:** in production, roles and grants were versioned SQL DDL
