@@ -41,8 +41,8 @@ uv sync --dev          # install dbt + sqlfluff (first time)
 uv run dbt deps        # install packages.yml dependencies (first time)
 
 just dbt::run          # dbt run
-just dbt::test         # pytest, then `dbt seed` + `dbt build` on the example fixtures (DBT_ENV=prod)
-just dbt::lint         # sqlfluff lint
+just dbt::test         # pytest, then `dbt build` of the seeds, then of everything else (DBT_ENV=prod)
+just dbt::lint         # sqlfluff + yamllint --strict (same as CI)
 just dbt::fix          # sqlfluff fix
 just dbt::docs         # dbt docs generate + serve
 ```

@@ -153,7 +153,7 @@ Every tool has its own test suite using its native test framework. All tests use
 | Temporal | pytest-asyncio + WorkflowEnvironment | `just temporal::test` |
 | dlt | pytest + DuckDB | `just dlt::test` |
 | Airbyte | terraform test (mock provider) | `just airbyte::test` |
-| dbt | pytest (dbt in-process) + `dbt seed` / `dbt build` on example fixtures | `just dbt::test` |
+| dbt | pytest (dbt in-process) + `dbt build` (seeds, then the rest) on example fixtures | `just dbt::test` |
 | file-export | pytest + DuckDB (validates every config in `configs/`) | `just file-export::test` |
 
 ---

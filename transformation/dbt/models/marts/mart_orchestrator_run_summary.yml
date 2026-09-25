@@ -72,19 +72,87 @@ unit_tests:
     given:
       - input: ref('stg_orchestrator_run_events')
         rows:
-          - {run_id: ok, job_name: daily_build, status: STARTED, event_at: "2026-01-05 06:00:00"}
-          - {run_id: ok, job_name: daily_build, status: SUCCESS, tests_total: 20, tests_failed: 0, event_at: "2026-01-05 06:10:00"}
-          - {run_id: bad, job_name: daily_build, status: STARTED, event_at: "2026-01-05 07:00:00"}
-          - {run_id: bad, job_name: daily_build, status: FAILURE, tests_total: 8, tests_failed: 2, event_at: "2026-01-05 07:02:30"}
-          - {run_id: running, job_name: daily_build, status: STARTED, event_at: "2026-01-06 06:00:00"}
-          - {run_id: dup, job_name: landing, status: STARTED, event_at: "2026-01-06 08:00:00"}
-          - {run_id: dup, job_name: landing, status: STARTED, event_at: "2026-01-06 08:00:05"}
-          - {run_id: dup, job_name: landing, status: SUCCESS, tests_total: 0, tests_failed: 0, event_at: "2026-01-06 08:05:00"}
-          - {run_id: self, job_name: refresh_monitoring, status: STARTED, event_at: "2026-01-06 09:00:00"}
-          - {run_id: self, job_name: refresh_monitoring, status: SUCCESS, event_at: "2026-01-06 09:01:00"}
+          - run_id: ok
+            job_name: daily_build
+            status: STARTED
+            event_at: "2026-01-05 06:00:00"
+          - run_id: ok
+            job_name: daily_build
+            status: SUCCESS
+            tests_total: 20
+            tests_failed: 0
+            event_at: "2026-01-05 06:10:00"
+          - run_id: bad
+            job_name: daily_build
+            status: STARTED
+            event_at: "2026-01-05 07:00:00"
+          - run_id: bad
+            job_name: daily_build
+            status: FAILURE
+            tests_total: 8
+            tests_failed: 2
+            event_at: "2026-01-05 07:02:30"
+          - run_id: running
+            job_name: daily_build
+            status: STARTED
+            event_at: "2026-01-06 06:00:00"
+          - run_id: dup
+            job_name: landing
+            status: STARTED
+            event_at: "2026-01-06 08:00:00"
+          - run_id: dup
+            job_name: landing
+            status: STARTED
+            event_at: "2026-01-06 08:00:05"
+          - run_id: dup
+            job_name: landing
+            status: SUCCESS
+            tests_total: 0
+            tests_failed: 0
+            event_at: "2026-01-06 08:05:00"
+          - run_id: self
+            job_name: refresh_monitoring
+            status: STARTED
+            event_at: "2026-01-06 09:00:00"
+          - run_id: self
+            job_name: refresh_monitoring
+            status: SUCCESS
+            event_at: "2026-01-06 09:01:00"
     expect:
       rows:
-        - {run_id: ok, run_status: SUCCESS, started_at: "2026-01-05 06:00:00", duration_seconds: 600, is_success: true, is_failure: false, test_count: 20, test_failures: 0, test_failure_rate: 0.0}
-        - {run_id: bad, run_status: FAILURE, started_at: "2026-01-05 07:00:00", duration_seconds: 150, is_success: false, is_failure: true, test_count: 8, test_failures: 2, test_failure_rate: 0.25}
-        - {run_id: running, run_status: IN_PROGRESS, started_at: "2026-01-06 06:00:00", duration_seconds: null, is_success: false, is_failure: false, test_count: null, test_failures: null, test_failure_rate: null}
-        - {run_id: dup, run_status: SUCCESS, started_at: "2026-01-06 08:00:00", duration_seconds: 300, is_success: true, is_failure: false, test_count: 0, test_failures: 0, test_failure_rate: null}
+        - run_id: ok
+          run_status: SUCCESS
+          started_at: "2026-01-05 06:00:00"
+          duration_seconds: 600
+          is_success: true
+          is_failure: false
+          test_count: 20
+          test_failures: 0
+          test_failure_rate: 0.0
+        - run_id: bad
+          run_status: FAILURE
+          started_at: "2026-01-05 07:00:00"
+          duration_seconds: 150
+          is_success: false
+          is_failure: true
+          test_count: 8
+          test_failures: 2
+          test_failure_rate: 0.25
+        - run_id: running
+          run_status: IN_PROGRESS
+          started_at: "2026-01-06 06:00:00"
+          duration_seconds: null
+          is_success: false
+          is_failure: false
+          test_count: null
+          test_failures: null
+          test_failure_rate: null
+        - run_id: dup
+          run_status: SUCCESS
+          started_at: "2026-01-06 08:00:00"
+          duration_seconds: 300
+          is_success: true
+          is_failure: false
+          test_count: 0
+          test_failures: 0
+          test_failure_rate: null
