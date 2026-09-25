@@ -237,13 +237,20 @@ jobs:
         # Renders every model's Jinja to SQL. Catches broken macros and bad
         # column references that `parse` alone does not reach.
         run: uv run dbt compile
-      - name: Run macro property tests
-        # Singular tests over literal rows (tests/macros/). They read no
-        # sources, so they run on the duckdb target with no credentials.
-        run: uv run dbt build --select path:tests/macros
+      - name: Build on the example fixtures
+        # seeds/example_raw/ stands in for the raw sources on duckdb, so this
+        # runs every model, data test, and unit test with no credentials. Seed
+        # first: models read the fixtures via source(), which dbt does not
+        # order after seeds. DBT_ENV=prod keeps limit_data_in_dev from
+        # filtering the fixed-date fixtures out.
+        env:
+          DBT_ENV: prod
+        run: |
+          uv run dbt seed
+          uv run dbt build
       - name: Run operation tests
-        # pytest drives run-operation macros (backfill_surrogate_keys) through
-        # dbtRunner against a throwaway duckdb file.
+        # pytest runs dbt in-process on a throwaway copy of the project:
+        # run-operations, seed behaviour, the durable fact, a full build.
         run: uv run pytest tests/python
 
   # Deliberately unconditional: this is a guard, and a guard that skips is not a

@@ -24,6 +24,11 @@ CONTROL = [
 ]
 
 
+# Where source('raw', ...) resolves on duckdb in prod: the example_raw schema
+# (see models/staging/_sources.yml). These tests write it directly instead of
+# seeding it, so each can shape the source data.
+
+
 def sql(project, statement, params=None):
     with duckdb.connect(str(project.db_path)) as con:
         return con.execute(statement, params or []).fetchall()
@@ -31,18 +36,23 @@ def sql(project, statement, params=None):
 
 @pytest.fixture
 def warehouse(project):
-    sql(project, "CREATE SCHEMA raw")
+    sql(project, "CREATE SCHEMA example_raw")
     sql(
         project,
-        "CREATE TABLE raw.orders (id INTEGER, status VARCHAR, amount DOUBLE, created_at TIMESTAMP)",
+        "CREATE TABLE example_raw.orders (id INTEGER, status VARCHAR, amount DOUBLE, created_at TIMESTAMP)",
     )
     sql(
-        project, "CREATE TABLE raw.order_daily_totals (order_date DATE, revenue DOUBLE)"
+        project,
+        "CREATE TABLE example_raw.order_daily_totals (order_date DATE, revenue DOUBLE)",
     )
     for row in ORDERS:
-        sql(project, "INSERT INTO raw.orders VALUES (?, ?, ?, ?)", list(row))
+        sql(project, "INSERT INTO example_raw.orders VALUES (?, ?, ?, ?)", list(row))
     for row in CONTROL:
-        sql(project, "INSERT INTO raw.order_daily_totals VALUES (?, ?)", list(row))
+        sql(
+            project,
+            "INSERT INTO example_raw.order_daily_totals VALUES (?, ?)",
+            list(row),
+        )
     assert project.dbt("build", "--select", f"+{MODEL}", *PROD)
     return project
 
@@ -59,7 +69,7 @@ def test_full_refresh_keeps_history_the_source_no_longer_has(warehouse):
     assert len(before) == 5
 
     # The source ages out its oldest three days.
-    sql(warehouse, "DELETE FROM raw.orders WHERE created_at < '2026-01-04'")
+    sql(warehouse, "DELETE FROM example_raw.orders WHERE created_at < '2026-01-04'")
     assert warehouse.dbt("build", "--full-refresh", "--select", f"+{MODEL}", *PROD)
 
     assert fact(warehouse) == before
@@ -67,9 +77,10 @@ def test_full_refresh_keeps_history_the_source_no_longer_has(warehouse):
 
 def test_only_the_restatement_window_is_reprocessed(warehouse):
     # A late correction on an old day and on a recent day, plus a new day.
-    sql(warehouse, "UPDATE raw.orders SET amount = 99 WHERE id IN (1, 6)")
+    sql(warehouse, "UPDATE example_raw.orders SET amount = 99 WHERE id IN (1, 6)")
     sql(
-        warehouse, "INSERT INTO raw.orders VALUES (7, 'active', 40, '2026-01-06 09:00')"
+        warehouse,
+        "INSERT INTO example_raw.orders VALUES (7, 'active', 40, '2026-01-06 09:00')",
     )
     assert warehouse.dbt("run", "--select", f"+{MODEL}", *PROD)
 
@@ -89,9 +100,13 @@ def test_only_the_restatement_window_is_reprocessed(warehouse):
     ],
 )
 def test_control_total(warehouse, control_rows, passes):
-    sql(warehouse, "DELETE FROM raw.order_daily_totals")
+    sql(warehouse, "DELETE FROM example_raw.order_daily_totals")
     for row in control_rows:
-        sql(warehouse, "INSERT INTO raw.order_daily_totals VALUES (?, ?)", list(row))
+        sql(
+            warehouse,
+            "INSERT INTO example_raw.order_daily_totals VALUES (?, ?)",
+            list(row),
+        )
     ok = warehouse.dbt(
         "test", "--select", f"{MODEL},test_name:ties_to_control_total", *PROD
     )

@@ -1,0 +1,20 @@
+version: 2
+
+seeds:
+  - name: order_daily_totals
+    description: >
+      Example fixture standing in for raw.order_daily_totals, the control total
+      for fct_daily_order_revenue. Complete days only. Delete
+      seeds/example_raw/ in a real project.
+    config:
+      meta:
+        owner: data-platform
+      column_types:
+        order_date: date
+        revenue: decimal(12, 2)
+    columns:
+      - name: order_date
+        description: Day the total covers
+        tests:
+          - unique
+          - not_null
