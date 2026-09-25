@@ -49,8 +49,9 @@ All five, or the tool is invisible to some part of the system.
 1. **Root `justfile`** — add `mod <tool-name> '<role>/<tool-name>'`, and add the
    tool to the aggregate `test`, `lint`, and `fmt` recipes.
 2. **`.github/workflows/ci.yml`** — add a `paths-filter` entry under
-   `detect-changes`, a `test-<tool>` job gated on it, and a row in the `lint`
-   matrix. If the tool participates in cross-paradigm impact (e.g. a transform
+   `detect-changes`, a `test-<tool>` job gated on it, a row in the `lint`
+   matrix, and the new job in `ci-success`'s `needs` list (`ci-success` fails
+   if that list drifts from the workflow's jobs). If the tool participates in cross-paradigm impact (e.g. a transform
    tool that orchestrators wrap), update `resolve-impacts` too.
 3. **`.github/dependabot.yml`** — add a `package-ecosystem: uv` entry pointing at
    the tool directory. Use `uv`, never `pip`: the `pip` ecosystem updates

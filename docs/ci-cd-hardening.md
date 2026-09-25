@@ -31,15 +31,18 @@ is why the status lives here rather than on the section headings.)
 - [x] 1. [Fix the `just` module recipes (local task runner is broken)](#1-fix-the-just-module-recipes-local-task-runner-is-broken)
 - [x] 2. [Give the dbt tool a `pyproject.toml` + dependabot entry](#2-give-the-dbt-tool-a-pyprojecttoml--dependabot-entry)
 - [x] 3. [Lint and test dbt in CI](#3-lint-and-test-dbt-in-ci)
-- [ ] 4. [Add a fan-in `ci-success` required check](#4-add-a-fan-in-ci-success-required-check)
+- [x] 4. [Add a fan-in `ci-success` required check](#4-add-a-fan-in-ci-success-required-check)
 - [ ] 5. [Add a repo-wide pre-commit (or lefthook) layer so local == CI](#5-add-a-repo-wide-pre-commit-or-lefthook-layer-so-local--ci)
 - [ ] 18. [Compile dbt after every merge to `main`, and raise an alarm issue](#18-compile-dbt-after-every-merge-to-main-and-raise-an-alarm-issue)
+- [ ] 25. [Load the real dbt manifest in the Dagster CI job](#25-load-the-real-dbt-manifest-in-the-dagster-ci-job)
+- [ ] 26. [Test that every tool is wired into every shared surface](#26-test-that-every-tool-is-wired-into-every-shared-surface)
 
 **P2 — security & supply chain**
 
 - [ ] 6. [Add a scheduled dependency/security audit](#6-add-a-scheduled-dependencysecurity-audit)
 - [ ] 7. [Add secret scanning](#7-add-secret-scanning)
 - [ ] 19. [Weekly dbt package upgrade PR, with bounded version ranges](#19-weekly-dbt-package-upgrade-pr-with-bounded-version-ranges)
+- [ ] 27. [Stop dependabot raising the dbt tool's version floors](#27-stop-dependabot-raising-the-dbt-tools-version-floors)
 - [ ] 20. [Weekly dbt deprecations tracker issue](#20-weekly-dbt-deprecations-tracker-issue)
 
 **P3 — Claude skills & agent tooling**
@@ -371,11 +374,36 @@ full job list as new jobs are added:
         run: echo "All required jobs passed or were skipped."
 ```
 
-Then set `ci-success` as the only required status check in the repo's
-branch-protection settings (Settings → Branches → `main`).
+Require `CI Success` in a **ruleset of its own with no bypass actors**. Do not
+add it to the ruleset that lets the repo admin skip reviews: a ruleset's
+bypass list applies to every rule in it, so an admin merge (`gh pr merge
+--admin`) would skip the red check along with the review. Splitting them means
+an admin can still skip review, but no one can merge a red CI.
+
+```bash
+gh api -X POST repos/<owner>/<repo>/rulesets --input - <<'JSON'
+{"name": "main: CI must pass (no bypass)", "target": "branch", "enforcement": "active",
+ "conditions": {"ref_name": {"include": ["~DEFAULT_BRANCH"], "exclude": []}},
+ "bypass_actors": [],
+ "rules": [{"type": "required_status_checks", "parameters": {
+   "strict_required_status_checks_policy": false,
+   "required_status_checks": [{"context": "CI Success"}]}}]}
+JSON
+```
+
+`ci-success` also checks that its `needs` list names every other job in the
+workflow. A job added without updating `needs` would never gate a merge, and
+nothing else would notice. Jobs in *other* workflows (`terraform-validate.yml`)
+are not covered, because a job can only `needs` jobs in its own workflow.
 
 **Acceptance.** `ci-success` reports on every PR; green when all relevant jobs
-pass or skip, red when any fail. It is the only required check.
+pass or skip, red when any fail or when `needs` is out of sync. It is the only
+required check, and the ruleset requiring it has no bypass actors.
+
+**Why the bypass detail matters.** Before this, `main` had no required checks,
+and every merge was only as safe as a person (or agent) reading CI output
+correctly. That process mis-gated twice in one session: once merging with CI
+unverified, once waiting on the wrong PR number.
 
 ---
 
@@ -892,6 +920,52 @@ rejoining upstream concepts, fan-outs. Start with `severity: warn` and
 document any deliberate exceptions in `seeds/dbt_project_evaluator_exceptions.csv`
 rather than disabling rules.
 
+### 25. Load the real dbt manifest in the Dagster CI job
+
+**What.** In `test-dagster`, run `dbt deps && dbt parse` in `transformation/dbt`
+before the Dagster tests, so `src/assets/dbt.py` finds `target/manifest.json`
+and actually builds the dbt assets.
+
+**Why.** Without a manifest, `dbt_project_assets` is `None` and the Dagster
+tests never load a single dbt asset. A seed and a source with the same
+`["raw", <table>]` asset key made `@dbt_assets` refuse to load. That only
+showed up locally, where a manifest happened to exist. CI would have passed.
+
+**Acceptance.** `test-dagster` fails if `@dbt_assets` cannot load the current
+dbt project, e.g. when two dbt resources map to one asset key.
+
+### 26. Test that every tool is wired into every shared surface
+
+**What.** A small script, run in CI, that derives the tool list from the root
+`justfile`'s `mod` lines and asserts, for each tool:
+
+- it is in the aggregate `test`, `lint`, and `fmt-check` recipes;
+- `ci.yml` has a paths-filter entry matching its directory, a test job, and a
+  lint-matrix row (or a dedicated lint job);
+- `dependabot.yml` has a `package-ecosystem: uv` entry for its directory;
+- the README tool table links it.
+
+**Why.** The `add-tool` skill covers *adding* a tool, not regressions. Root
+`just test` silently left out dbt for months while CI tested it, so local runs
+were weaker than CI and nobody noticed.
+
+**Acceptance.** Removing any one of those wirings for any tool fails the
+check with a message naming the tool and the surface.
+
+### 27. Stop dependabot raising the dbt tool's version floors
+
+**What.** Set `versioning-strategy: lockfile-only` on the
+`/transformation/dbt` entry in `.github/dependabot.yml`.
+
+**Why.** The dbt tool's `pyproject.toml` floors are deliberately tied to
+`require-dbt-version` (`>=1.8.0`) and the `.pre-commit-config.yaml` pins. The
+`uv` ecosystem's default strategy raises them on every bump, so each weekly
+run opens PRs that can't be merged as-is. The consolidated sweep (#138) had
+to apply them lock-only by hand and close the originals.
+
+**Acceptance.** Dependabot PRs for `/transformation/dbt` change only
+`uv.lock`.
+
 ---
 
 ## Context-dependent — deliberately NOT recommended (yet)
@@ -910,6 +984,11 @@ reference toolkit today. Documented so we don't adopt them reflexively:
   to route to.
 - **Release automation** (e.g. `release-please`). Adopt only if the toolkit
   starts shipping versioned artifacts.
+- **Require branches to be up to date before merging** (strict status checks).
+  It guarantees CI ran against the latest `main`, at the cost of a rebase and
+  re-run for every PR whenever `main` moves. With `CI Success` required, a
+  stale base is the remaining gap. Adopt it if a merge ever breaks `main`
+  despite a green PR.
 - **A global-skill directory synced to `~/.claude/skills/`.** Personal workflow
   skills (commit, PR, standup, ticket-filing) belong in a dotfiles repo, not in
   a toolkit others clone. Ship repo-local `.claude/skills/` only (#8).

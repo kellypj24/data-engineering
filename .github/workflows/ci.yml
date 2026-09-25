@@ -330,3 +330,50 @@ jobs:
             fi
           done
           exit $failed
+
+  # The single required status check. Every other job skips on unrelated PRs,
+  # so none of them can be required directly; this one always runs and fails
+  # only if a dependency failed or was cancelled (skipped is fine). It is
+  # required by a ruleset with NO bypass actors, so even an admin merge cannot
+  # skip a red CI -- see docs/ci-cd-hardening.md #4.
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - detect-changes
+      - resolve-impacts
+      - test-dagster
+      - test-airflow
+      - test-prefect
+      - test-temporal
+      - test-dlt
+      - exposures-drift
+      - test-file-export
+      - lint
+      - lint-dbt
+      - test-dbt
+      - lockfiles
+    steps:
+      - uses: actions/checkout@v7
+      # A job missing from `needs` would never gate a merge, and nothing else
+      # would notice. yq is preinstalled on GitHub's Ubuntu runners.
+      - name: Every job in this workflow is in needs
+        run: |
+          all=$(yq '.jobs | keys | .[]' .github/workflows/ci.yml | grep -vx ci-success | sort)
+          needed=$(yq '.jobs["ci-success"].needs[]' .github/workflows/ci.yml | sort)
+          if [ "$all" != "$needed" ]; then
+            echo "ci-success.needs is out of sync with the jobs in ci.yml:"
+            diff <(echo "$all") <(echo "$needed") || true
+            exit 1
+          fi
+      - name: Fail if any dependency failed or was cancelled
+        if: >-
+          contains(needs.*.result, 'failure') ||
+          contains(needs.*.result, 'cancelled')
+        run: |
+          echo "One or more jobs did not succeed:"
+          echo '${{ toJSON(needs) }}'
+          exit 1
+      - name: Success
+        run: echo "All jobs passed or were skipped."
