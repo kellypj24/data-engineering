@@ -39,14 +39,18 @@ def warehouse(project):
     sql(project, "CREATE SCHEMA example_raw")
     sql(
         project,
-        "CREATE TABLE example_raw.orders (id INTEGER, status VARCHAR, amount DOUBLE, created_at TIMESTAMP)",
+        "CREATE TABLE example_raw.orders (id INTEGER, status VARCHAR, amount DOUBLE, created_at TIMESTAMP, customer_id INTEGER)",
     )
     sql(
         project,
         "CREATE TABLE example_raw.order_daily_totals (order_date DATE, revenue DOUBLE)",
     )
     for row in ORDERS:
-        sql(project, "INSERT INTO example_raw.orders VALUES (?, ?, ?, ?)", list(row))
+        sql(
+            project,
+            "INSERT INTO example_raw.orders (id, status, amount, created_at) VALUES (?, ?, ?, ?)",
+            list(row),
+        )
     for row in CONTROL:
         sql(
             project,
@@ -80,7 +84,7 @@ def test_only_the_restatement_window_is_reprocessed(warehouse):
     sql(warehouse, "UPDATE example_raw.orders SET amount = 99 WHERE id IN (1, 6)")
     sql(
         warehouse,
-        "INSERT INTO example_raw.orders VALUES (7, 'active', 40, '2026-01-06 09:00')",
+        "INSERT INTO example_raw.orders (id, status, amount, created_at) VALUES (7, 'active', 40, '2026-01-06 09:00')",
     )
     assert warehouse.dbt("run", "--select", f"+{MODEL}", *PROD)
 

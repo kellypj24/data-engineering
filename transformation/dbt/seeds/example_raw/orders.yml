@@ -10,6 +10,7 @@ seeds:
         owner: data-platform
       column_types:
         id: integer
+        customer_id: integer
         amount: decimal(12, 2)
         created_at: timestamp
     columns:

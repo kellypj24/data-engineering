@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: >
+      One row per order. Read by the example file exports
+      (delivery/file-export/configs/); every column an export references must
+      be documented here, which the generated-exposures drift check enforces.
+    columns:
+      - name: order_id
+        description: Primary key
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        description: Customer who placed the order; the tenant key for shared exports
+      - name: status
+        description: Cleaned order status
+      - name: amount
+        description: Order amount
+      - name: created_at
+        description: Order creation timestamp; the incremental window column for exports

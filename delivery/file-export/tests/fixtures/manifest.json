@@ -1,0 +1,105 @@
+{
+  "nodes": {
+    "model.p.fct_orders": {
+      "unique_id": "model.p.fct_orders",
+      "name": "fct_orders",
+      "resource_type": "model",
+      "alias": "fct_orders",
+      "schema": "main_marts",
+      "config": {
+        "schema": "marts"
+      },
+      "columns": {
+        "order_id": {
+          "name": "order_id"
+        },
+        "customer_id": {
+          "name": "customer_id"
+        },
+        "status": {
+          "name": "status"
+        },
+        "amount": {
+          "name": "amount"
+        },
+        "created_at": {
+          "name": "created_at"
+        }
+      }
+    },
+    "model.p.orders_v2": {
+      "unique_id": "model.p.orders_v2",
+      "name": "orders_v2",
+      "resource_type": "model",
+      "alias": "orders_legacy",
+      "schema": "main_marts",
+      "config": {
+        "schema": "marts"
+      },
+      "columns": {
+        "order_id": {
+          "name": "order_id"
+        },
+        "created_at": {
+          "name": "created_at"
+        }
+      }
+    },
+    "model.p.dupe_a": {
+      "unique_id": "model.p.dupe_a",
+      "name": "dupe_a",
+      "resource_type": "model",
+      "alias": "dupe",
+      "schema": "main_a",
+      "config": {
+        "schema": "a"
+      },
+      "columns": {
+        "x": {
+          "name": "x"
+        }
+      }
+    },
+    "model.p.dupe_b": {
+      "unique_id": "model.p.dupe_b",
+      "name": "dupe_b",
+      "resource_type": "model",
+      "alias": "dupe",
+      "schema": "main_b",
+      "config": {
+        "schema": "b"
+      },
+      "columns": {
+        "x": {
+          "name": "x"
+        }
+      }
+    },
+    "seed.p.status_codes": {
+      "unique_id": "seed.p.status_codes",
+      "name": "status_codes",
+      "resource_type": "seed",
+      "alias": "status_codes",
+      "schema": "main_seeds",
+      "config": {
+        "schema": "seeds"
+      },
+      "columns": {
+        "code": {
+          "name": "code"
+        }
+      }
+    },
+    "test.p.not_a_model": {
+      "unique_id": "test.p.not_a_model",
+      "name": "fct_undocumented",
+      "resource_type": "test",
+      "alias": "fct_undocumented",
+      "schema": "main_marts",
+      "config": {
+        "schema": "marts"
+      },
+      "columns": {}
+    }
+  }
+}

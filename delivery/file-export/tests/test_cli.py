@@ -16,7 +16,7 @@ def test_dry_run_prints_sql(tmp_path, capsys):
     with duckdb.connect(str(db)) as con:
         con.execute("CREATE SCHEMA marts")
         con.execute(
-            "CREATE TABLE marts.order_lines (order_id INT, updated_at TIMESTAMP)"
+            "CREATE TABLE marts.fct_orders (order_id INT, created_at TIMESTAMP)"
         )
     code = main(
         [
@@ -34,5 +34,5 @@ def test_dry_run_prints_sql(tmp_path, capsys):
     )
     assert code == 0
     out = capsys.readouterr().out
-    assert "FROM marts.order_lines" in out
+    assert "FROM marts.fct_orders" in out
     assert not (tmp_path / "out").exists()

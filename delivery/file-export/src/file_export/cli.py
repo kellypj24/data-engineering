@@ -1,6 +1,7 @@
 """`file-export` command line.
 
     file-export validate [CONFIG_DIR]
+    file-export exposures (--write | --check) --manifest MANIFEST --out EXPOSURES_YML [--configs DIR]
     file-export run CONFIG (--recipient NAME | --all) --mode dry-run|select-only|execute \
         --duckdb PATH [--output-root DIR]
 """
@@ -14,6 +15,7 @@ from pathlib import Path
 
 import duckdb
 
+from file_export import exposures
 from file_export.config import ConfigError, load_config, load_configs
 from file_export.engine import ExportEngine, ExportFailed, Mode
 
@@ -29,6 +31,29 @@ def _validate(args) -> int:
     for w in caught:
         print(f"warning: {w.message}", file=sys.stderr)
     print(f"{len(configs)} export config(s) valid")
+    return 0
+
+
+def _exposures(args) -> int:
+    out = Path(args.out)
+    try:
+        text = exposures.generate(load_configs(Path(args.configs)), Path(args.manifest))
+    except (ConfigError, exposures.ExposureError) as exc:
+        print(f"exposures: {exc}", file=sys.stderr)
+        return 1
+    if args.write:
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_text(text)
+        print(f"wrote {out}")
+        return 0
+    if not exposures.is_current(out, text):
+        print(
+            f"{out} is stale: the export configs changed without regenerating it. "
+            "Run `file-export exposures --write` and commit the result.",
+            file=sys.stderr,
+        )
+        return 1
+    print(f"{out} is current")
     return 0
 
 
@@ -69,6 +94,23 @@ def main(argv: list[str] | None = None) -> int:
     validate = sub.add_parser("validate", help="validate every config in a directory")
     validate.add_argument("config_dir", nargs="?", default="configs")
     validate.set_defaults(func=_validate)
+
+    exp = sub.add_parser("exposures", help="generate or check the dbt exposures file")
+    action = exp.add_mutually_exclusive_group(required=True)
+    action.add_argument("--write", action="store_true")
+    action.add_argument("--check", action="store_true")
+    exp.add_argument(
+        "--manifest",
+        required=True,
+        help="dbt target/manifest.json (run `dbt parse` first)",
+    )
+    exp.add_argument(
+        "--out",
+        required=True,
+        help="the generated exposures .yml inside the dbt project",
+    )
+    exp.add_argument("--configs", default="configs")
+    exp.set_defaults(func=_exposures)
 
     run = sub.add_parser("run", help="run one export")
     run.add_argument("config")

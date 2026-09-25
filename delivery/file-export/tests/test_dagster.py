@@ -13,11 +13,11 @@ from tests.conftest import CONFIGS_DIR, add_lines, shared_config
 
 def test_one_job_and_schedule_per_scheduled_recipient():
     jobs, schedules = build_jobs_and_schedules(CONFIGS_DIR)
-    # order-lines: north + south; customer-snapshot: north; the ad hoc export: none.
+    # orders: north + south; daily-revenue: north; the ad hoc export: none.
     assert sorted(j.name for j in jobs) == [
-        "export__customer_snapshot__north",
-        "export__order_lines__north",
-        "export__order_lines__south",
+        "export__daily_revenue__north",
+        "export__orders__north",
+        "export__orders__south",
     ]
     assert len(schedules) == len(jobs)
 
