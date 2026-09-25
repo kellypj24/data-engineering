@@ -58,7 +58,7 @@
 - [x] E6. [One notification model, rendered by severity](#e6-one-notification-model-rendered-by-severity)
 - [x] E8. [Deployment-routed target database with a fail-safe default](#e8-deployment-routed-target-database-with-a-fail-safe-default)
 - [x] E7. [Run-status sensor chaining](#e7-run-status-sensor-chaining)
-- [ ] E30. [Versioned dbt docs publishing with a fail-safe destination](#e30-versioned-dbt-docs-publishing-with-a-fail-safe-destination)
+- [x] E30. [Versioned dbt docs publishing with a fail-safe destination](#e30-versioned-dbt-docs-publishing-with-a-fail-safe-destination)
 
 **P3 — Warehouse environments & cost (Snowflake extra)**
 
