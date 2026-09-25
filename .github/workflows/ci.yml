@@ -170,6 +170,29 @@ jobs:
 
   # Generated dbt exposures must match the export configs and the dbt project.
   # Either side can make them stale, so this runs when either changes.
+  # Terraform, not uv: validates the Airbyte config offline with a mock
+  # provider. Kept in this workflow so CI Success gates it.
+  test-airbyte:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.airbyte == 'true'
+    defaults:
+      run:
+        working-directory: extract_load/airbyte/terraform
+    steps:
+      - uses: actions/checkout@v7
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ">=1.6.0"
+      - name: Terraform format check
+        run: terraform fmt -check -recursive
+      - name: Terraform init
+        run: terraform init -backend=false
+      - name: Terraform validate
+        run: terraform validate
+      - name: Terraform test
+        run: terraform test
+
   exposures-drift:
     runs-on: ubuntu-latest
     needs: detect-changes
@@ -373,6 +396,7 @@ jobs:
       - test-prefect
       - test-temporal
       - test-dlt
+      - test-airbyte
       - exposures-drift
       - test-file-export
       - lint

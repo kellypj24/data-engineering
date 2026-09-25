@@ -36,7 +36,7 @@ is why the status lives here rather than on the section headings.)
 - [ ] 18. [Compile dbt after every merge to `main`, and raise an alarm issue](#18-compile-dbt-after-every-merge-to-main-and-raise-an-alarm-issue)
 - [x] 25. [Load the real dbt manifest in the Dagster CI job](#25-load-the-real-dbt-manifest-in-the-dagster-ci-job)
 - [x] 26. [Test that every tool is wired into every shared surface](#26-test-that-every-tool-is-wired-into-every-shared-surface)
-- [ ] 28. [Gate Terraform validation through `CI Success`](#28-gate-terraform-validation-through-ci-success)
+- [x] 28. [Gate Terraform validation through `CI Success`](#28-gate-terraform-validation-through-ci-success)
 
 **P2 — security & supply chain**
 
@@ -80,7 +80,8 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
   changes trigger the orchestrator tests that wrap them). Every job sets its own
   `working-directory:` and calls `uv` directly — CI never goes through `just`.
 - **`terraform-validate.yml`** — `fmt`/`validate`/`test`, scoped to
-  `extract_load/airbyte/terraform/**` only.
+  `extract_load/airbyte/terraform/**` only. (Since folded into `ci.yml` as
+  `test-airbyte`; see #28.)
 - **`dependabot.yml`** — 8 entries, weekly: 6 `uv` (dagster, airflow, prefect,
   temporal, dlt, dbt), 1 terraform, 1 github-actions. The Python tools use the
   `uv` ecosystem rather than `pip` so that `uv.lock` is updated alongside
@@ -394,8 +395,9 @@ JSON
 
 `ci-success` also checks that its `needs` list names every other job in the
 workflow. A job added without updating `needs` would never gate a merge, and
-nothing else would notice. Jobs in *other* workflows (`terraform-validate.yml`)
-are not covered, because a job can only `needs` jobs in its own workflow.
+nothing else would notice. Jobs in *other* workflows are not covered, because a
+job can only `needs` jobs in its own workflow -- so every gating job lives in
+`ci.yml` (#28 moved Terraform validation there).
 
 **Acceptance.** `ci-success` reports on every PR; green when all relevant jobs
 pass or skip, red when any fail or when `needs` is out of sync. It is the only
@@ -810,9 +812,9 @@ check — a red check that isn't required trains people to ignore red checks.
 ### 14. Broaden Terraform validation beyond Airbyte
 
 `infrastructure/terraform/{snowflake,aws,modules}` exist as placeholders but
-aren't validated — `terraform-validate.yml` is scoped to
-`extract_load/airbyte/terraform/**` only. As they fill in, widen the `paths`
-filter and working directories to cover `infrastructure/terraform/**`, and add
+aren't validated — `ci.yml`'s `test-airbyte` job covers
+`extract_load/airbyte/terraform/` only. As they fill in, add a paths-filter
+entry and a `ci.yml` job (in `ci-success` needs) to cover `infrastructure/terraform/**`, and add
 `tflint init` + `tflint` alongside the existing `fmt`/`validate`/`test`.
 
 ### 15. Consider ARM runners for cost/speed

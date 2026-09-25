@@ -89,10 +89,16 @@ def test_repo_is_fully_wired():
             "dagster: not wired into the README tool table",
         ),
         (
-            ".github/workflows/terraform-validate.yml",
+            ".github/workflows/ci.yml",
             "run: terraform test",
             "run: terraform plan",
-            "airbyte: not wired into a workflow job running `terraform test`",
+            "airbyte: not wired into ci.yml job `test-airbyte` running `terraform test`",
+        ),
+        (
+            ".github/workflows/ci.yml",
+            "  test-airbyte:\n    runs-on",
+            "  test-airbyte-renamed:\n    runs-on",
+            "airbyte: not wired into ci.yml job `test-airbyte`",
         ),
         (
             ".github/dependabot.yml",
