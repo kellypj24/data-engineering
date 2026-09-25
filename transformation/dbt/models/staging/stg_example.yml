@@ -15,6 +15,8 @@ models:
         description: Order amount
       - name: created_at
         description: Order creation timestamp
+        tests:
+          - timestamp_is_utc
       - name: _loaded_at
         description: Timestamp when this row was first loaded into the warehouse by the EL tool
       - name: _dbt_updated_at

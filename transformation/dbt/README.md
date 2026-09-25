@@ -160,6 +160,7 @@ SQL files end **without** a semicolon. dbt wraps every model in
 | `macros/staging/audit_columns`, `clean_strings` | `_loaded_at` / `_dbt_updated_at`; trim + lower + nullif |
 | `macros/validation/` | Tiered-severity validation framework with a failure log. See [its README](macros/validation/README.md) |
 | `tests/generic/ties_to_control_total` | Ties a per-period sum to an independent control; fails when zero periods are compared |
+| `tests/generic/timestamp_is_utc` | Fails non-UTC offsets: ISO-8601 strings on every adapter, and `TIMESTAMP_TZ` on Snowflake. Types that store no offset (duckdb/Postgres `timestamptz`, BigQuery `TIMESTAMP`, naive timestamps) get a **logged no-op**, not a silent pass |
 | `models/marts/fct_daily_order_revenue` | Worked example of a **durable fact** (see [docs/patterns/durable-facts.md](../../docs/patterns/durable-facts.md)) |
 | Seed contract | Seeds are dropped and recreated on every run (`+full_refresh: true`). Each needs a description, `meta.owner`, and a test |
 
