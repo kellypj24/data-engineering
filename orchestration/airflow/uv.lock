@@ -204,10 +204,10 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "apache-airflow", specifier = ">=2.8.0,<4.0" },
-    { name = "apache-airflow-providers-airbyte", specifier = ">=6.0.0" },
-    { name = "apache-airflow-providers-amazon", specifier = ">=9.33.0" },
-    { name = "apache-airflow-providers-snowflake", specifier = ">=6.15.0" },
-    { name = "dbt-core", specifier = ">=1.12.0,<2.0" },
+    { name = "apache-airflow-providers-airbyte", specifier = ">=6.0.1" },
+    { name = "apache-airflow-providers-amazon", specifier = ">=9.34.0" },
+    { name = "apache-airflow-providers-snowflake", specifier = ">=6.16.0" },
+    { name = "dbt-core", specifier = ">=1.12.2,<2.0" },
     { name = "dbt-snowflake", specifier = ">=1.11.4,<2.0" },
 ]
 
@@ -335,7 +335,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-airbyte"
-version = "6.0.0"
+version = "6.0.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "airbyte-api" },
@@ -343,14 +343,14 @@ dependencies = [
     { name = "apache-airflow-providers-common-compat" },
     { name = "httpx" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/77/0b/64bd06538fb2994a1ad65e314e3698ceae9227b8500fb5817ae3b4f9f9ba/apache_airflow_providers_airbyte-6.0.0.tar.gz", hash = "sha256:bbcd7b799d2be3b21106a82dbc97bd8cdc61e555b0ccaf0fd7b0c0d5288d492c", size = 38882, upload-time = "2026-07-28T06:38:22.814Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/52/07/3b653553a9948f16c1f9c29ed3ec1fa9043cd060eaae79f14eea1bafe2da/apache_airflow_providers_airbyte-6.0.1.tar.gz", hash = "sha256:a604d776d22acd644317b750dde41d392dbc5151ee4018acc7719aef5f0234ea", size = 39278, upload-time = "2026-08-08T03:16:41.219Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f2/73/0ae4c35d362d93d19d4078905013667945b7e5d48f7b95ae5aa91d41fc6d/apache_airflow_providers_airbyte-6.0.0-py3-none-any.whl", hash = "sha256:4cb413968fb9ad017d122f7262c7b2b6e1dc5c1043f7d89720e5103c7ad9e3db", size = 23699, upload-time = "2026-07-28T06:37:36.976Z" },
+    { url = "https://files.pythonhosted.org/packages/5e/2b/e135dc72479691654e819fe7481b1e0f719c29cdf947e187e8c47b171ce9/apache_airflow_providers_airbyte-6.0.1-py3-none-any.whl", hash = "sha256:90437203b64b9df09747a8ce635092ffe45f2713c8ccd63df5e2ad0e03aeeddb", size = 23782, upload-time = "2026-08-08T03:15:44.829Z" },
 ]
 
 [[package]]
 name = "apache-airflow-providers-amazon"
-version = "9.33.0"
+version = "9.34.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -370,22 +370,22 @@ dependencies = [
     { name = "sagemaker-studio" },
     { name = "watchtower" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b0/03/1331caee34cbef53b28a33e9eaab4af87e7d51f71c34e496bbf0cb9e3412/apache_airflow_providers_amazon-9.33.0.tar.gz", hash = "sha256:34f1f3494200e300be0f925163c270701f11cf473b33b342685d215b8ae5591b", size = 2265558, upload-time = "2026-07-28T06:38:25.822Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/87/e2/d0c8f653e2ca28c3a3c3eeee1559ba20a6332c34926ccbebb10d8c89badc/apache_airflow_providers_amazon-9.34.0.tar.gz", hash = "sha256:5572ecd65a52892d3d18d92c2de481339330fbff03ad7bed8220b70b8b526a21", size = 2284448, upload-time = "2026-08-08T03:16:51.019Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/19/ec72e494ec9ff1e37611a5064a841e027bd0eb51a39e69f667b74d0f437a/apache_airflow_providers_amazon-9.33.0-py3-none-any.whl", hash = "sha256:385b09f6d3dabc590d5cf8584fdb0a98f7a24ce37b28f7a4a68fe6f4c8c88dfd", size = 776200, upload-time = "2026-07-28T06:37:40.293Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/4b/c74d9d62d4b1aec4fcc061b107ff1b7c71473478b710aa7d01688b9633d3/apache_airflow_providers_amazon-9.34.0-py3-none-any.whl", hash = "sha256:4e9bcc91bde445ce5455615d3fcf4f2cdd2696dd5a5ea70b0850c9910c3436e6", size = 785663, upload-time = "2026-08-08T03:15:48.637Z" },
 ]
 
 [[package]]
 name = "apache-airflow-providers-common-compat"
-version = "1.16.0"
+version = "1.19.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
     { name = "asgiref" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/03/af/d47bcc7b4a82fc52a6e3082fcb4954ee280d3b09ce1c70d773b79e9159e7/apache_airflow_providers_common_compat-1.16.0.tar.gz", hash = "sha256:7f319f8ccd168508c23b591051bd3f662c33b43aa4a0b39157c590c532b54572", size = 42238, upload-time = "2026-07-10T16:28:28.025Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/68/a8/e1d304e2d98d5df26ef2da35e1ebfb914630f29fdb5d05560c6c982bca04/apache_airflow_providers_common_compat-1.19.0.tar.gz", hash = "sha256:887d1f84907df0b01f5ce812bd8c84aeb196742abf7a5fbb78eb5ce60adcd2bd", size = 45512, upload-time = "2026-09-14T14:48:05.245Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/05/bb/c065e5e992539776129badc00e49042bc44eb7622b8a381ef40ff9df2a44/apache_airflow_providers_common_compat-1.16.0-py3-none-any.whl", hash = "sha256:8fc317c5388d1e263e9728afa40201011c95b5454bf062d17baf300426d73416", size = 43854, upload-time = "2026-07-10T16:27:55.513Z" },
+    { url = "https://files.pythonhosted.org/packages/db/2e/904ef0308548a4de139fecbd591456dddc2f33f5baa10faf053d34853360/apache_airflow_providers_common_compat-1.19.0-py3-none-any.whl", hash = "sha256:72f03811f5e7cd219939e1c0f2a33ac5bb8538898b0c61adaadc5c9e8acb8a91", size = 46113, upload-time = "2026-09-14T14:47:24.519Z" },
 ]
 
 [[package]]
@@ -494,7 +494,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-snowflake"
-version = "6.15.0"
+version = "6.16.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -502,14 +502,15 @@ dependencies = [
     { name = "apache-airflow-providers-common-sql" },
     { name = "pandas" },
     { name = "pyarrow" },
+    { name = "pyopenssl" },
     { name = "setuptools" },
     { name = "snowflake-connector-python" },
     { name = "snowflake-snowpark-python", marker = "python_full_version < '3.14'" },
     { name = "snowflake-sqlalchemy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/6e/21/7c81923283892843570643c99c386a488ac05eac11b02862910598969fbd/apache_airflow_providers_snowflake-6.15.0.tar.gz", hash = "sha256:b62044a5fb8c89b6df4821dc7b41a035fcfc5165d50e83c537f02404373faba5", size = 132616, upload-time = "2026-07-28T06:38:54.554Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/61/68/d82170d3adefceb670024fc772f8f14dfc783aace68a7fdc1b0752b98387/apache_airflow_providers_snowflake-6.16.0.tar.gz", hash = "sha256:9d7603ad90894774612412966da73b9789a2c2d32f14e7eff183a7876f6af6df", size = 135266, upload-time = "2026-08-08T03:17:33.92Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d4/e0/5b2f884d5725c03d679c8f0fc9cbd88624a3a2535171aaa1dddb5fc4431b/apache_airflow_providers_snowflake-6.15.0-py3-none-any.whl", hash = "sha256:a2b55182b7e00192b030ca18a7e2b217de772be25398bd5e18c7c04cf7a954d8", size = 70929, upload-time = "2026-07-28T06:38:17.117Z" },
+    { url = "https://files.pythonhosted.org/packages/bb/ac/c02a147c395547dce5a816f9e14a5fb44436cb775015a42383a41c414551/apache_airflow_providers_snowflake-6.16.0-py3-none-any.whl", hash = "sha256:e5ea4defd16b7ab72757b018ccfb8396386c5ff2e7501b96e7975f8ac1714635", size = 72845, upload-time = "2026-08-08T03:16:31.804Z" },
 ]
 
 [[package]]
@@ -1138,7 +1139,7 @@ wheels = [
 
 [[package]]
 name = "dbt-core"
-version = "1.12.0"
+version = "1.12.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agate" },
@@ -1154,6 +1155,7 @@ dependencies = [
     { name = "mashumaro", extra = ["msgpack"] },
     { name = "metricflow" },
     { name = "networkx" },
+    { name = "opentelemetry-api" },
     { name = "packaging" },
     { name = "pathspec" },
     { name = "protobuf" },
@@ -1166,16 +1168,16 @@ dependencies = [
     { name = "sqlparse" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/50/a8/da65cff9c221b944040b35122ffcbaf0e7b583c6f0729a473c63d15536c5/dbt_core-1.12.0.tar.gz", hash = "sha256:f7d6a34f6600a371b8771e813f6b1566ab6d1fb8cea691619c791f527b1f8d7e", size = 1027023, upload-time = "2026-07-16T13:57:34.041Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/08/58/b5ba1961d9fd7ec502f3d0790a9fb4e1b951a4828c3af243264e786b4391/dbt_core-1.12.2.tar.gz", hash = "sha256:9c4d60c58ed759ceff3cc20c065420abc4d26cb092b0e142b39b8747ee43c79b", size = 1032794, upload-time = "2026-08-12T19:28:39.548Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b2/88/ebcb8fa7f2fd8e82ed1bbbd0950fe3717101f1c16d10ee3aa33fac520ed2/dbt_core-1.12.0-py3-none-any.whl", hash = "sha256:8a91ec6aabaf329efc603330b629e72551ea6be8321483d7c284c598541faaab", size = 1123180, upload-time = "2026-07-16T13:57:32.277Z" },
+    { url = "https://files.pythonhosted.org/packages/08/c5/24ce8e3ef4b72c20b5780c78ff1ce8357913ef746cebb009b94150991336/dbt_core-1.12.2-py3-none-any.whl", hash = "sha256:ecc5bc66eb09de0411658d159e973cf503bb1605589a7c2b3fb82a1637e31d32", size = 1129546, upload-time = "2026-08-12T19:28:37.791Z" },
 ]
 
 [[package]]
 name = "dbt-core-experimental-parser"
-version = "2.0.0a5"
+version = "2.0.5"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/54/bc/d37f24f564cb32b3c13e470e5dfd8555b71c202580f701580ebd7e9cd10d/dbt_core_experimental_parser-2.0.0a5.tar.gz", hash = "sha256:1bba1807c697113a6a63a92bec3a89568c65d7168c7d17413591cbfa7d5c5375", size = 4474, upload-time = "2026-07-20T10:04:24.495Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/44/22/43a63fb0cd40dba713dba46c83e860924b42e90be0b9af00afc7482ac21d/dbt_core_experimental_parser-2.0.5.tar.gz", hash = "sha256:b6ad345dc5bf187d8324d2f643ba6aad274eeb51e5c3b7c17780ea62338b069c", size = 4835, upload-time = "2026-09-18T15:49:27.495Z" }
 
 [[package]]
 name = "dbt-extractor"
@@ -3639,15 +3641,15 @@ resolution-markers = [
     "python_full_version < '3.12' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "beautifulsoup4" },
-    { name = "boto3" },
-    { name = "botocore" },
-    { name = "lxml", version = "5.4.0", source = { registry = "https://pypi.org/simple" } },
-    { name = "packaging" },
-    { name = "pytz" },
-    { name = "requests" },
-    { name = "scramp" },
-    { name = "setuptools" },
+    { name = "beautifulsoup4", marker = "python_full_version < '3.14'" },
+    { name = "boto3", marker = "python_full_version < '3.14'" },
+    { name = "botocore", marker = "python_full_version < '3.14'" },
+    { name = "lxml", version = "5.4.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14'" },
+    { name = "packaging", marker = "python_full_version < '3.14'" },
+    { name = "pytz", marker = "python_full_version < '3.14'" },
+    { name = "requests", marker = "python_full_version < '3.14'" },
+    { name = "scramp", marker = "python_full_version < '3.14'" },
+    { name = "setuptools", marker = "python_full_version < '3.14'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f4/27/192a7bf58577dca8fb4e2e40130aacdf9a9e9d6ec5af0c5b150596704013/redshift_connector-2.1.11-py3-none-any.whl", hash = "sha256:25e03ec006e43ef809c5ceb42344ce9f8b6c6c5dd5ee594a8f2848171689bec0", size = 152834, upload-time = "2026-01-27T06:26:29.84Z" },
@@ -3663,15 +3665,15 @@ resolution-markers = [
     "python_full_version >= '3.14' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
-    { name = "beautifulsoup4" },
-    { name = "boto3" },
-    { name = "botocore" },
-    { name = "lxml", version = "6.1.1", source = { registry = "https://pypi.org/simple" } },
-    { name = "packaging" },
-    { name = "pytz" },
-    { name = "requests" },
-    { name = "scramp" },
-    { name = "setuptools" },
+    { name = "beautifulsoup4", marker = "python_full_version >= '3.14'" },
+    { name = "boto3", marker = "python_full_version >= '3.14'" },
+    { name = "botocore", marker = "python_full_version >= '3.14'" },
+    { name = "lxml", version = "6.1.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14'" },
+    { name = "packaging", marker = "python_full_version >= '3.14'" },
+    { name = "pytz", marker = "python_full_version >= '3.14'" },
+    { name = "requests", marker = "python_full_version >= '3.14'" },
+    { name = "scramp", marker = "python_full_version >= '3.14'" },
+    { name = "setuptools", marker = "python_full_version >= '3.14'" },
 ]
 wheels = [
     { url = "https://files.pythonhosted.org/packages/59/00/e5770c8a84fad8f9ab51a7481b971003a18195dfdc0fdb296d7dd6c554e0/redshift_connector-2.1.15-py3-none-any.whl", hash = "sha256:4e4b4b0e88a6f9dfe6c2ec9f81b328936ec1f32fc9549c6b960e1131364b3dd7", size = 157106, upload-time = "2026-06-09T19:20:23.369Z" },
@@ -3936,8 +3938,8 @@ name = "secretstorage"
 version = "3.5.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cryptography" },
-    { name = "jeepney" },
+    { name = "cryptography", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
+    { name = "jeepney", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/1c/03/e834bcd866f2f8a49a85eaff47340affa3bfa391ee9912a952a1faa68c7b/secretstorage-3.5.0.tar.gz", hash = "sha256:f04b8e4689cbce351744d5537bf6b1329c6fc68f91fa666f60a380edddcd11be", size = 19884, upload-time = "2025-11-23T19:02:53.191Z" }
 wheels = [
@@ -4085,15 +4087,15 @@ name = "snowflake-snowpark-python"
 version = "1.45.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "cloudpickle" },
-    { name = "protobuf" },
-    { name = "python-dateutil" },
-    { name = "pyyaml" },
-    { name = "setuptools" },
-    { name = "snowflake-connector-python" },
-    { name = "typing-extensions" },
-    { name = "tzlocal" },
-    { name = "wheel" },
+    { name = "cloudpickle", marker = "python_full_version < '3.14'" },
+    { name = "protobuf", marker = "python_full_version < '3.14'" },
+    { name = "python-dateutil", marker = "python_full_version < '3.14'" },
+    { name = "pyyaml", marker = "python_full_version < '3.14'" },
+    { name = "setuptools", marker = "python_full_version < '3.14'" },
+    { name = "snowflake-connector-python", marker = "python_full_version < '3.14'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.14'" },
+    { name = "tzlocal", marker = "python_full_version < '3.14'" },
+    { name = "wheel", marker = "python_full_version < '3.14'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/36/6a/f5d5944a3e33ae9e7d81b7f125182333e11905d30c8eac8e3dbb3c9dace8/snowflake_snowpark_python-1.45.0.tar.gz", hash = "sha256:2b557d11d0369109b6205dfafbe7b1b42b2b3ffb17f35321dcd53d6532928b80", size = 1731888, upload-time = "2026-02-02T23:10:47.926Z" }
 wheels = [
@@ -4341,7 +4343,7 @@ name = "tzlocal"
 version = "5.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "tzdata", marker = "sys_platform == 'win32'" },
+    { name = "tzdata", marker = "python_full_version < '3.14' and sys_platform == 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/8b/2e/c14812d3d4d9cd1773c6be938f89e5735a1f11a9f184ac3639b93cef35d5/tzlocal-5.3.1.tar.gz", hash = "sha256:cceffc7edecefea1f595541dbd6e990cb1ea3d19bf01b2809f362a03dd7921fd", size = 30761, upload-time = "2025-03-05T21:17:41.549Z" }
 wheels = [
@@ -4408,7 +4410,7 @@ name = "wheel"
 version = "0.46.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "packaging" },
+    { name = "packaging", marker = "python_full_version < '3.14'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/89/24/a2eb353a6edac9a0303977c4cb048134959dd2a51b48a269dfc9dde00c8a/wheel-0.46.3.tar.gz", hash = "sha256:e3e79874b07d776c40bd6033f8ddf76a7dad46a7b8aa1b2787a83083519a1803", size = 60605, upload-time = "2026-01-22T12:39:49.136Z" }
 wheels = [

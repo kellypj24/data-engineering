@@ -4,12 +4,12 @@ version = "0.1.0"
 description = "Composable data engineering toolkit powered by Dagster"
 requires-python = ">=3.11"
 dependencies = [
-    "dagster>=1.13.16,<2.0",
+    "dagster>=1.13.17,<2.0",
     "dagster-webserver>=1.6,<2.0",
-    "dagster-dbt>=0.22,<1.0",
-    "dagster-airbyte>=0.22,<1.0",
+    "dagster-dbt>=0.29.17,<1.0",
+    "dagster-airbyte>=0.29.17,<1.0",
     "dagster-snowflake>=0.29.0,<1.0",
-    "boto3>=1.42.88,<2.0",
+    "boto3>=1.43.71,<2.0",
     "dbt-core>=1.11.8,<2.0",
     "dbt-snowflake>=1.12.0,<2.0",
 ]
@@ -23,7 +23,7 @@ dev = [
 ]
 
 [build-system]
-requires = ["setuptools>=83.0.0", "wheel"]
+requires = ["setuptools>=84.0.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]

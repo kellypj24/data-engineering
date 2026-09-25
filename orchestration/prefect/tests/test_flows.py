@@ -4,6 +4,7 @@ All flows are tested with mocked external services (HTTP, subprocess, S3).
 The prefect_test_harness from conftest.py is used automatically.
 """
 
+from datetime import UTC
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -100,22 +101,22 @@ class TestFullPipelineFlow:
 
     def test_freshness_check_passes_within_threshold(self):
         """freshness_check should pass when elapsed time is within threshold."""
-        from datetime import datetime, timezone
+        from datetime import datetime
 
         from flows.full_pipeline import freshness_check
 
-        recent_start = datetime.now(timezone.utc)
+        recent_start = datetime.now(UTC)
         result = freshness_check.fn(pipeline_start=recent_start, threshold_hours=25)
 
         assert result["passed"] is True
 
     def test_freshness_check_fails_when_exceeded(self):
         """freshness_check should raise ValueError when threshold exceeded."""
-        from datetime import datetime, timedelta, timezone
+        from datetime import datetime, timedelta
 
         from flows.full_pipeline import freshness_check
 
-        old_start = datetime.now(timezone.utc) - timedelta(hours=30)
+        old_start = datetime.now(UTC) - timedelta(hours=30)
         with pytest.raises(ValueError, match="exceeded"):
             freshness_check.fn(pipeline_start=old_start, threshold_hours=25)
 
