@@ -9,7 +9,7 @@ Mirrors the Dagster full pipeline pattern using Prefect subflows.
 """
 
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from prefect import flow, get_run_logger, task
 
@@ -25,7 +25,7 @@ def freshness_check(
 ) -> dict:
     """Verify that the pipeline completed within the SLA threshold."""
     logger = get_run_logger()
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     elapsed = now - pipeline_start
     threshold = timedelta(hours=threshold_hours)
 
@@ -49,7 +49,7 @@ def freshness_check(
 @flow(name="full-pipeline", log_prints=True)
 def full_pipeline() -> dict:
     """Orchestrate the full ELT pipeline."""
-    pipeline_start = datetime.now(timezone.utc)
+    pipeline_start = datetime.now(UTC)
 
     # Step 1: Extract & Load
     airbyte_sync()
