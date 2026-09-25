@@ -1,0 +1,31 @@
+[project]
+name = "file-export"
+version = "0.1.0"
+description = "Config-driven file export engine: one YAML per export, generated SQL, run log and watermarks, fail-closed tenant isolation"
+requires-python = ">=3.11"
+dependencies = [
+    "duckdb>=1.3.0",
+    "pydantic>=2.7,<3.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+# The Dagster adapter (file_export.dagster). The core never imports it.
+dagster = ["dagster>=1.13.17,<2.0"]
+
+[project.scripts]
+file-export = "file_export.cli:main"
+
+[dependency-groups]
+dev = [
+    "dagster>=1.13.17,<2.0",
+    "pytest>=9.0.3",
+    "ruff>=0.16.8",
+]
+
+[build-system]
+requires = ["setuptools>=84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,44 @@
+# Shared export: one model serves every recipient. Each recipient is selected
+# by its tenant keys (or its own `filters`), and before anything is written
+# the result is checked to contain ONLY those tenant keys -- a leak fails
+# closed with no file written.
+name: order-lines
+kind: shared
+source: marts.order_lines
+tenant_column: customer_id
+
+columns:
+  - name: order_id
+  - name: line_number
+  - name: amount
+    alias: line_amount
+  - name: is_priority
+  - name: updated_at
+  - expr: "{range_end}"
+    alias: extracted_through
+
+# Incremental: (last successful window end, current max]. The first run, with
+# no watermark, exports all history.
+window:
+  column: updated_at
+  start_exclusive_end_inclusive:
+    start: last_run_end
+    end: max_value
+
+outputs:
+  - path: "{recipient}/order_lines_{run_date}.csv"
+    header_record: "H|{export}|{recipient}|{run_date}"
+    trailer_record: "T|{row_count}"
+    control_file: true
+  - path: "{recipient}/order_lines_{run_date}.parquet"
+    format: parquet
+
+recipients:
+  - name: north
+    tenant_keys: [101, 102]
+    schedule:
+      cron: "0 6 * * *"
+  - name: south
+    tenant_keys: [201]
+    schedule:
+      cron: "30 6 * * 1"

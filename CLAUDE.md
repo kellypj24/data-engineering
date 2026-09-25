@@ -6,6 +6,7 @@ This is a composable collection of data engineering tools organized by role:
 - `extract_load/` — EL tools (Airbyte, dlt)
 - `orchestration/` — Orchestrators (Dagster, Airflow, Prefect, Temporal)
 - `transformation/` — Transform tools (dbt)
+- `delivery/` — Outbound delivery tools (file-export)
 - `stacks/` — Pre-assembled combinations (airbyte-dagster-dbt, dlt-dagster-dbt, dlt-temporal-dbt)
 - `infrastructure/` — Shared Docker/Terraform
 - `docs/` — Architecture patterns, tool comparison matrices, `patterns/` write-ups, and the two roadmaps

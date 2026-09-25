@@ -20,7 +20,7 @@ the root `CLAUDE.md`. Read it first; this skill does not restate it.
 a **specification, not a skeleton** — there are no files to copy. Read it as a
 checklist of capabilities the new tool has to cover.
 
-Roles: `extract_load/`, `orchestration/`, `transformation/`.
+Roles: `extract_load/`, `orchestration/`, `transformation/`, `delivery/`.
 
 ## 2. Create the tool directory
 

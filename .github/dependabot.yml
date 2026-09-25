@@ -41,6 +41,11 @@ updates:
     open-pull-requests-limit: 5
 
   - package-ecosystem: uv
+    directory: /delivery/file-export
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: uv
     directory: /transformation/dbt
     schedule:
       interval: weekly

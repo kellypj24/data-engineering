@@ -1,0 +1,35 @@
+# Ad hoc export: any relation, run by hand, never scheduled.
+name: order-audit
+kind: ad_hoc
+source: marts.order_lines
+
+columns:
+  - name: order_id
+  - name: status
+  - name: amount
+  - expr: "{range_start}"
+    alias: period_start
+  - expr: "{range_end}"
+    alias: period_end
+
+filters:
+  - column: status
+    in: [active, pending]
+  - column: region
+    not_in: [test]
+  - column: note
+    ilike: "%refund%"
+  - column: customer_id
+    not_null: true
+
+window:
+  column: updated_at
+  start_inclusive_end_inclusive:
+    start: "2026-01-01"
+    end: last_sunday
+
+outputs:
+  - path: "adhoc/order_audit_{run_date}.csv"
+
+recipients:
+  - name: finance

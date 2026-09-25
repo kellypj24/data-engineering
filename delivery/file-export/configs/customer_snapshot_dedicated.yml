@@ -1,0 +1,14 @@
+# Dedicated export: each recipient has its own model with its filters baked
+# in, so the YAML carries delivery settings only.
+name: customer-snapshot
+kind: dedicated
+
+outputs:
+  - path: "{recipient}/customers_{run_date}.csv"
+    delimiter: "|"
+
+recipients:
+  - name: north
+    source: marts.customers_north
+    schedule:
+      cron: "0 5 * * *"
