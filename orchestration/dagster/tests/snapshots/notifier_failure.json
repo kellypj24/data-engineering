@@ -1,0 +1,49 @@
+{
+  "blocks": [
+    {
+      "text": {
+        "emoji": true,
+        "text": ":red_circle: daily_build failure",
+        "type": "plain_text"
+      },
+      "type": "header"
+    },
+    {
+      "text": {
+        "text": "<!here> Op `dbt_project_assets` failed.",
+        "type": "mrkdwn"
+      },
+      "type": "section"
+    },
+    {
+      "fields": [
+        {
+          "text": "*Job*\n`daily_build`",
+          "type": "mrkdwn"
+        },
+        {
+          "text": "*Op*\n`dbt_project_assets`",
+          "type": "mrkdwn"
+        }
+      ],
+      "type": "section"
+    },
+    {
+      "text": {
+        "text": "```Database Error in model fct_orders: division by zero```",
+        "type": "mrkdwn"
+      },
+      "type": "section"
+    },
+    {
+      "elements": [
+        {
+          "text": "<https://dagster.example.com/runs/ghi789|Run>",
+          "type": "mrkdwn"
+        }
+      ],
+      "type": "context"
+    }
+  ],
+  "text": "daily_build failure: Op `dbt_project_assets` failed."
+}

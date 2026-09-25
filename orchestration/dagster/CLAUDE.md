@@ -13,7 +13,7 @@ Reference orchestrator implementation. All other orchestrators (Airflow, Prefect
 - `src/schedules/daily.py` — Daily 06:00 UTC `ScheduleDefinition`
 - `src/checks/freshness.py` — Asset freshness check (25h threshold)
 - `src/resources/connections.py` — `RESOURCES` dict: airbyte, dbt, snowflake, telemetry
-- `src/utils/alerts.py` — Slack failure hook factory
+- `src/utils/notifier.py` — One `Notification` model rendered to Slack Block Kit by severity (success = one line; warning/failure expand). Severity→channel routing only in `channel_for`. `make_slack_on_failure_hook` builds on it. Renders are snapshot-tested (`tests/snapshots/`; `UPDATE_SNAPSHOTS=1` to rewrite)
 - `src/utils/factories.py` — `build_source_assets()` factory pattern
 - `src/telemetry/` — Run-event telemetry. `run_events.sql` is the table DDL; `sensors.py` has run-status sensors appending STARTED/SUCCESS/FAILURE rows (completion writers backfill a missing STARTED); `store.py` is the `telemetry` resource (duckdb by default). Every telemetry error is logged, never raised. dbt summarises the table in `mart_orchestrator_run_summary`
 - `src/utils/invariants.py` — `check_definitions(defs)`: invariants over every schedule, sensor, job, and `@dbt_assets`. Run by `tests/test_invariants.py`; importable by downstream projects

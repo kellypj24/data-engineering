@@ -1,0 +1,46 @@
+{
+  "blocks": [
+    {
+      "text": {
+        "emoji": true,
+        "text": ":warning: orders_export warning",
+        "type": "plain_text"
+      },
+      "type": "header"
+    },
+    {
+      "text": {
+        "text": "2 of 5 recipients received 0 rows.",
+        "type": "mrkdwn"
+      },
+      "type": "section"
+    },
+    {
+      "fields": [
+        {
+          "text": "*Recipients*\n5",
+          "type": "mrkdwn"
+        },
+        {
+          "text": "*Empty*\n2",
+          "type": "mrkdwn"
+        },
+        {
+          "text": "*Window*\n2026-01-05",
+          "type": "mrkdwn"
+        }
+      ],
+      "type": "section"
+    },
+    {
+      "elements": [
+        {
+          "text": "<https://dagster.example.com/runs/def456|Run> | <https://dagster.example.com/runs/def456/logs|Run log>",
+          "type": "mrkdwn"
+        }
+      ],
+      "type": "context"
+    }
+  ],
+  "text": "orders_export warning: 2 of 5 recipients received 0 rows."
+}

@@ -1,0 +1,12 @@
+{
+  "blocks": [
+    {
+      "text": {
+        "text": ":white_check_mark: *daily_build* built 42 models in 6m 10s <https://dagster.example.com/runs/abc123|run>",
+        "type": "mrkdwn"
+      },
+      "type": "section"
+    }
+  ],
+  "text": "daily_build: built 42 models in 6m 10s"
+}
