@@ -6,8 +6,8 @@ previously-unseen key appears.
 Customisation
 -------------
 * Set ``S3_BUCKET`` and ``S3_PREFIX`` to your landing-zone location.
-* Change ``target_asset_key`` to the asset that should be materialised when
-  a new file lands.
+* Point ``job`` at whatever should run when a new file lands; the RunRequest's
+  ``run_config`` must match that job's ops.
 * For production workloads consider using SQS-backed S3 event notifications
   instead of polling.
 """
@@ -19,6 +19,8 @@ from dagster import (
     sensor,
 )
 
+from src.jobs.landing import process_landing_file_job
+
 # ---- Configuration ---------------------------------------------------------
 S3_BUCKET = "my-data-lake-landing"
 S3_PREFIX = "inbound/"
@@ -28,6 +30,7 @@ S3_PREFIX = "inbound/"
 
 @sensor(
     name="s3_file_arrival_sensor",
+    job=process_landing_file_job,
     minimum_interval_seconds=60,
     description="Polls S3 for new files and triggers a run when one appears.",
 )

@@ -9,6 +9,7 @@ from dagster import Definitions
 
 from src.assets import all_assets
 from src.checks import all_checks
+from src.jobs import all_jobs
 from src.resources import RESOURCES
 from src.schedules import all_schedules
 from src.sensors import all_sensors
@@ -16,6 +17,7 @@ from src.sensors import all_sensors
 defs = Definitions(
     assets=all_assets,
     asset_checks=all_checks,
+    jobs=all_jobs,
     sensors=all_sensors,
     schedules=all_schedules,
     resources=RESOURCES,

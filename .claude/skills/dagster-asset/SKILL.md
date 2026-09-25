@@ -155,5 +155,8 @@ broken — walk the three links in order.
 - **Editing `src/__init__.py` to add an asset.** `all_assets` is the seam;
   touching `Definitions` for a routine asset means the next person has two
   places to look.
+- **A schedule or job-launching sensor that starts itself.** Leave
+  `default_status` STOPPED and set `execution_timezone="UTC"`; if the project
+  has `src/utils/invariants.py`, its test fails otherwise.
 - **Testing by materialising against a real warehouse.** Assert on structure and
   use the conftest mocks; save live runs for `dagster dev`.

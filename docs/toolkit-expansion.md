@@ -53,7 +53,7 @@
 
 **P2 — Dagster patterns & observability**
 
-- [ ] E5. [Definition invariant tests](#e5-definition-invariant-tests)
+- [x] E5. [Definition invariant tests](#e5-definition-invariant-tests)
 - [ ] E26. [Run-event telemetry and a run-summary model](#e26-run-event-telemetry-and-a-run-summary-model)
 - [ ] E6. [One notification model, rendered by severity](#e6-one-notification-model-rendered-by-severity)
 - [ ] E8. [Deployment-routed target database with a fail-safe default](#e8-deployment-routed-target-database-with-a-fail-safe-default)
