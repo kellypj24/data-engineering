@@ -1,0 +1,16 @@
+version: 2
+
+seeds:
+  - name: order_status_codes
+    description: Allowed order status codes and their display labels.
+    config:
+      meta:
+        owner: data-platform
+    columns:
+      - name: status_code
+        description: Lowercase status code as it appears in stg_example.status
+        tests:
+          - unique
+          - not_null
+      - name: status_label
+        description: Human-readable label for the status
