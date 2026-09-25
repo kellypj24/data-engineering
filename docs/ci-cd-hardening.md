@@ -1,7 +1,11 @@
 # CI/CD & Infrastructure Hardening Plan
 
 > **Purpose.** A Claude Code–executable backlog of CI/CD and infrastructure
-> improvements for this repo.
+> improvements for this repo. Its sibling,
+> [`toolkit-expansion.md`](./toolkit-expansion.md), is the backlog of *features*
+> the toolkit ships (dbt macros, Dagster patterns, warehouse environment
+> management, developer tools). If it changes how this repo is checked, it goes
+> here; if a downstream project copies it out, it goes there.
 >
 > **How to use this (Claude Code).** Pick the highest-priority unchecked task
 > from the index below, implement it, and verify against its **Acceptance**
@@ -29,11 +33,14 @@ is why the status lives here rather than on the section headings.)
 - [x] 3. [Lint and test dbt in CI](#3-lint-and-test-dbt-in-ci)
 - [ ] 4. [Add a fan-in `ci-success` required check](#4-add-a-fan-in-ci-success-required-check)
 - [ ] 5. [Add a repo-wide pre-commit (or lefthook) layer so local == CI](#5-add-a-repo-wide-pre-commit-or-lefthook-layer-so-local--ci)
+- [ ] 18. [Compile dbt after every merge to `main`, and raise an alarm issue](#18-compile-dbt-after-every-merge-to-main-and-raise-an-alarm-issue)
 
 **P2 — security & supply chain**
 
 - [ ] 6. [Add a scheduled dependency/security audit](#6-add-a-scheduled-dependencysecurity-audit)
 - [ ] 7. [Add secret scanning](#7-add-secret-scanning)
+- [ ] 19. [Weekly dbt package upgrade PR, with bounded version ranges](#19-weekly-dbt-package-upgrade-pr-with-bounded-version-ranges)
+- [ ] 20. [Weekly dbt deprecations tracker issue](#20-weekly-dbt-deprecations-tracker-issue)
 
 **P3 — Claude skills & agent tooling**
 
@@ -53,6 +60,10 @@ is why the status lives here rather than on the section headings.)
 - [ ] 15. [Consider ARM runners for cost/speed](#15-consider-arm-runners-for-costspeed)
 - [ ] 16. [Make the shipped dbt tests executable](#16-make-the-shipped-dbt-tests-executable)
 - [x] 17. [Add stack-usage skills for downstream projects](#17-add-stack-usage-skills-for-downstream-projects)
+- [ ] 21. [Retarget stacked PRs, then delete merged branches](#21-retarget-stacked-prs-then-delete-merged-branches)
+- [ ] 22. [Stale bot that exempts tracker issues](#22-stale-bot-that-exempts-tracker-issues)
+- [ ] 23. [Auto-label PRs by path](#23-auto-label-prs-by-path)
+- [ ] 24. [Run `dbt_project_evaluator` in CI](#24-run-dbt_project_evaluator-in-ci)
 
 ---
 
@@ -104,6 +115,13 @@ Grounded in the current `.github/` and tool configs (verified 2026-07-27):
 | PR template | ❌ | #12 |
 | Semantic PR title check | ❌ | #13 |
 | Terraform validation coverage | ⚠️ airbyte only | #14 |
+| Post-merge compile of the merged result | ❌ | #18 |
+| dbt package (`packages.yml`) upgrades | ❌ Dependabot can't read it | #19 |
+| dbt deprecation tracking | ❌ | #20 |
+| Stacked-PR-safe branch cleanup | ❌ | #21 |
+| Stale issue/PR housekeeping | ❌ | #22 |
+| PR labels by path | ❌ | #23 |
+| dbt project structure linting | ❌ | #24 |
 | CODEOWNERS granularity | wildcard (correct for now) | — |
 
 ---
@@ -392,6 +410,47 @@ A PR that would fail lint fails identically whether caught locally or in CI.
 
 ---
 
+### 18. Compile dbt after every merge to `main`, and raise an alarm issue
+
+> **Depends on #3.** Uses the living-issue helper from #6.
+
+**What.** A `dbt-compile-gate.yml` on `push` to `main` that runs `dbt parse` +
+`dbt compile` over the **whole** project and keeps one "`main` is not compiling"
+issue open while it fails, closing it on the next green push.
+
+**Why.** Two PRs can each be green and merge without a git conflict while
+breaking `main` together, because the conflicting halves live in different
+files — one removes a `var()` from `dbt_project.yml`, the other adds a model that
+uses it. PR CI compiles each PR against the base as it was, never the merged
+result. This is an *alarm*, not prevention: by the time it fires `main` is
+broken, and the point is that someone knows within minutes.
+
+**How.**
+- Compile the whole project, not changed models. The model that breaks is often
+  untouched; only `dbt_project.yml` changed. `state:modified+` doesn't rescue it:
+  it needs a baseline manifest and needs the new state to parse first.
+- `parse` and `compile` catch different classes: `parse` catches duplicate
+  resources cheaply, but does not render model bodies, so an undefined `var()`
+  only fails at `compile`. Run both.
+- Include `packages.yml`, `package-lock.yml`, `pyproject.toml`, and
+  `.python-version` in the `paths` filter — a dbt or interpreter bump changes
+  compile behaviour.
+- **Only `push` events on `refs/heads/main` may touch the issue.** A
+  `workflow_dispatch` against an old green commit must not close the alarm while
+  `main` is still broken. No `dry_run` input; restricting mutation to push makes
+  a dispatched test run safe by construction.
+- Put `github.event_name` and `github.ref` in the concurrency group. GitHub keeps
+  one pending run per group and cancels earlier pending ones, so a shared group
+  lets a dispatch evict a queued push whose breakage then goes unreported.
+- Fallbacks in shell pipelines need `set -o pipefail` or an explicit `-f` test;
+  `tail missing | head -c N || echo fallback` never prints the fallback.
+
+**Acceptance.** Pushing a commit that removes a used `var()` opens the issue with
+the compile error; the next green push closes it; a manual dispatch never
+changes the issue.
+
+---
+
 ## P2 — Security & supply chain
 
 ### 6. Add a scheduled dependency/security audit
@@ -409,6 +468,14 @@ triggered by `schedule` + `workflow_dispatch`. For the tracker issue, use
 `actions/github-script` to search for an open issue with a fixed marker in the
 title, then create/update/close it — one issue, not one per run. Report-only:
 never gate PRs on it.
+
+Build the create/update/close logic as a reusable script
+(`.github/scripts/manage-tracker-issue.js`, taking the marker, label, and body
+as inputs) rather than inlining it. #18, #20, and #11 need the same "living
+issue" behaviour, and #22 must exempt every label it manages.
+
+For `uv` tools, audit the resolved lockfile rather than the declared ranges:
+`uv export --frozen --no-hashes | uvx pip-audit -r /dev/stdin`.
 
 **Acceptance.** A known-vulnerable pin surfaces as a labeled `security` issue;
 the issue auto-closes when the vuln is resolved. No effect on PR status.
@@ -433,6 +500,52 @@ and unbypassable rather than a local hook — the point is that it can't be
 skipped.
 
 **Acceptance.** A PR that adds a fake AWS key or Snowflake password fails.
+
+> **Not the same as E16.** `toolkit-expansion.md` E16 is a configurable
+> sensitive-data guard (PII patterns, identity-column literals) that the toolkit
+> *ships* for downstream projects with regulated data. This repo holds no such
+> data, so its own CI stays on gitleaks.
+
+---
+
+### 19. Weekly dbt package upgrade PR, with bounded version ranges
+
+**What.** A weekly `dbt-deps-update.yml` that runs `dbt deps --upgrade` in
+`transformation/dbt/` and opens (or updates) one PR when `package-lock.yml`
+changes. In the same PR, give every `packages.yml` entry an upper bound
+(`[">=1.3.0", "<2.0.0"]`) instead of today's open-ended `>=`.
+
+**Why.** Dependabot does not understand `packages.yml`, so dbt Hub packages never
+get bumped — until an upgrade is forced and arrives as a wall of deprecation
+warnings. Weekly bumps land upstream YAML migrations in small batches. The upper
+bound stops a major release from arriving through that PR unannounced.
+
+**How.** Schedule it on the same weekday as Dependabot so all dependency PRs share
+a review window. Concurrency: serialise, don't cancel — two runs must never race
+on the same branch. Offer a `workflow_dispatch` that logs the diff without
+opening a PR.
+
+**Acceptance.** A stale lockfile produces one PR; an up-to-date one produces
+none; re-running updates the existing PR instead of opening another.
+
+---
+
+### 20. Weekly dbt deprecations tracker issue
+
+> **Depends on #6's living-issue helper.**
+
+**What.** A weekly job that runs `dbt parse --show-all-deprecations`, strips ANSI
+codes, and renders every deprecation grouped **by type and by source file** into
+one tracker issue (label `dbt-deprecations`), closed automatically when clean.
+Keep the parser in a small tested Python module, not inline shell.
+
+**Why.** dbt deprecations are warnings until the release that removes them.
+Grouped by type and file, they can be fixed in batches before that release; left
+as log noise, they become an emergency upgrade.
+
+**Acceptance.** A project with a deprecated config produces an issue listing it
+under its type and file; removing it closes the issue; parser tests cover a
+captured log sample.
 
 ---
 
@@ -616,6 +729,10 @@ independence, mocked services in tests. Skip bot-authored PRs (dependabot).
 **Acceptance.** Every non-bot PR gets exactly one Claude review comment; "no
 significant issues" is a valid one-line result. No multi-comment spam.
 
+> **Local counterpart:** `toolkit-expansion.md` E15 reviews the diff on the
+> developer's machine before it is pushed. The two are complementary — E15 is
+> opt-in and fast, and this one is the one nobody can skip.
+
 ### 11. Add scheduled Claude codebase reviews
 
 **What.** A reusable `claude-codebase-review.yml` invoked by thin wrapper
@@ -657,7 +774,9 @@ platform.
 Advisory-to-enforced Conventional-Commit title check so history stays clean
 (and future release automation is possible). Use
 `amannn/action-semantic-pull-request`. Start advisory; flip to enforced once the
-habit sticks.
+habit sticks. While advisory, report through a single sticky comment that is
+edited in place and deleted once the title is fixed, rather than a failing
+check — a red check that isn't required trains people to ignore red checks.
 
 ### 14. Broaden Terraform validation beyond Airbyte
 
@@ -730,6 +849,49 @@ Ship them a couple at a time, each with the **Verify** and **Common mistakes**
 sections that `.claude/skills/CLAUDE.md` requires. Ground every one in a real
 file in this repo rather than an invented example.
 
+Further stack skills (`data-profiling`, `dbt-test`, `backfill-runbook`) are
+tracked in `toolkit-expansion.md` E17–E19.
+
+### 21. Retarget stacked PRs, then delete merged branches
+
+On `pull_request: closed` with `merged == true`, find every open PR whose base is
+the merged branch, retarget it to the merged PR's base, and **only then** delete
+the branch. GitHub closes any open PR whose base branch disappears; it
+auto-retargets dependents only when the branch is deleted through its own
+post-merge button, not via a raw `DELETE /git/refs` from a workflow. A PR closed
+that way cannot be reopened or retargeted — it has to be recreated. Pass branch
+names through `env:`, never `${{ }}` inside `run:` (branch names are
+user-controlled, so that's a shell-injection vector). Skip fork PRs and
+protected branches. Needs `contents: write` and `pull-requests: write`.
+
+**Acceptance.** Merging the bottom PR of a two-PR stack deletes its branch and
+leaves the upper PR open, retargeted to `main`.
+
+### 22. Stale bot that exempts tracker issues
+
+`actions/stale`: mark issues/PRs stale after 60 days idle, close 14 days later.
+Exempt every label a workflow manages (`security`, `dbt-deprecations`,
+`claude-review`, the #18 alarm) plus `pinned`/`blocked`/`on-hold` — otherwise the
+bot closes the living issues that #6/#18/#20 depend on.
+
+### 23. Auto-label PRs by path
+
+`actions/labeler` with `.github/labeler.yml` mapping each role and tool
+directory (`orchestration/dagster/**` → `dagster`, `stacks/**` → `stacks`, …) to a
+label, plus a title-prefix step (`feat`/`fix`/`docs`/`ci`). Additive only:
+`sync-labels: false`, so it never removes a label a human added.
+
+### 24. Run `dbt_project_evaluator` in CI
+
+> **Depends on #16** — the evaluator builds models, so the project must build.
+
+Add `dbt-labs/dbt_project_evaluator` to `packages.yml` and a CI step that runs
+it against the duckdb target. It flags structural problems dbt tests can't see:
+models without tests or descriptions, direct source references outside staging,
+rejoining upstream concepts, fan-outs. Start with `severity: warn` and
+document any deliberate exceptions in `seeds/dbt_project_evaluator_exceptions.csv`
+rather than disabling rules.
+
 ---
 
 ## Context-dependent — deliberately NOT recommended (yet)
@@ -740,8 +902,9 @@ reference toolkit today. Documented so we don't adopt them reflexively:
 - **A `dev → staging → main` promotion path + merge-commit enforcement.**
   Justified when a live production warehouse is downstream of `main`; overkill
   for a clone-to-start toolkit. Revisit only if this repo ever deploys something.
-- **PHI/PII scanning.** No regulated data here; #7 (secret scanning) is the
-  right-sized substitute.
+- **PHI/PII scanning of this repo.** No regulated data here; #7 (secret
+  scanning) is the right-sized substitute. The toolkit does *ship* such a
+  scanner for downstream projects — `toolkit-expansion.md` E16.
 - **Domain- or path-partitioned CODEOWNERS.** The `* @kellypj24` wildcard is
   correct for a solo-owned repo. Partition only when there are multiple owners
   to route to.
@@ -777,4 +940,7 @@ Not CI/CD, but noted so it isn't lost:
    construction, and demonstrate the pattern to downstream clones.
 6. **#10 (Claude PR review)** — biggest CI quality-per-effort win, especially solo.
 7. **#6 / #7 (security)** and **#9 (block-no-verify hook)** — cheap guardrails.
-8. **#11 (scheduled AI reviews)** and **#12–#15 (polish)** — as capacity allows.
+8. **#18 (post-merge compile alarm)** — once #6's living-issue helper exists;
+   then **#19 / #20** (dbt package upgrades and deprecations) on the same helper.
+9. **#11 (scheduled AI reviews)** and **#12–#15, #21–#24 (polish)** — as
+   capacity allows. Land #22 after the living-issue workflows it must exempt.
