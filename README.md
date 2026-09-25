@@ -30,7 +30,7 @@ Data flows left to right: **Sources -> EL -> Warehouse (raw) -> Transformation -
 | Orchestration | [Temporal](orchestration/temporal/) | Durable workflow execution | Ready |
 | Orchestration | [Airflow](orchestration/airflow/) | Task-based DAG orchestration | Ready |
 | Orchestration | [Prefect](orchestration/prefect/) | Flow-based orchestration | Ready |
-| Transformation | [dbt](transformation/dbt/) | SQL-based transformation framework | Ready |
+| Transformation | [dbt](transformation/dbt/) | SQL transformation, plus a macro library: surrogate keys, in-place backfills, a validation framework, durable facts | Ready |
 
 **Ready** = fully configured with working examples, tests, and documentation.
 
@@ -89,9 +89,13 @@ data-engineering/
 │   ├── airbyte-dagster-dbt/
 │   ├── dlt-dagster-dbt/
 │   └── dlt-temporal-dbt/
-├── docs/                   # Architecture docs and comparisons
+├── docs/                   # Architecture docs, comparisons, roadmaps
 │   ├── architecture-patterns.md
-│   └── tool-comparison.md
+│   ├── tool-comparison.md
+│   ├── patterns/           # Reusable patterns (e.g. durable facts)
+│   ├── ci-cd-hardening.md  # Roadmap: how this repo is checked
+│   └── toolkit-expansion.md  # Roadmap: features the toolkit ships
+├── .claude/skills/         # Claude Code skills (toolkit + stack)
 └── archive/                # Previous experiments for reference
 ```
 
@@ -114,11 +118,15 @@ just airflow::test
 just prefect::test
 just temporal::test
 just dlt::test
+just dbt::test
 
 # Lint all code
 just lint
 
-# Format all code
+# Check formatting without rewriting (run this before pushing)
+just fmt-check
+
+# Format all code (rewrites files)
 just fmt
 ```
 
@@ -138,7 +146,7 @@ Every tool has its own test suite using its native test framework. All tests use
 | Temporal | pytest-asyncio + WorkflowEnvironment | `just temporal::test` |
 | dlt | pytest + DuckDB | `just dlt::test` |
 | Airbyte | terraform test (mock provider) | `just airbyte::test` |
-| dbt | dbt test (schema + unit tests) | `just dbt::test` |
+| dbt | pytest (dbt in-process) + `dbt seed` / `dbt build` on example fixtures | `just dbt::test` |
 
 ---
 
@@ -146,9 +154,9 @@ Every tool has its own test suite using its native test framework. All tests use
 
 GitHub Actions workflows with intelligent change detection:
 
-- **`ci.yml`** — Detects which tools changed and runs only the relevant tests. Includes cross-paradigm impact detection: dbt or Airbyte changes also trigger orchestrator tests (since Dagster, Airflow, and Prefect all wrap dbt and Airbyte).
+- **`ci.yml`** — Detects which tools changed and runs only the relevant tests. Includes cross-paradigm impact detection: dbt or Airbyte changes also trigger orchestrator tests (since Dagster, Airflow, and Prefect all wrap dbt and Airbyte). Lint runs `ruff check` and `ruff format --check`; the dbt job builds the whole example project on its fixtures; a `lockfiles` job enforces `uv lock --check` for every tool.
 - **`terraform-validate.yml`** — Runs `terraform fmt`, `validate`, and `test` on Airbyte Terraform changes.
-- **`dependabot.yml`** — Weekly dependency updates for pip, Terraform, and GitHub Actions.
+- **`dependabot.yml`** — Weekly updates for Python (`uv` ecosystem, so `uv.lock` moves with `pyproject.toml`), Terraform, and GitHub Actions.
 
 ---
 
@@ -175,6 +183,9 @@ Working with Claude Code? The `add-tool` skill in `.claude/skills/` does all of 
 
 - [Architecture Patterns](docs/architecture-patterns.md) — ELT, orchestration models, idempotency, and how the pieces fit together
 - [Tool Comparison](docs/tool-comparison.md) — Decision matrices for choosing between tools in each role
+- [Durable facts](docs/patterns/durable-facts.md) — Incremental tables whose history outlives their source
+- [Validation framework](transformation/dbt/macros/validation/README.md) — Tiered-severity rules, notification routing, failure log
+- Roadmaps: [CI/CD hardening](docs/ci-cd-hardening.md) (how this repo is checked) and [toolkit expansion](docs/toolkit-expansion.md) (features to add)
 
 ---
 
