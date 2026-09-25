@@ -35,7 +35,8 @@ is why the status lives here rather than on the section headings.)
 - [ ] 5. [Add a repo-wide pre-commit (or lefthook) layer so local == CI](#5-add-a-repo-wide-pre-commit-or-lefthook-layer-so-local--ci)
 - [ ] 18. [Compile dbt after every merge to `main`, and raise an alarm issue](#18-compile-dbt-after-every-merge-to-main-and-raise-an-alarm-issue)
 - [x] 25. [Load the real dbt manifest in the Dagster CI job](#25-load-the-real-dbt-manifest-in-the-dagster-ci-job)
-- [ ] 26. [Test that every tool is wired into every shared surface](#26-test-that-every-tool-is-wired-into-every-shared-surface)
+- [x] 26. [Test that every tool is wired into every shared surface](#26-test-that-every-tool-is-wired-into-every-shared-surface)
+- [ ] 28. [Gate Terraform validation through `CI Success`](#28-gate-terraform-validation-through-ci-success)
 
 **P2 — security & supply chain**
 
@@ -965,6 +966,20 @@ to apply them lock-only by hand and close the originals.
 
 **Acceptance.** Dependabot PRs for `/transformation/dbt` change only
 `uv.lock`.
+
+### 28. Gate Terraform validation through `CI Success`
+
+**What.** Move the `terraform-validate.yml` job into `ci.yml` as
+`test-airbyte`, gated on the existing `airbyte` paths-filter output, and add it
+to `ci-success`'s `needs`. Delete the separate workflow.
+
+**Why.** `terraform-validate.yml` is its own workflow, so `CI Success` never
+sees it and the no-bypass ruleset does not require it. A PR that breaks
+`terraform fmt`, `validate`, or `test` can merge green. Found while writing
+#26's wiring check.
+
+**Acceptance.** A PR that breaks `terraform test` under
+`extract_load/airbyte/terraform/` fails `CI Success`.
 
 ---
 

@@ -37,7 +37,8 @@ just test              # Run all test suites
 just lint              # Lint all code
 just fmt               # Format all code (rewrites files)
 just fmt-check         # Verify formatting without rewriting -- run this before pushing
-just dagster::test     # Run Dagster tests only
+just check-wiring      # Every tool wired into justfile, ci.yml, dependabot, README
+just dagster::test     # Run Dagster tests only (parses the dbt project first)
 just airflow::test     # Run Airflow tests only
 just dbt::test         # pytest + dbt seed/build on the example fixtures
 just dbt::lint         # Lint dbt SQL
@@ -50,6 +51,7 @@ GitHub Actions with cross-paradigm impact detection:
 - airbyte changes trigger orchestrator tests
 - Tool-specific changes trigger only that tool's tests
 - The dbt job builds the full example project (models, data tests, unit test) on duckdb
+- `wiring` (`.github/scripts/check_wiring.py`) fails when a tool is missing from any shared surface
 - `CI Success` fans in every job and is the only required check (no-bypass ruleset). **Add every new job to its `needs`** — it fails if the list drifts
 
 ## Adding a New Tool
@@ -64,11 +66,11 @@ role must provide. It is not a code skeleton; there is nothing to copy.
    CLAUDE.md, `mod.just`, and `tests/` — model it on `extract_load/dlt/`
 3. Wire into the root `justfile`: the `mod` import and the aggregate recipes
 4. Wire into `.github/workflows/ci.yml`: paths-filter entry, `test-<tool>` job,
-   `lint` matrix row
+   `lint` matrix row, `lockfiles` job list
 5. Wire into `.github/dependabot.yml` with `package-ecosystem: uv` (not `pip` —
    `pip` leaves `uv.lock` untouched and the `lockfiles` job will fail)
 6. Update the root README tool table
-7. Verify: `just --list`, `just <tool>::test`, `uv lock --check`
+7. Verify: `just --list`, `just check-wiring`, `just <tool>::test`, `uv lock --check`
 
 ## Claude Skills
 
