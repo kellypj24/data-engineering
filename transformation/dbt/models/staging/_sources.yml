@@ -50,3 +50,20 @@ sources:
             description: Day the total covers
           - name: revenue
             description: Recorded revenue for the day
+      - name: orchestrator_run_events
+        description: >
+          Orchestrator run lifecycle events, appended by the Dagster telemetry
+          sensors (orchestration/dagster/src/telemetry/). One row per event;
+          a run can have duplicate STARTED rows.
+        columns:
+          - name: run_id
+            description: Orchestrator run id
+            tests:
+              - not_null
+          - name: status
+            description: STARTED, SUCCESS, or FAILURE
+            tests:
+              - accepted_values:
+                  values: ["STARTED", "SUCCESS", "FAILURE"]
+          - name: event_at
+            description: When the event happened, UTC

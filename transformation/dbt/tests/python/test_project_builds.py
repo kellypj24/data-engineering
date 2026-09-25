@@ -7,7 +7,8 @@ PROD = ["--vars", "{dbt_env: prod}"]
 
 
 def test_example_project_builds_from_its_fixtures(project):
-    # Seed first: models read the fixtures via source(), which dbt does not
-    # order after seeds.
-    assert project.dbt("seed", *PROD)
-    assert project.dbt("build", *PROD)
+    # Seeds first, then everything else without them: models and source tests
+    # read the fixtures via source(), which dbt does not order after seeds, and
+    # a seed rebuilt in the same run is dropped and recreated while they read it.
+    assert project.dbt("build", "--select", "resource_type:seed", *PROD)
+    assert project.dbt("build", "--exclude", "resource_type:seed", *PROD)

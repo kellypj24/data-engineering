@@ -1,0 +1,36 @@
+version: 2
+
+seeds:
+  - name: orchestrator_run_events
+    description: >
+      Example fixture standing in for raw.orchestrator_run_events, the table
+      the Dagster telemetry sensors append to
+      (orchestration/dagster/src/telemetry/run_events.sql). Covers a success, a
+      failure, a run still in progress, a run with duplicate STARTED rows, and
+      the monitoring job the summary excludes. Delete seeds/example_raw/ in a
+      real project.
+    config:
+      meta:
+        owner: data-platform
+      column_types:
+        run_id: varchar
+        job_name: varchar
+        status: varchar
+        trigger_source: varchar
+        trigger_name: varchar
+        dbt_command: varchar
+        warehouse: varchar
+        tests_total: integer
+        tests_failed: integer
+        error: varchar
+        event_at: timestamp
+    columns:
+      - name: run_id
+        description: Dagster run id
+        tests:
+          - not_null
+      - name: status
+        description: STARTED, SUCCESS, or FAILURE
+        tests:
+          - accepted_values:
+              values: ["STARTED", "SUCCESS", "FAILURE"]

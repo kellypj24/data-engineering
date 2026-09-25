@@ -171,11 +171,14 @@ project builds with no EL tool and no credentials. The seeds are enabled on
 duckdb only. **Delete the folder in a real project.**
 
 ```bash
-just dbt::test    # pytest, then `dbt seed` + `dbt build` on the fixtures
+just dbt::test    # pytest, then `dbt build` of the seeds, then of everything else
 ```
 
-- `dbt seed` runs first: models read the fixtures through `source()`, which
-  dbt does not order after seeds.
+- Seeds (and their tests) build first, then everything else with
+  `--exclude resource_type:seed`. Models and source tests read the fixtures
+  through `source()`, which dbt does not order after seeds, and a seed rebuilt
+  in the same run is dropped and recreated (`+full_refresh`) while they read
+  it. One `dbt build` races.
 - The build runs with `DBT_ENV=prod`. The fixtures have fixed dates, which the
   dev-only `limit_data_in_dev` window would filter out.
 - `tests/python/` drives dbt in-process (`dbtRunner`) on a throwaway copy of

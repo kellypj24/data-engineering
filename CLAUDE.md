@@ -18,7 +18,7 @@ This is a composable collection of data engineering tools organized by role:
 - **Package manager**: `uv` for all Python operations (`uv run`, `uv pip install`)
 - **Task runner**: `just` (Justfile at root, per-tool `mod.just` files)
 - **Linting**: `ruff` for Python, `sqlfluff` for SQL (Snowflake dialect)
-- **Testing**: `pytest` for all Python tools, `terraform test` for Terraform. dbt: pytest drives dbt in-process, plus `dbt seed` + `dbt build` on `seeds/example_raw/` fixtures — see `transformation/dbt/CLAUDE.md`
+- **Testing**: `pytest` for all Python tools, `terraform test` for Terraform. dbt: pytest drives dbt in-process, plus `dbt build` of the seeds, then of everything else, on `seeds/example_raw/` fixtures — see `transformation/dbt/CLAUDE.md`
 - **Each tool is independent**: own pyproject.toml, own Dockerfile, own README, own tests
 
 ## Key Patterns
@@ -40,7 +40,7 @@ just fmt-check         # Verify formatting without rewriting -- run this before 
 just check-wiring      # Every tool wired into justfile, ci.yml, dependabot, README
 just dagster::test     # Run Dagster tests only (parses the dbt project first)
 just airflow::test     # Run Airflow tests only
-just dbt::test         # pytest + dbt seed/build on the example fixtures
+just dbt::test         # pytest + dbt build (seeds first) on the example fixtures
 just dbt::lint         # Lint dbt SQL
 ```
 

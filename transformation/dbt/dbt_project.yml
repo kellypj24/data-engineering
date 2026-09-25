@@ -37,6 +37,10 @@ vars:
     MEDIUM: "#data-quality"
     LOW: "#data-quality"
 
+  # Jobs left out of mart_orchestrator_run_summary: the job that refreshes the
+  # monitoring models would otherwise report on itself.
+  orchestrator_monitoring_jobs: ["refresh_monitoring"]
+
 models:
   data_warehouse:
     staging:

@@ -323,15 +323,18 @@ jobs:
         run: uv run dbt compile
       - name: Build on the example fixtures
         # seeds/example_raw/ stands in for the raw sources on duckdb, so this
-        # runs every model, data test, and unit test with no credentials. Seed
-        # first: models read the fixtures via source(), which dbt does not
-        # order after seeds. DBT_ENV=prod keeps limit_data_in_dev from
-        # filtering the fixed-date fixtures out.
+        # runs every model, data test, and unit test with no credentials. Seeds
+        # (and their tests) build first, then everything else without them:
+        # models and source tests read the fixtures via source(), which dbt
+        # does not order after seeds, and a seed rebuilt in the same run is
+        # dropped and recreated (+full_refresh) while they read it.
+        # DBT_ENV=prod keeps limit_data_in_dev from filtering the fixed-date
+        # fixtures out.
         env:
           DBT_ENV: prod
         run: |
-          uv run dbt seed
-          uv run dbt build
+          uv run dbt build --select resource_type:seed
+          uv run dbt build --exclude resource_type:seed
       - name: Run operation tests
         # pytest runs dbt in-process on a throwaway copy of the project:
         # run-operations, seed behaviour, the durable fact, a full build.
