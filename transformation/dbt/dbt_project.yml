@@ -26,6 +26,17 @@ vars:
   # before this var existed.
   dbt_env: "{{ env_var('DBT_ENV', 'dev') }}"
 
+  # Validation framework (macros/validation/README.md). Behaviour changes here,
+  # not in code: per-validation overrides, which validations escalate MEDIUM
+  # failures, and severity -> channel routing.
+  validation_configs: {}
+  high_priority_validations: []
+  validation_notification_channels:
+    CRITICAL: "#data-alerts"
+    HIGH: "#data-alerts"
+    MEDIUM: "#data-quality"
+    LOW: "#data-quality"
+
 models:
   data_warehouse:
     staging:
@@ -37,6 +48,9 @@ models:
     marts:
       +materialized: table
       +schema: marts
+    validation:
+      +materialized: table
+      +schema: validation
 
 seeds:
   data_warehouse:

@@ -22,6 +22,8 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `macros/staging/clean_strings.sql` — TRIM + LOWER + NULLIF
 - `seeds/example_raw/` — Fixtures standing in for `raw.orders` / `raw.customers` / `raw.order_daily_totals`, so the example project builds on duckdb with no EL tool. `+schema: example_raw`, **enabled on duckdb only**; `_sources.yml` resolves the `raw` source to wherever they land. Delete this folder in a real project
 - `seeds/` — CSV + one `.yml` per seed. Project-wide `+full_refresh: true` (drop and recreate every run, so a new CSV column never needs a manual `--full-refresh`) and seed-level `+persist_docs`. Every seed needs a description, `meta.owner`, and at least one test — enforced by `tests/python/test_seeds.py`
+- `macros/validation/` — Tiered-severity validation framework: `validate_data_source`, config/notification routing via vars, `no_validation_failures` generic test. See its README
+- `models/validation/` — Rule-set models (`val_*`, one per rule set), incremental `validation_log` (purged per `retention_days`), `validation_summary`
 - `models/staging/` — 1:1 with source tables (views)
 - `models/intermediate/` — Business logic joins (views)
 - `models/marts/` — Consumer-facing tables (tables)
@@ -49,7 +51,7 @@ e.g. `uv sync --extra postgres`.
 ## Patterns
 
 - `require-dbt-version: ">=1.8.0"` for unit test support
-- Macros organized: `overrides/` (built-in overrides), `utils/` (helpers), `staging/` (staging-specific)
+- Macros organized: `overrides/` (built-in overrides), `utils/` (helpers), `staging/` (staging-specific), `validation/` (validation framework)
 - **Environment is `DBT_ENV`, not the target.** A target picks a *warehouse*
   (`duckdb`, `snowflake`, …); the `dbt_env` var in `dbt_project.yml` picks an
   *environment* (`dev` default, `prod`). Macros branch on `var('dbt_env')`.

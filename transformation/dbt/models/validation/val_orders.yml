@@ -1,0 +1,31 @@
+version: 2
+
+models:
+  - name: val_orders
+    description: >
+      Example validation rule set over stg_example: one row per order with a
+      pass/fail and severity column per rule, the worst failed severity, and an
+      overall PASS / WARN / FAIL. Rebuilt every run; failures accumulate in
+      validation_log.
+    tests:
+      # Blocking tier: a CRITICAL failure stops the pipeline.
+      - no_validation_failures:
+          min_severity: CRITICAL
+          config:
+            severity: error
+      # Quality tier: MEDIUM and above is reported, and the run continues.
+      - no_validation_failures:
+          min_severity: MEDIUM
+          config:
+            severity: warn
+    columns:
+      - name: validation_key
+        description: Deterministic key over validation, source table, record, and run time
+        tests:
+          - unique
+          - not_null
+      - name: validation_result
+        description: FAIL if any MEDIUM-or-higher rule failed, WARN if only LOW rules failed, else PASS
+        tests:
+          - accepted_values:
+              values: ['PASS', 'WARN', 'FAIL']

@@ -1,0 +1,12 @@
+version: 2
+
+models:
+  - name: validation_summary
+    description: Daily failure counts per validation and severity, for dashboards.
+    columns:
+      - name: validation_name
+        description: Rule-set name passed to validate_data_source
+        tests:
+          - not_null
+      - name: failure_count
+        description: Failing rows recorded that day at this severity
