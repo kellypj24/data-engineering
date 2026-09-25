@@ -80,6 +80,7 @@ def shared_config(**overrides) -> dict:
     config = {
         "name": "lines",
         "kind": "shared",
+        "owner": {"name": "data-platform"},
         "source": "marts.order_lines",
         "tenant_column": "customer_id",
         "columns": [{"name": "order_id"}, {"name": "customer_id"}],

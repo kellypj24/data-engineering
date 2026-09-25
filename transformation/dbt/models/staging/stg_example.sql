@@ -10,6 +10,7 @@ renamed AS (
 
     SELECT
         id AS order_id,
+        customer_id,
         {{ clean_string('status') }} AS status,
         amount,
         created_at,

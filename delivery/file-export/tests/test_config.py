@@ -46,6 +46,7 @@ def test_dedicated_rejects_filters_and_needs_per_recipient_source(tmp_path):
     base = {
         "name": "d",
         "kind": "dedicated",
+        "owner": {"name": "data-platform"},
         "outputs": [{"path": "x.csv"}],
         "recipients": [{"name": "a", "source": "marts.a"}],
     }
@@ -62,6 +63,7 @@ def test_ad_hoc_cannot_be_scheduled(tmp_path):
     data = {
         "name": "a",
         "kind": "ad_hoc",
+        "owner": {"name": "data-platform"},
         "source": "marts.x",
         "outputs": [{"path": "x.csv"}],
         "recipients": [{"name": "a", "schedule": {"cron": "0 0 * * *"}}],

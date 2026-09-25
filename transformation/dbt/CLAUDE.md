@@ -27,6 +27,8 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `models/staging/` — 1:1 with source tables (views)
 - `models/intermediate/` — Business logic joins (views)
 - `models/marts/` — Consumer-facing tables (tables)
+- `models/marts/fct_orders.sql` — One row per order; the source for the example file exports (`delivery/file-export/configs/`)
+- `models/exports/_generated_exposures.yml` — **Generated** by `just file-export::exposures-write`; one exposure per delivered file. Never hand-edit; CI fails if stale
 - `models/marts/fct_daily_order_revenue.sql` — Worked example of a **durable fact** (history outlives its source): `full_refresh=false`, bounded restatement window, control total. See `docs/patterns/durable-facts.md`
 - `tests/generic/timestamp_is_utc.sql` — Fails non-UTC offsets on ISO-8601 strings (any adapter) and Snowflake `TIMESTAMP_TZ`; logs a no-op for types with no per-value offset. Dispatch helpers in `macros/utils/timestamp_is_utc_kind.sql` (dbt does not register plain macros under `tests/generic/`)
 - `tests/generic/ties_to_control_total.sql` — Ties a column's per-period sum to an independent control; fails when zero periods are compared

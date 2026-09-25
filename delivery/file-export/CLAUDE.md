@@ -11,6 +11,7 @@ config contract and failure behaviour.
 - `src/file_export/engine.py` — modes, window resolution, materialise → tenant check → `.partial` writes → rename → run log
 - `src/file_export/runlog.py` — run log DDL + watermark reads (`last_successful_end`)
 - `src/file_export/dialects.py` — duckdb executes; Snowflake is statement generation only
+- `src/file_export/exposures.py` — dbt exposures generator + `--check` drift gate, offline from `manifest.json`. Output: `transformation/dbt/models/exports/_generated_exposures.yml`
 - `src/file_export/dagster.py` — optional adapter; **the core must never import dagster**
 - `configs/` — example exports; every file is validated by `tests/test_config.py` in CI
 
@@ -20,10 +21,14 @@ config contract and failure behaviour.
 just file-export::test       # pytest (includes validating configs/)
 just file-export::validate   # file-export validate configs
 just file-export::lint
+just file-export::exposures-write   # after changing configs/: regenerate and commit
+just file-export::exposures-check
 ```
 
 ## Patterns
 
 - Shared exports: `tenant_keys` are **asserted on the result**, independent of how recipients are selected. Never weaken this to "filtered, so it must be fine"
 - Resolve window bounds to literals before querying; record exactly those in the run log
+- Changing a config means regenerating exposures in the same PR; CI's `exposures-drift` fails otherwise
+- Every column an export references must be documented on its dbt model
 - Tests use an injected `Clock` (tests/conftest.py) so windows and file names are deterministic

@@ -29,6 +29,17 @@ repos:
       - id: yamllint
         args: [--strict]
 
+  # Generated exposures (delivery/file-export) must match the export configs and
+  # this project. pre-commit runs hooks from the repo root.
+  - repo: local
+    hooks:
+      - id: file-export-exposures-check
+        name: file-export exposures are current
+        language: system
+        entry: just file-export::exposures-check
+        pass_filenames: false
+        files: ^(delivery/file-export/configs/|transformation/dbt/models/)
+
   - repo: https://github.com/dbt-checkpoint/dbt-checkpoint
     rev: v2.0.2
     hooks:

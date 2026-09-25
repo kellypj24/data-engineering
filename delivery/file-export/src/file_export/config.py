@@ -168,6 +168,13 @@ class Output(_Strict):
         return self
 
 
+class Owner(_Strict):
+    """Who answers for this delivery. Becomes the dbt exposure's owner."""
+
+    name: str
+    email: str | None = None
+
+
 class Schedule(_Strict):
     cron: str
     # Generated schedules always run in UTC; there is deliberately no timezone key.
@@ -184,6 +191,7 @@ class Recipient(_Strict):
 class ExportConfig(_Strict):
     name: Annotated[str, Field(pattern=NAME)]
     kind: Kind
+    owner: Owner
     source: Annotated[str, Field(pattern=RELATION)] | None = None
     tenant_column: Annotated[str, Field(pattern=IDENTIFIER)] | None = None
     columns: list[Column] = []
@@ -250,6 +258,18 @@ class ExportConfig(_Strict):
             if r.name == name:
                 return r
         raise ConfigError(f"export {self.name}: no recipient {name!r}")
+
+    def referenced_columns(self, recipient: Recipient) -> set[str]:
+        """Every source column this recipient's export depends on: selected
+        columns, filter and window columns, and the tenant column."""
+        columns = {c.name for c in self.columns if c.name}
+        columns |= {f.column for f in self.filters}
+        columns |= {f.column for f in recipient.filters}
+        if self.window:
+            columns.add(self.window.column)
+        if self.tenant_column:
+            columns.add(self.tenant_column)
+        return columns
 
     def warnings(self) -> list[str]:
         """Legal but risky configurations, reported rather than rejected."""

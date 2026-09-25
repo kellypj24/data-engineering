@@ -26,6 +26,8 @@ sources:
             tests:
               - unique
               - not_null
+          - name: customer_id
+            description: Customer who placed the order
           - name: created_at
             description: Order creation timestamp
       - name: customers

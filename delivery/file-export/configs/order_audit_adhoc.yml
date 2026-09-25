@@ -1,7 +1,9 @@
 # Ad hoc export: any relation, run by hand, never scheduled.
 name: order-audit
 kind: ad_hoc
-source: marts.order_lines
+owner:
+  name: finance-analytics
+source: marts.fct_orders
 
 columns:
   - name: order_id
@@ -15,15 +17,15 @@ columns:
 filters:
   - column: status
     in: [active, pending]
-  - column: region
+  - column: status
     not_in: [test]
-  - column: note
-    ilike: "%refund%"
+  - column: status
+    ilike: "%a%"
   - column: customer_id
     not_null: true
 
 window:
-  column: updated_at
+  column: created_at
   start_inclusive_end_inclusive:
     start: "2026-01-01"
     end: last_sunday

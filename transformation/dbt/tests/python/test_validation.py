@@ -43,12 +43,12 @@ def warehouse(project):
     sql(
         project,
         "CREATE TABLE example_raw.orders "
-        "(id INTEGER, status VARCHAR, amount DOUBLE, created_at TIMESTAMP)",
+        "(id INTEGER, status VARCHAR, amount DOUBLE, created_at TIMESTAMP, customer_id INTEGER)",
     )
     for order_id, status, amount in ORDERS:
         sql(
             project,
-            "INSERT INTO example_raw.orders VALUES (?, ?, ?, TIMESTAMP '2026-01-01')",
+            "INSERT INTO example_raw.orders (id, status, amount, created_at) VALUES (?, ?, ?, TIMESTAMP '2026-01-01')",
             [order_id, status, amount],
         )
     assert project.dbt(

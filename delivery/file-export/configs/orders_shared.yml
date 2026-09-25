@@ -2,35 +2,37 @@
 # by its tenant keys (or its own `filters`), and before anything is written
 # the result is checked to contain ONLY those tenant keys -- a leak fails
 # closed with no file written.
-name: order-lines
+name: orders
 kind: shared
-source: marts.order_lines
+owner:
+  name: data-platform
+source: marts.fct_orders
 tenant_column: customer_id
 
 columns:
   - name: order_id
-  - name: line_number
+  - name: customer_id
+  - name: status
   - name: amount
-    alias: line_amount
-  - name: is_priority
-  - name: updated_at
+    alias: order_amount
+  - name: created_at
   - expr: "{range_end}"
     alias: extracted_through
 
 # Incremental: (last successful window end, current max]. The first run, with
 # no watermark, exports all history.
 window:
-  column: updated_at
+  column: created_at
   start_exclusive_end_inclusive:
     start: last_run_end
     end: max_value
 
 outputs:
-  - path: "{recipient}/order_lines_{run_date}.csv"
+  - path: "{recipient}/orders_{run_date}.csv"
     header_record: "H|{export}|{recipient}|{run_date}"
     trailer_record: "T|{row_count}"
     control_file: true
-  - path: "{recipient}/order_lines_{run_date}.parquet"
+  - path: "{recipient}/orders_{run_date}.parquet"
     format: parquet
 
 recipients:

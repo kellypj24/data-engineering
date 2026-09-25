@@ -156,6 +156,31 @@ jobs:
       - run: uv sync --dev
       - run: uv run pytest tests/ -v --tb=short
 
+  # Generated dbt exposures must match the export configs and the dbt project.
+  # Either side can make them stale, so this runs when either changes.
+  exposures-drift:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.file_export == 'true' || needs.detect-changes.outputs.dbt == 'true'
+    env:
+      DBT_PROFILES_DIR: .
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - name: Parse the dbt project (no warehouse needed)
+        working-directory: transformation/dbt
+        run: |
+          uv sync --dev
+          uv run dbt deps
+          uv run dbt parse
+      - name: Check generated exposures
+        working-directory: delivery/file-export
+        run: |
+          uv sync --dev
+          uv run file-export exposures --check \
+            --manifest ../../transformation/dbt/target/manifest.json \
+            --out ../../transformation/dbt/models/exports/_generated_exposures.yml
+
   test-file-export:
     runs-on: ubuntu-latest
     needs: resolve-impacts

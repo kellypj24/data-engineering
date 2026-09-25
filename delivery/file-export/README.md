@@ -21,6 +21,7 @@ src/file_export/
   dialects.py   # duckdb COPY ... TO (executed); Snowflake COPY INTO @stage (generated)
   cli.py        # `file-export validate` / `file-export run`
   dagster.py    # optional adapter (the `dagster` extra); the core never imports it
+  exposures.py  # dbt exposures generator + drift check (offline, from manifest.json)
 configs/        # one YAML per export -- every file is validated in CI
 ```
 
@@ -29,6 +30,8 @@ configs/        # one YAML per export -- every file is validated in CI
 ```yaml
 name: order-lines
 kind: shared                  # shared | dedicated | ad_hoc
+owner:                        # required; becomes the dbt exposure owner
+  name: data-platform
 source: marts.order_lines     # shared / ad_hoc; dedicated sets it per recipient
 tenant_column: customer_id    # shared only, required
 
@@ -131,6 +134,34 @@ defs = build_export_definitions(
 
 One job per scheduled recipient (`export__<export>__<recipient>`), each with a
 schedule that is STOPPED by default and runs in UTC.
+
+## Generated dbt exposures
+
+Every delivered file gets a dbt exposure: one per (export, recipient, output),
+with a deterministic name (`export__<export>__<recipient>__<format>`), the
+export's `owner`, and `depends_on` the model it reads. Recipients then show up
+in the DAG, and `dbt ls --select +exposure:*` answers "what does this PR change
+for the people we send files to?".
+
+```bash
+just file-export::exposures-write   # dbt parse, then regenerate the file
+just file-export::exposures-check   # dbt parse, then fail if it is stale or wrong
+```
+
+`--check` works from `target/manifest.json`, with no warehouse connection. It
+fails when:
+
+- a config changed without regenerating the file;
+- an export's source matches no dbt model, seed, or snapshot (matched by
+  alias, with ties broken by schema);
+- any column the export references (selected, filter, window, tenant) is not
+  documented on that model. The manifest only knows documented columns;
+- two exposures would share a name.
+
+It runs in CI (`exposures-drift`, on changes to either the configs or the dbt
+project) and as a local pre-commit hook in `transformation/dbt`. The generated
+file is `transformation/dbt/models/exports/_generated_exposures.yml`. Never
+edit it by hand.
 
 ## Warehouses
 
