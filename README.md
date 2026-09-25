@@ -8,7 +8,7 @@ Each tool lives in its own directory with independent configuration, documentati
 
 ## Architecture
 
-The toolkit is organized around three roles that make up a modern data pipeline:
+The toolkit is organized around the roles that make up a modern data pipeline:
 
 - **EL (Extract & Load)** — Moves data from sources (APIs, databases, files) to destinations (warehouses, lakes). Handles connection management, schema detection, incremental loading, and error recovery.
 
@@ -16,7 +16,9 @@ The toolkit is organized around three roles that make up a modern data pipeline:
 
 - **Transformation** — Models and transforms data inside the warehouse. Applies business logic, builds dimensional models, and ensures data quality through testing.
 
-Data flows left to right: **Sources -> EL -> Warehouse (raw) -> Transformation -> Warehouse (modeled) -> Consumers**. Orchestration wraps the entire process.
+- **Delivery** — Moves modeled data out of the warehouse to recipients: files, extracts, feeds. Config-driven, fail-closed on tenant isolation, logged.
+
+Data flows left to right: **Sources -> EL -> Warehouse (raw) -> Transformation -> Warehouse (modeled) -> Delivery / Consumers**. Orchestration wraps the entire process.
 
 ---
 
@@ -30,6 +32,7 @@ Data flows left to right: **Sources -> EL -> Warehouse (raw) -> Transformation -
 | Orchestration | [Temporal](orchestration/temporal/) | Durable workflow execution | Ready |
 | Orchestration | [Airflow](orchestration/airflow/) | Task-based DAG orchestration | Ready |
 | Orchestration | [Prefect](orchestration/prefect/) | Flow-based orchestration | Ready |
+| Delivery | [file-export](delivery/file-export/) | Config-driven file exports: generated SQL, watermarks, fail-closed tenant isolation, generated schedules | Ready |
 | Transformation | [dbt](transformation/dbt/) | SQL transformation, plus a macro library: surrogate keys, in-place backfills, a validation framework, durable facts | Ready |
 
 **Ready** = fully configured with working examples, tests, and documentation.
@@ -84,6 +87,9 @@ data-engineering/
 ├── transformation/         # Transformation tools
 │   ├── dbt/
 │   └── _template/
+├── delivery/               # Outbound delivery tools
+│   ├── file-export/
+│   └── _template/
 ├── infrastructure/         # Shared infra (Docker, Terraform, etc.)
 ├── stacks/                 # Pre-assembled tool combinations
 │   ├── airbyte-dagster-dbt/
@@ -119,6 +125,7 @@ just prefect::test
 just temporal::test
 just dlt::test
 just dbt::test
+just file-export::test
 
 # Lint all code
 just lint
@@ -147,6 +154,7 @@ Every tool has its own test suite using its native test framework. All tests use
 | dlt | pytest + DuckDB | `just dlt::test` |
 | Airbyte | terraform test (mock provider) | `just airbyte::test` |
 | dbt | pytest (dbt in-process) + `dbt seed` / `dbt build` on example fixtures | `just dbt::test` |
+| file-export | pytest + DuckDB (validates every config in `configs/`) | `just file-export::test` |
 
 ---
 
