@@ -104,6 +104,42 @@ def test_scheduled_manual_only_job_is_flagged():
     assert_flags(problems, "schedule repair_schedule", "manual-only job repair_job")
 
 
+def _chain(upstream_job):
+    @dg.run_status_sensor(
+        run_status=dg.DagsterRunStatus.SUCCESS,
+        name="after_upstream",
+        monitored_jobs=[upstream_job],
+        request_job=orders_job,
+    )
+    def after_upstream(context):
+        return dg.RunRequest()
+
+    return after_upstream
+
+
+def test_chained_job_with_a_schedule_is_flagged():
+    upstream = dg.define_asset_job("upstream_job", selection=[orders])
+    schedule = dg.ScheduleDefinition(
+        name="orders_cron",
+        cron_schedule="0 7 * * *",
+        execution_timezone="UTC",
+        job=orders_job,
+    )
+    problems = check(
+        assets=[orders],
+        jobs=[upstream, orders_job],
+        schedules=[schedule],
+        sensors=[_chain(upstream)],
+    )
+    assert_flags(problems, "job orders_job", "also scheduled")
+
+
+def test_chain_with_missing_upstream_is_flagged():
+    missing = dg.define_asset_job("missing_job", selection=[orders])
+    problems = check(assets=[orders], jobs=[orders_job], sensors=[_chain(missing)])
+    assert_flags(problems, "sensor after_upstream", "upstream job missing_job")
+
+
 # -- dbt ----------------------------------------------------------------------
 
 

@@ -120,6 +120,30 @@ def new_file_sensor(context):
 
 Most production systems use both. Scheduled runs provide a baseline guarantee ("data is never more than 6 hours stale"), while sensors provide opportunistic freshness ("if new data arrives, process it immediately").
 
+### Chaining jobs: one cron at the head, run-status sensors for the rest
+
+Don't give dependent jobs staggered crons ("extract at 06:00, transform at 07:00"). The gap is a guess about how long upstream takes. When upstream runs long, downstream reads half-built data. When upstream fails, downstream runs anyway.
+
+Schedule only the head of the chain. Launch each later job from a run-status sensor that monitors the job before it:
+
+```python
+@run_status_sensor(
+    run_status=DagsterRunStatus.SUCCESS,
+    monitored_jobs=[extract_job],
+    request_job=transform_job,
+)
+def transform_after_extract(context):
+    return RunRequest(run_key=context.dagster_run.run_id)  # one run per upstream success
+```
+
+Rules, enforced by `orchestration/dagster/tests/test_invariants.py`:
+
+- a chained job has **no** schedule of its own;
+- each chained job has exactly one upstream sensor;
+- every job a sensor monitors exists. A typo'd upstream otherwise leaves the chain silently never firing.
+
+Worked example: `orchestration/dagster/src/jobs/chain.py` and `src/sensors/chain.py`.
+
 ---
 
 ## The Modern Data Stack

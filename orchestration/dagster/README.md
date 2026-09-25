@@ -45,9 +45,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
     │   └── s3_sensor.py     # S3 file-arrival sensor
     ├── schedules/
     │   ├── __init__.py
-    │   └── daily.py         # Daily materialisation schedule
+    │   └── daily.py         # Daily 06:00 UTC: starts the extract chain
     ├── jobs/
     │   ├── __init__.py
+    │   ├── chain.py         # extract_job -> transform_job (chained, not two crons)
     │   └── landing.py       # Job launched by the S3 sensor
     ├── resources/
     │   ├── __init__.py

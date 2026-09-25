@@ -1,21 +1,20 @@
 """Daily materialisation schedule.
 
-Targets a selection of assets to be materialised once per day at 06:00 UTC.
+Starts the extract -> transform chain once per day at 06:00 UTC. It targets
+only the head, ``extract_job``; ``transform_job`` follows when extract succeeds
+(src/sensors/chain.py), so no second cron guesses how long extract takes.
 
 Customisation
 -------------
 * Change ``cron_schedule`` to any valid cron expression.
-* Update ``AssetSelection`` to target specific assets, groups, or tags.
+* Point ``job`` at the head of your chain. Never schedule a chained job.
 * Keep ``default_status=STOPPED`` and turn the schedule on in the UI:
   ``tests/test_invariants.py`` fails on a schedule that starts itself.
 """
 
-from dagster import (
-    AssetSelection,
-    DefaultScheduleStatus,
-    ScheduleDefinition,
-)
+from dagster import DefaultScheduleStatus, ScheduleDefinition
 
+from src.jobs.chain import extract_job
 from src.utils.deployment import current_deployment, deployment_tags
 
 # ---- Schedule definition ----------------------------------------------------
@@ -24,11 +23,9 @@ daily_asset_schedule = ScheduleDefinition(
     # Run every day at 06:00 UTC.
     cron_schedule="0 6 * * *",
     execution_timezone="UTC",
-    # Materialise all assets in the "default" group.  Swap this for a more
-    # targeted selection (e.g. AssetSelection.keys("my_asset")) as needed.
-    target=AssetSelection.all(),
+    job=extract_job,
     default_status=DefaultScheduleStatus.STOPPED,
     # Shows each run's deployment and target database in the UI.
     tags=deployment_tags(current_deployment()),
-    description="Materialises all assets daily at 06:00 UTC.",
+    description="Starts the extract -> transform chain daily at 06:00 UTC.",
 )
