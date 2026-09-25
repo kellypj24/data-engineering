@@ -46,12 +46,17 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
     ├── schedules/
     │   ├── __init__.py
     │   └── daily.py         # Daily materialisation schedule
+    ├── jobs/
+    │   ├── __init__.py
+    │   └── landing.py       # Job launched by the S3 sensor
     ├── resources/
     │   ├── __init__.py
     │   └── connections.py   # Airbyte, dbt, Snowflake resources
-    └── checks/
-        ├── __init__.py
-        └── freshness.py     # Asset freshness checks
+    ├── checks/
+    │   ├── __init__.py
+    │   └── freshness.py     # Asset freshness checks
+    └── utils/
+        └── invariants.py    # check_definitions(): rules every definition must follow
 ```
 
 ## How to Add New Components
@@ -65,14 +70,26 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ### Sensors
 
 1. Create a new file in `src/sensors/`.
-2. Decorate your function with `@sensor`.
+2. Decorate your function with `@sensor`, with `job=` if it yields `RunRequest`s.
+   Leave it STOPPED by default. A sensor that only observes (no job) must be
+   named in `observing_sensors` in `tests/test_invariants.py`.
 3. Import and append to `all_sensors` in `src/sensors/__init__.py`.
 
 ### Schedules
 
 1. Create a new file in `src/schedules/`.
-2. Use `ScheduleDefinition` or the `@schedule` decorator.
+2. Use `ScheduleDefinition` or the `@schedule` decorator, with
+   `execution_timezone="UTC"` and the default STOPPED status; turn it on in the UI.
 3. Import and append to `all_schedules` in `src/schedules/__init__.py`.
+
+`tests/test_invariants.py` checks every schedule, sensor, job, and dbt asset
+definition against these rules (see `src/utils/invariants.py`). A downstream
+project runs the same checks on its own code location:
+
+```python
+from src.utils.invariants import check_definitions
+assert check_definitions(defs, observing_sensors={"my_watch_sensor"}) == []
+```
 
 ### Resources
 

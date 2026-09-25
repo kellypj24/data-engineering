@@ -8,12 +8,14 @@ Reference orchestrator implementation. All other orchestrators (Airflow, Prefect
 - `src/__init__.py` — Entry point, wires all components into `Definitions`
 - `src/assets/airbyte.py` — Airbyte connection assets via `build_airbyte_assets()`
 - `src/assets/dbt.py` — dbt project wrapped as Dagster assets via `@dbt_assets`
-- `src/sensors/s3_sensor.py` — S3 file arrival polling sensor (boto3, cursor-based)
+- `src/sensors/s3_sensor.py` — S3 file arrival polling sensor (boto3, cursor-based); launches `process_landing_file_job`
+- `src/jobs/landing.py` — `process_landing_file_job`, one run per landed S3 object
 - `src/schedules/daily.py` — Daily 06:00 UTC `ScheduleDefinition`
 - `src/checks/freshness.py` — Asset freshness check (25h threshold)
 - `src/resources/connections.py` — `RESOURCES` dict: airbyte, dbt, snowflake
 - `src/utils/alerts.py` — Slack failure hook factory
 - `src/utils/factories.py` — `build_source_assets()` factory pattern
+- `src/utils/invariants.py` — `check_definitions(defs)`: invariants over every schedule, sensor, job, and `@dbt_assets`. Run by `tests/test_invariants.py`; importable by downstream projects
 - `dagster.yaml` — Instance config. Storage is intentionally unconfigured so it
   defaults to SQLite under `$DAGSTER_HOME`. Never use `base_dir: ~/...` — `~` is
   not expanded here and a literal `~` directory ends up in the repo.
@@ -39,7 +41,8 @@ AIRBYTE_USERNAME, AIRBYTE_PASSWORD, SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE
 ## Patterns
 
 - Assets export via `all_assets` list in `src/assets/__init__.py`
-- Same pattern for sensors (`all_sensors`), schedules (`all_schedules`), checks (`all_checks`)
+- Same pattern for sensors (`all_sensors`), schedules (`all_schedules`), jobs (`all_jobs`), checks (`all_checks`)
+- `tests/test_invariants.py` enforces, for every definition: schedules and job-launching sensors default to STOPPED; schedules set `execution_timezone="UTC"`; a sensor without a job target is listed in `observing_sensors`; no duplicate names; jobs tagged `toolkit/manual_only` are never scheduled; `@dbt_assets` partition the manifest and run `dbt build`; a job selecting a dbt node selects its parent seeds
 - Resources are a flat dict passed to `Definitions(resources=RESOURCES)`
 - dbt manifest loaded at import time; `@dbt_assets` rejects two dbt resources
   with one asset key (e.g. a seed in schema `raw` and source `raw.<table>`)
