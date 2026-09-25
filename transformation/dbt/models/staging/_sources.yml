@@ -3,7 +3,20 @@ version: 2
 sources:
   - name: raw
     description: Raw data loaded by Airbyte or dlt
-    schema: raw
+    # On a real warehouse this is the `raw` schema the EL tool loads. On duckdb
+    # the example seeds in seeds/example_raw/ stand in for it, and this follows
+    # generate_schema_name to wherever they land: `example_raw` when the
+    # environment is prod, `<target schema>_example_raw` otherwise. Override
+    # with the `raw_schema` var.
+    #
+    # Checks DBT_ENV as well as var('dbt_env'): in property YAML, var() sees
+    # --vars overrides but not the env_var() default dbt_project.yml gives it,
+    # so DBT_ENV=prod alone would otherwise resolve to the dev schema.
+    schema: >-
+      {{ var('raw_schema',
+             ('example_raw' if var('dbt_env') == 'prod' or env_var('DBT_ENV', 'dev') == 'prod'
+              else target.schema ~ '_example_raw')
+             if target.type == 'duckdb' else 'raw') }}
     tables:
       - name: orders
         description: Raw orders from the source system

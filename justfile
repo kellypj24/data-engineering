@@ -13,7 +13,7 @@ default:
     @just --list
 
 # Run all tests
-test: dagster::test airflow::test prefect::test temporal::test dlt::test
+test: dagster::test airflow::test prefect::test temporal::test dlt::test dbt::test
 
 # Lint all code
 lint: dagster::lint airflow::lint prefect::lint temporal::lint dbt::lint dlt::lint

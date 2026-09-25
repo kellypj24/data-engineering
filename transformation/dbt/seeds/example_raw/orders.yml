@@ -1,0 +1,20 @@
+version: 2
+
+seeds:
+  - name: orders
+    description: >
+      Example fixture standing in for raw.orders, so the example project builds
+      on duckdb with no EL tool. Delete seeds/example_raw/ in a real project.
+    config:
+      meta:
+        owner: data-platform
+      column_types:
+        id: integer
+        amount: decimal(12, 2)
+        created_at: timestamp
+    columns:
+      - name: id
+        description: Primary key
+        tests:
+          - unique
+          - not_null

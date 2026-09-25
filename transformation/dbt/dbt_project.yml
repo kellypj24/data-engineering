@@ -51,6 +51,15 @@ seeds:
     +persist_docs:
       relation: true
       columns: true
+    # Stand-ins for the raw sources, so the example project builds on duckdb
+    # with no EL tool. source('raw', ...) resolves to their schema on duckdb
+    # (see models/staging/_sources.yml). Disabled on every other adapter, so
+    # they can never write fake rows into a real warehouse. Their own schema
+    # name (not `raw`) keeps their Dagster asset keys distinct from the
+    # sources' ["raw", <table>] keys.
+    example_raw:
+      +schema: example_raw
+      +enabled: "{{ target.type == 'duckdb' }}"
 
 snapshots:
   data_warehouse:
