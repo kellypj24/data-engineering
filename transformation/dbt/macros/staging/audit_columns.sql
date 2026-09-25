@@ -4,9 +4,12 @@
 
         - _loaded_at: When the row was first loaded into the warehouse by the
           EL tool. Pass the source column name to preserve the original
-          timestamp (e.g., `_airbyte_extracted_at`). Falls back to
-          CURRENT_TIMESTAMP() if no source column is available.
+          timestamp (e.g., `_airbyte_extracted_at`). Falls back to the
+          current timestamp if no source column is available.
         - _dbt_updated_at: When this row was last processed by dbt.
+
+        Uses dbt.current_timestamp() rather than CURRENT_TIMESTAMP(): the
+        parenthesised form is Snowflake/BigQuery syntax and fails on duckdb.
 
         Usage:
             SELECT
@@ -21,7 +24,7 @@
     {%- if loaded_at_column is not none -%}
         {{ loaded_at_column }} AS _loaded_at,
     {%- else -%}
-        CURRENT_TIMESTAMP() AS _loaded_at,
+        {{ dbt.current_timestamp() }} AS _loaded_at,
     {%- endif %}
-    CURRENT_TIMESTAMP() AS _dbt_updated_at
+    {{ dbt.current_timestamp() }} AS _dbt_updated_at
 {%- endmacro %}

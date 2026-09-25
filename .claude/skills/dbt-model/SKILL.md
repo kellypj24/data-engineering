@@ -91,7 +91,8 @@ most often:
 
 - Keywords, functions, literals, and types **UPPER**; identifiers **lower**.
 - **Trailing commas in `SELECT` are forbidden.**
-- A final semicolon is **required**, on its own line after the last statement.
+- **No final semicolon.** dbt wraps the model in `create ... as (...)`, so a
+  terminator is a syntax error on every adapter.
 - Aliasing is **explicit** — `AS` is mandatory, and aliases are **≥2 characters**.
 - CTEs are not indented; 4-space indent; 120-char lines.
 
@@ -187,8 +188,9 @@ are calling `dbt` directly, export it yourself.
   This is the single most common reason a model bounces.
 - **Restating the layer's materialisation** in `config()` when it already
   matches `dbt_project.yml`. Two sources of truth, one of which will go stale.
-- **Trailing comma before `FROM`,** or a missing final semicolon. Both are
-  sqlfluff failures, and both are invisible until you lint.
+- **Trailing comma before `FROM`** is a sqlfluff failure, invisible until you
+  lint. A **final semicolon** lints clean but fails at `dbt build` with
+  `syntax error at or near ";"`.
 - **Running `sqlfluff` before `dbt deps`.** The templater compiles the project to
   lint it, so a missing package surfaces as a confusing lint error rather than a
   missing-dependency one.
