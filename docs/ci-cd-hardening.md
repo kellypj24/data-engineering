@@ -42,7 +42,7 @@ is why the status lives here rather than on the section headings.)
 - [ ] 6. [Add a scheduled dependency/security audit](#6-add-a-scheduled-dependencysecurity-audit)
 - [ ] 7. [Add secret scanning](#7-add-secret-scanning)
 - [ ] 19. [Weekly dbt package upgrade PR, with bounded version ranges](#19-weekly-dbt-package-upgrade-pr-with-bounded-version-ranges)
-- [ ] 27. [Stop dependabot raising the dbt tool's version floors](#27-stop-dependabot-raising-the-dbt-tools-version-floors)
+- [x] 27. [Stop dependabot raising the dbt tool's version floors](#27-stop-dependabot-raising-the-dbt-tools-version-floors)
 - [ ] 20. [Weekly dbt deprecations tracker issue](#20-weekly-dbt-deprecations-tracker-issue)
 
 **P3 — Claude skills & agent tooling**
