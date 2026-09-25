@@ -16,6 +16,7 @@ Reference orchestrator implementation. All other orchestrators (Airflow, Prefect
 - `src/utils/notifier.py` — One `Notification` model rendered to Slack Block Kit by severity (success = one line; warning/failure expand). Severity→channel routing only in `channel_for`. `make_slack_on_failure_hook` builds on it. Renders are snapshot-tested (`tests/snapshots/`; `UPDATE_SNAPSHOTS=1` to rewrite)
 - `src/utils/factories.py` — `build_source_assets()` factory pattern
 - `src/telemetry/` — Run-event telemetry. `run_events.sql` is the table DDL; `sensors.py` has run-status sensors appending STARTED/SUCCESS/FAILURE rows (completion writers backfill a missing STARTED); `store.py` is the `telemetry` resource (duckdb by default). Every telemetry error is logged, never raised. dbt summarises the table in `mart_orchestrator_run_summary`
+- `src/utils/deployment.py` — Deployment → target database (`prod`/`stage`/else non-prod, exact match) and the `toolkit/deployment` / `toolkit/target_database` run tags
 - `src/utils/invariants.py` — `check_definitions(defs)`: invariants over every schedule, sensor, job, and `@dbt_assets`. Run by `tests/test_invariants.py`; importable by downstream projects
 - `dagster.yaml` — Instance config. Storage is intentionally unconfigured so it
   defaults to SQLite under `$DAGSTER_HOME`. Never use `base_dir: ~/...` — `~` is
@@ -37,7 +38,9 @@ just dagster::test     # runs `dbt parse` in transformation/dbt, then pytest
 
 ## Environment Variables
 
-AIRBYTE_USERNAME, AIRBYTE_PASSWORD, SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_DATABASE, SNOWFLAKE_SCHEMA, SNOWFLAKE_WAREHOUSE
+AIRBYTE_USERNAME, AIRBYTE_PASSWORD, SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_SCHEMA, SNOWFLAKE_WAREHOUSE, and `DAGSTER_CLOUD_DEPLOYMENT_NAME` or `DEPLOYMENT`.
+
+The Snowflake database is **not** an env var: `src/utils/deployment.py` maps the deployment to it, and anything unrecognised maps to non-prod. Never route it back to `EnvVar`
 
 ## Patterns
 

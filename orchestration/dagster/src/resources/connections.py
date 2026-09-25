@@ -23,6 +23,7 @@ from dagster_dbt import DbtCliResource
 from dagster_snowflake import SnowflakeResource
 
 from src.telemetry.store import RunEventStore
+from src.utils.deployment import current_deployment, target_database
 
 # ---- Relative paths ---------------------------------------------------------
 DBT_PROJECT_DIR = str(Path(__file__).resolve().parents[4] / "transformation" / "dbt")
@@ -44,7 +45,9 @@ RESOURCES: dict = {
         account=EnvVar("SNOWFLAKE_ACCOUNT"),
         user=EnvVar("SNOWFLAKE_USER"),
         password=EnvVar("SNOWFLAKE_PASSWORD"),
-        database=EnvVar("SNOWFLAKE_DATABASE"),
+        # Chosen from the deployment, never from an env var: an unknown or
+        # missing deployment resolves to the non-prod database.
+        database=target_database(current_deployment()),
         schema=EnvVar("SNOWFLAKE_SCHEMA"),
         warehouse=EnvVar("SNOWFLAKE_WAREHOUSE"),
     ),
