@@ -7,30 +7,39 @@ models:
       currency. Durable: keeps months after ACCOUNT_USAGE drops their source
       rows. Every foreign key is not_null as well as related, because a NULL
       foreign key passes a relationships test silently.
+      Grain: one row per cost_month, team, workload, warehouse_name, currency.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - cost_month
+            - team
+            - workload
+            - warehouse_name
+            - currency
     columns:
       - name: cost_month
-        description: Month, first day
+        description: '{{ doc("cost_month") }}'
         tests:
           - not_null
           - relationships:
               to: ref('dim_cost_month')
               field: cost_month
       - name: team
-        description: Owning team, SHARED, or NEEDS_OWNER_REVIEW
+        description: '{{ doc("cost_team") }}'
         tests:
           - not_null
           - relationships:
               to: ref('dim_cost_team')
               field: team
       - name: workload
-        description: Workload, or IDLE / CLOUD_SERVICES / STORAGE / OTHER / NEEDS_OWNER_REVIEW
+        description: '{{ doc("cost_workload") }}'
         tests:
           - not_null
           - relationships:
               to: ref('dim_cost_workload')
               field: workload
       - name: warehouse_name
-        description: Warehouse; NONE for storage, cloud services, and other usage
+        description: '{{ doc("cost_warehouse_name") }}'
         tests:
           - not_null
           - relationships:

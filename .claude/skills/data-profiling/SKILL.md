@@ -17,7 +17,7 @@ project's `mod.just` exports it).
 
 Profile before writing anything. Tests and cleaning written from assumptions
 about a table encode the assumptions, not the data. The profile is the evidence
-the **`dbt-source`** (tests) and **`dbt-model`** (cleaning) skills act on.
+the **`dbt-source`** / **`dbt-test`** (tests) and **`dbt-model`** (cleaning) skills act on.
 
 Every query goes through `dbt show --inline`, so `{{ source() }}` resolves and
 nothing is created in the warehouse. Pass the row limit with `--limit`. A
