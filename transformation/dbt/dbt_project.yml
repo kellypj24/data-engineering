@@ -53,6 +53,12 @@ vars:
     stage: ANALYTICS_STAGE
     dev: ANALYTICS_DEV
 
+  # Objects dbt does not manage that a cloned environment must get back
+  # (macros/utils/preserve_objects.sql; Snowflake example in
+  # macros/snowflake/README.md). refresh_environment restores them after the
+  # clone.
+  preservation_manifest: []
+
 models:
   data_warehouse:
     staging:
