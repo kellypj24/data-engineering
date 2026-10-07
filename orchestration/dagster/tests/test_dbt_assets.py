@@ -35,3 +35,17 @@ def test_definitions_load(dbt_assets_def):
     from src import defs
 
     Definitions.validate_loadable(defs)
+
+
+def test_dbt_runs_from_the_dagster_environment(tmp_path):
+    """Dagster runs dbt with its own venv's dbt, not the dbt tool's. Parsing
+    on the default (duckdb) target fails here if that adapter is missing."""
+    from dagster_dbt import DbtCliResource
+
+    from src.assets.dbt import DBT_PROJECT_DIR
+
+    dbt = DbtCliResource(
+        project_dir=str(DBT_PROJECT_DIR), profiles_dir=str(DBT_PROJECT_DIR)
+    )
+    invocation = dbt.cli(["parse"], target_path=tmp_path, raise_on_error=False).wait()
+    assert invocation.is_successful(), invocation.get_error()

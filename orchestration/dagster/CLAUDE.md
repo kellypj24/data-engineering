@@ -33,6 +33,7 @@ just dagster::test     # runs `dbt parse` in transformation/dbt, then pytest
 
 - Tests in `tests/` use `unittest.mock` — no live services
 - `conftest.py` provides mock fixtures for airbyte, dbt, s3
+- Dagster runs dbt with **this** venv's dbt, so it carries `dbt-duckdb` (the profile's default target) as well as `dbt-snowflake`; `test_dbt_runs_from_the_dagster_environment` fails without it
 - `tests/test_dbt_assets.py` loads the real dbt project as assets. With
   `DAGSTER_REQUIRE_DBT_MANIFEST=1` (set by `just dagster::test` and CI) a missing
   manifest fails; bare `uv run pytest` without one skips those tests
