@@ -37,6 +37,7 @@ is why the status lives here rather than on the section headings.)
 - [x] 25. [Load the real dbt manifest in the Dagster CI job](#25-load-the-real-dbt-manifest-in-the-dagster-ci-job)
 - [x] 26. [Test that every tool is wired into every shared surface](#26-test-that-every-tool-is-wired-into-every-shared-surface)
 - [x] 28. [Gate Terraform validation through `CI Success`](#28-gate-terraform-validation-through-ci-success)
+- [x] 29. [Run dbt from the Dagster environment in its tests](#29-run-dbt-from-the-dagster-environment-in-its-tests)
 
 **P2 — security & supply chain**
 
@@ -982,6 +983,20 @@ sees it and the no-bypass ruleset does not require it. A PR that breaks
 
 **Acceptance.** A PR that breaks `terraform test` under
 `extract_load/airbyte/terraform/` fails `CI Success`.
+
+### 29. Run dbt from the Dagster environment in its tests
+
+**What.** Add `dbt-duckdb` to the Dagster tool's dependencies, and a test that
+runs `dbt parse` through `DbtCliResource`, i.e. with the Dagster venv's dbt.
+
+**Why.** Dagster runs dbt with its *own* venv's dbt, not the dbt tool's. That
+venv had dbt-snowflake only, while the profile defaults to duckdb, so the dbt
+assets and the docs job failed locally unless `DBT_TARGET=snowflake`. CI never
+noticed: #25 parses the project in the dbt tool's venv.
+
+**Acceptance.** Removing `dbt-duckdb` from the Dagster venv fails
+`tests/test_dbt_assets.py::test_dbt_runs_from_the_dagster_environment` with
+"Could not find adapter type duckdb".
 
 ---
 
