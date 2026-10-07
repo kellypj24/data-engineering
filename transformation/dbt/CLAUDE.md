@@ -16,6 +16,7 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `macros/utils/safe_divide.sql` — Null/zero-safe division
 - `macros/utils/mint_surrogate_key.sql` — Versioned, collision-free UUID-shaped surrogate keys (`mint_surrogate_key`, `surrogate_key_version`). Use instead of `dbt_utils.generate_surrogate_key`
 - `macros/utils/backfill_surrogate_keys.sql` — `run-operation` that fills or upgrades key columns in place (no source reads, no `--full-refresh`). Dry run by default; dependent keys in a second UPDATE; version column written last
+- `macros/snowflake/clone_database.sql` — **Snowflake extra.** `clone_database(source, target, copy_grants, dry_run)` and `refresh_environment(env, dry_run)` run-operations: zero-copy clone of prod over a shared environment. Dry run by default. Refuse the prod database by name (`environment_databases` var), so `refresh_environment` refuses `prod`. `copy_grants` re-applies the replaced database's own grants (Snowflake has no COPY GRANTS for databases), ownership last
 - `tests/python/` — pytest suite that runs dbt in-process (`dbtRunner`) on a throwaway copy of the project and duckdb file (`conftest.py`): run-operations, seeds, the durable fact, and a whole-project `dbt build`
 - `tests/macros/` — Singular tests over literal rows that pin macro behaviour; no sources, so they run on duckdb in CI
 - `macros/staging/audit_columns.sql` — _loaded_at (EL timestamp or fallback), _dbt_updated_at columns
@@ -56,7 +57,8 @@ e.g. `uv sync --extra postgres`.
 ## Patterns
 
 - `require-dbt-version: ">=1.8.0"` for unit test support
-- Macros organized: `overrides/` (built-in overrides), `utils/` (helpers), `staging/` (staging-specific), `validation/` (validation framework)
+- Macros organized: `overrides/` (built-in overrides), `utils/` (helpers), `staging/` (staging-specific), `validation/` (validation framework), `snowflake/` (Snowflake-only features; they refuse to execute on other adapters)
+- A macro argument named `target` shadows dbt's `target`; inside such a macro use `adapter.type()`
 - **Environment is `DBT_ENV`, not the target.** A target picks a *warehouse*
   (`duckdb`, `snowflake`, …); the `dbt_env` var in `dbt_project.yml` picks an
   *environment* (`dev` default, `prod`). Macros branch on `var('dbt_env')`.

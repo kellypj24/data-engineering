@@ -156,7 +156,7 @@ The following environment variables are expected by the resources defined in
 | `DAGSTER_CLOUD_DEPLOYMENT_NAME` or `DEPLOYMENT` | Target database routing |
 
 The Snowflake **database** is not an environment variable. It is chosen from
-the deployment by `src/utils/deployment.py`: `prod` → `ANALYTICS`, `stage` →
+the deployment by `src/utils/deployment.py`: `prod` → `ANALYTICS_PROD`, `stage` →
 `ANALYTICS_STAGE`, and any other value, or none, → `ANALYTICS_DEV`. So a
 misconfigured or local process cannot write production. Schedules and jobs carry
 `toolkit/deployment` and `toolkit/target_database` run tags showing the choice.

@@ -16,7 +16,7 @@ run "example_layout" {
   }
 
   assert {
-    condition     = length(output.roles) == 6
-    error_message = "OWNER/READ/WRITE for analytics in dev and prod."
+    condition     = length(output.roles) == 9
+    error_message = "OWNER/READ/WRITE for analytics in dev, stage, and prod."
   }
 }

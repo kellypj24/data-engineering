@@ -3,7 +3,7 @@
 module "rbac" {
   source = "../modules/snowflake_rbac"
 
-  environments       = ["dev", "prod"]
+  environments       = ["dev", "stage", "prod"]
   future_grant_level = var.future_grant_level
 
   databases = {
@@ -11,7 +11,7 @@ module "rbac" {
   }
 
   warehouses = {
-    transforming = { size = "XSMALL", environments = ["dev", "prod"] }
+    transforming = { size = "XSMALL", environments = ["dev", "stage", "prod"] }
   }
 
   service_users = {
