@@ -45,7 +45,7 @@ is why the status lives here rather than on the section headings.)
 - [x] 7. [Add secret scanning](#7-add-secret-scanning)
 - [ ] 19. [Weekly dbt package upgrade PR, with bounded version ranges](#19-weekly-dbt-package-upgrade-pr-with-bounded-version-ranges)
 - [x] 27. [Stop dependabot raising the dbt tool's version floors](#27-stop-dependabot-raising-the-dbt-tools-version-floors)
-- [ ] 20. [Weekly dbt deprecations tracker issue](#20-weekly-dbt-deprecations-tracker-issue)
+- [x] 20. [Weekly dbt deprecations tracker issue](#20-weekly-dbt-deprecations-tracker-issue)
 
 **P3 — Claude skills & agent tooling**
 

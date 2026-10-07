@@ -1,0 +1,98 @@
+[0m03:18:03  Running with dbt=1.12.5
+[0m03:18:03  Registered adapter: duckdb=1.11.0
+[0m03:18:04  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `accepted_values` defined on
+'stg_orchestrator_run_events' in package 'data_warehouse'
+(models/staging/stg_orchestrator_run_events.yml). Arguments to generic tests
+should be nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `relationships` defined on 'fct_monthly_cost'
+in package 'data_warehouse' (models/cost/marts/fct_monthly_cost.yml). Arguments
+to generic tests should be nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `relationships` defined on 'fct_monthly_cost'
+in package 'data_warehouse' (models/cost/marts/fct_monthly_cost.yml). Arguments
+to generic tests should be nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `relationships` defined on 'fct_monthly_cost'
+in package 'data_warehouse' (models/cost/marts/fct_monthly_cost.yml). Arguments
+to generic tests should be nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `relationships` defined on 'fct_monthly_cost'
+in package 'data_warehouse' (models/cost/marts/fct_monthly_cost.yml). Arguments
+to generic tests should be nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `ties_to_control_total` defined on
+'fct_monthly_cost' in package 'data_warehouse'
+(models/cost/marts/fct_monthly_cost.yml). Arguments to generic tests should be
+nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `dbt_utils.unique_combination_of_columns`
+defined on 'fct_monthly_cost' in package 'data_warehouse'
+(models/cost/marts/fct_monthly_cost.yml). Arguments to generic tests should be
+nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `accepted_values` defined on
+'mart_orchestrator_run_summary' in package 'data_warehouse'
+(models/marts/mart_orchestrator_run_summary.yml). Arguments to generic tests
+should be nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `ties_to_control_total` defined on
+'fct_daily_order_revenue' in package 'data_warehouse'
+(models/marts/fct_daily_order_revenue.yml). Arguments to generic tests should be
+nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `accepted_values` defined on
+'fct_delivery_reconciliation' in package 'data_warehouse'
+(models/marts/fct_delivery_reconciliation.yml). Arguments to generic tests
+should be nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `accepted_values` defined on 'val_orders' in
+package 'data_warehouse' (models/validation/val_orders.yml). Arguments to
+generic tests should be nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `no_validation_failures` defined on
+'val_orders' in package 'data_warehouse' (models/validation/val_orders.yml).
+Arguments to generic tests should be nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `no_validation_failures` defined on
+'val_orders' in package 'data_warehouse' (models/validation/val_orders.yml).
+Arguments to generic tests should be nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `accepted_values` defined on
+'orchestrator_run_events' in package 'data_warehouse'
+(seeds/example_raw/orchestrator_run_events.yml). Arguments to generic tests
+should be nested under the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `accepted_values` defined on
+'raw_orchestrator_run_events' in package 'data_warehouse'
+(models/staging/_sources.yml). Arguments to generic tests should be nested under
+the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m][MissingArgumentsPropertyInGenericTestDeprecation]: Deprecated
+functionality
+Found top-level arguments to test `accepted_values` defined on
+'file_export_export_run_log' in package 'data_warehouse'
+(models/staging/_sources.yml). Arguments to generic tests should be nested under
+the `arguments` property.
+[0m03:18:05  [[33mWARNING[0m]: Configuration paths exist in your dbt_project.yml file which do not apply to any resources.
+There are 1 unused configuration paths:
+- models.data_warehouse.intermediate
+[0m03:18:05  Performance info: /Users/pjkelly/data-engineering/transformation/dbt/target/perf_info.json
+[0m03:18:05  [[33mWARNING[0m][DeprecationsSummary]: Deprecated functionality
+Summary of encountered deprecations:
+- MissingArgumentsPropertyInGenericTestDeprecation: 16 occurrences
