@@ -42,7 +42,7 @@ is why the status lives here rather than on the section headings.)
 **P2 — security & supply chain**
 
 - [x] 6. [Add a scheduled dependency/security audit](#6-add-a-scheduled-dependencysecurity-audit)
-- [ ] 7. [Add secret scanning](#7-add-secret-scanning)
+- [x] 7. [Add secret scanning](#7-add-secret-scanning)
 - [ ] 19. [Weekly dbt package upgrade PR, with bounded version ranges](#19-weekly-dbt-package-upgrade-pr-with-bounded-version-ranges)
 - [x] 27. [Stop dependabot raising the dbt tool's version floors](#27-stop-dependabot-raising-the-dbt-tools-version-floors)
 - [ ] 20. [Weekly dbt deprecations tracker issue](#20-weekly-dbt-deprecations-tracker-issue)
@@ -538,6 +538,14 @@ and unbypassable rather than a local hook — the point is that it can't be
 skipped.
 
 **Acceptance.** A PR that adds a fake AWS key or Snowflake password fails.
+
+> **As built:** the `secrets` job runs a pinned, checksum-verified gitleaks
+> binary over the full history (about a second here) rather than
+> `gitleaks-action`. The default rules catch an AWS key but **not** a Snowflake
+> password in a profile or env file, so `.gitleaks.toml` adds a
+> `warehouse-password` rule. It ignores code that reads a password (calls,
+> lookups, `var.` references), placeholders, the local Temporal compose file,
+> and `*.example` templates. Tuned against this repo's history to zero findings.
 
 > **Not the same as E16.** `toolkit-expansion.md` E16 is a configurable
 > sensitive-data guard (PII patterns, identity-column literals) that the toolkit
