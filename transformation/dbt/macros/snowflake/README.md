@@ -9,6 +9,7 @@ adapters; dry runs work everywhere.
 | `refresh_environment` | `clone_database` from prod into a shared environment (`environment_databases` var), then `normalize_object_ownership`, then restores the preservation manifest |
 | `refresh_dev_database` | `clone_database` from prod into `<PROD>_<USERNAME>` (E31) |
 | `audit_object_ownership` | Read-only: schemas/tables/views not owned by `<DATABASE>_OWNER`, and an owner role that cannot create schemas |
+| `generate_semantic_view` | `CREATE SEMANTIC VIEW` for one mart domain (a workload tag): tables with primary keys from uniqueness tests, documented columns as facts/dimensions with descriptions as comments, `meta.sensitive` columns excluded. Metrics, relationships, and synonyms are hand-curated in the `semantic_views` var. Prints by default |
 | `normalize_object_ownership` | Transfers that ownership (`COPY CURRENT GRANTS`) and grants `CREATE SCHEMA`. Dry run by default |
 
 ## Ownership after a clone
