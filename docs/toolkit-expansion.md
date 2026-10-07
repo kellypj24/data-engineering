@@ -67,7 +67,7 @@
 - [x] E10. [Zero-copy shared-environment refresh](#e10-zero-copy-shared-environment-refresh)
 - [x] E11. [Preservation manifest for non-dbt objects](#e11-preservation-manifest-for-non-dbt-objects)
 - [x] E12. [Ownership drift audit and repair](#e12-ownership-drift-audit-and-repair)
-- [ ] E13. [Write-boundary proof and identity probe](#e13-write-boundary-proof-and-identity-probe)
+- [x] E13. [Write-boundary proof and identity probe](#e13-write-boundary-proof-and-identity-probe)
 - [ ] E27. [Query-level cost attribution reconciled to the invoice](#e27-query-level-cost-attribution-reconciled-to-the-invoice)
 
 **P4 — Shippable quality tools**

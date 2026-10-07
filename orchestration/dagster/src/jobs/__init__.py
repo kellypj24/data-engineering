@@ -1,5 +1,6 @@
 """Job definitions — re-exported from submodules."""
 
+from src.jobs.boundary import identity_probe_job, write_boundary_job
 from src.jobs.chain import extract_job, transform_job
 from src.jobs.dbt_docs import publish_dbt_docs_job
 from src.jobs.environment_refresh import refresh_stage_environment_job
@@ -11,4 +12,6 @@ all_jobs = [
     process_landing_file_job,
     publish_dbt_docs_job,
     refresh_stage_environment_job,
+    identity_probe_job,
+    write_boundary_job,
 ]
