@@ -1,0 +1,67 @@
+version: 2
+
+sources:
+  - name: snowflake_account_usage
+    description: >
+      Snowflake ACCOUNT_USAGE views (365-day retention).
+      Read-only: Snowflake's own views, never written. On duckdb the fixture
+      seeds in seeds/example_raw/ stand in.
+    meta:
+      read_only: true
+    database: "{{ 'SNOWFLAKE' if target.type == 'snowflake' else target.database }}"
+    schema: >-
+      {{ 'ACCOUNT_USAGE' if target.type == 'snowflake'
+           else ('example_raw' if var('dbt_env') == 'prod' or env_var('DBT_ENV', 'dev') == 'prod'
+                 else target.schema ~ '_example_raw') }}
+    tables:
+      - name: query_attribution_history
+        identifier: >-
+          {{ 'QUERY_ATTRIBUTION_HISTORY' if target.type == 'snowflake'
+               else 'snowflake_query_attribution_history' }}
+        description: Compute credits attributed to each query; excludes idle time
+        columns:
+          - name: query_id
+            tests:
+              - not_null
+      - name: query_history
+        identifier: >-
+          {{ 'QUERY_HISTORY' if target.type == 'snowflake'
+               else 'snowflake_query_history' }}
+        description: Query metadata; supplies the database a query ran in
+        columns:
+          - name: query_id
+            tests:
+              - not_null
+      - name: warehouse_metering_history
+        identifier: >-
+          {{ 'WAREHOUSE_METERING_HISTORY' if target.type == 'snowflake'
+               else 'snowflake_warehouse_metering_history' }}
+        description: Hourly credits per warehouse, compute and cloud services
+      - name: database_storage_usage_history
+        identifier: >-
+          {{ 'DATABASE_STORAGE_USAGE_HISTORY' if target.type == 'snowflake'
+               else 'snowflake_database_storage_usage_history' }}
+        description: Daily average bytes per database
+
+  - name: snowflake_organization_usage
+    description: >
+      Snowflake ORGANIZATION_USAGE views: what the invoice is built from.
+      Read-only: Snowflake's own views, never written. On duckdb the fixture
+      seeds in seeds/example_raw/ stand in.
+    meta:
+      read_only: true
+    database: "{{ 'SNOWFLAKE' if target.type == 'snowflake' else target.database }}"
+    schema: >-
+      {{ 'ORGANIZATION_USAGE' if target.type == 'snowflake'
+           else ('example_raw' if var('dbt_env') == 'prod' or env_var('DBT_ENV', 'dev') == 'prod'
+                 else target.schema ~ '_example_raw') }}
+    tables:
+      - name: usage_in_currency_daily
+        identifier: >-
+          {{ 'USAGE_IN_CURRENCY_DAILY' if target.type == 'snowflake'
+               else 'snowflake_usage_in_currency_daily' }}
+        description: Daily usage and its cost in the invoice currency, per usage type
+        columns:
+          - name: usage_date
+            tests:
+              - not_null

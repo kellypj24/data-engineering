@@ -1,0 +1,4 @@
+database_name,team
+ANALYTICS_PROD,data_platform
+ANALYTICS_DEV,analytics
+FINANCE_PROD,finance

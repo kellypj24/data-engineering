@@ -1,0 +1,22 @@
+version: 2
+
+seeds:
+  - name: snowflake_usage_in_currency_daily
+    description: >
+      Example fixture standing in for SNOWFLAKE.ORGANIZATION_USAGE.USAGE_IN_CURRENCY_DAILY,
+      a subset of its columns, so the cost models (models/cost/) build on duckdb. Delete seeds/example_raw/ in
+      a real project.
+    config:
+      meta:
+        owner: data-platform
+      column_types:
+        usage_date: date
+        usage_type: varchar
+        usage: double
+        usage_in_currency: decimal(18, 2)
+        currency: varchar
+    columns:
+      - name: usage_type
+        description: Usage type
+        tests:
+          - not_null

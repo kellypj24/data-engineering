@@ -1,0 +1,97 @@
+version: 2
+
+models:
+  - name: fct_monthly_cost
+    description: >
+      Snowflake spend per month, team, workload, and warehouse, in the invoice
+      currency. Durable: keeps months after ACCOUNT_USAGE drops their source
+      rows. Every foreign key is not_null as well as related, because a NULL
+      foreign key passes a relationships test silently.
+    columns:
+      - name: cost_month
+        description: Month, first day
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_cost_month')
+              field: cost_month
+      - name: team
+        description: Owning team, SHARED, or NEEDS_OWNER_REVIEW
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_cost_team')
+              field: team
+      - name: workload
+        description: Workload, or IDLE / CLOUD_SERVICES / STORAGE / OTHER / NEEDS_OWNER_REVIEW
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_cost_workload')
+              field: workload
+      - name: warehouse_name
+        description: Warehouse; NONE for storage, cloud services, and other usage
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_cost_warehouse')
+              field: warehouse_name
+      - name: currency
+        description: Invoice currency
+      - name: credits
+        description: Credits behind the cost, where the usage is in credits
+      - name: cost
+        description: Cost in the invoice currency
+        tests:
+          - not_null
+          - ties_to_control_total:
+              period_column: cost_month
+              control: ref('stg_snowflake__usage_in_currency_daily')
+              control_period_column: usage_month
+              control_value_column: usage_in_currency
+              tolerance: 0.01
+
+  - name: int_cost_daily_allocation
+    description: >
+      Each day's invoiced amount per usage type split into team / workload /
+      warehouse shares. See the model's header for the rules.
+    columns:
+      - name: usage_date
+        description: Day
+      - name: team
+        description: Owning team, SHARED, or NEEDS_OWNER_REVIEW
+        tests:
+          - not_null
+      - name: workload
+        description: Workload bucket
+        tests:
+          - not_null
+      - name: cost
+        description: Share of the day's invoiced amount
+        tests:
+          - not_null
+
+  - name: mart_monthly_cost_summary
+    description: Monthly total with its SHARED and NEEDS_OWNER_REVIEW shares, reported rather than hidden
+    columns:
+      - name: cost_month
+        description: Month
+        tests:
+          - unique
+          - not_null
+      - name: total_cost
+        description: Total invoiced cost for the month
+      - name: shared_cost
+        description: Idle, cloud services, and other shared usage
+      - name: needs_owner_review_cost
+        description: Spend with no mapped owner
+      - name: shared_share
+        description: shared_cost / total_cost
+      - name: needs_owner_review_share
+        description: needs_owner_review_cost / total_cost
+
+  - name: fct_monthly_cost_per_unit
+    description: Optional cost per business unit; enabled by the cost_unit_model var
+    columns:
+      - name: cost_per_unit
+        description: Monthly team cost / units

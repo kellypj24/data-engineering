@@ -1,0 +1,8 @@
+usage_date,usage_type,usage,usage_in_currency,currency
+2026-01-05,compute,6.0,18.00,USD
+2026-01-05,cloud services,0.5,1.50,USD
+2026-01-05,storage,0.04,0.92,USD
+2026-01-05,data transfer,0.1,0.25,USD
+2026-01-06,compute,1.0,3.00,USD
+2026-01-06,cloud services,0.05,0.15,USD
+2026-01-06,storage,0.04,0.92,USD

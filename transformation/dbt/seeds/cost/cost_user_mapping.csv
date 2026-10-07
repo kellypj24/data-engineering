@@ -1,0 +1,4 @@
+user_name,team,workload,resolve_by_database
+DBT_PROD,data_platform,transformation,false
+JDOE,analytics,ad_hoc,false
+BI_SERVICE,,reporting,true

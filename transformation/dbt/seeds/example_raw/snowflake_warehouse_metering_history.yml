@@ -1,0 +1,21 @@
+version: 2
+
+seeds:
+  - name: snowflake_warehouse_metering_history
+    description: >
+      Example fixture standing in for SNOWFLAKE.ACCOUNT_USAGE.WAREHOUSE_METERING_HISTORY,
+      a subset of its columns, so the cost models (models/cost/) build on duckdb. Delete seeds/example_raw/ in
+      a real project.
+    config:
+      meta:
+        owner: data-platform
+      column_types:
+        start_time: timestamp
+        warehouse_name: varchar
+        credits_used_compute: double
+        credits_used_cloud_services: double
+    columns:
+      - name: warehouse_name
+        description: Warehouse name
+        tests:
+          - not_null
