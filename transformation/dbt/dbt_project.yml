@@ -67,6 +67,14 @@ vars:
     workload: [revenue, delivery, observability, cost, data_quality]
     entity: [order, customer, run, export_file, warehouse_spend]
 
+  # generate_semantic_view (macros/snowflake/semantic_view.sql): the parts of a
+  # semantic view that must stay hand-curated, per domain (workload tag), e.g.
+  #   revenue:
+  #     metrics: ["fct_orders.total_amount AS SUM(fct_orders.amount)"]
+  #     relationships: []
+  #     synonyms: {fct_orders: [orders]}
+  semantic_views: {}
+
   # Cost attribution (models/cost/): first month of the month spine, months the
   # durable fact restates, and an optional per-unit denominator model.
   cost_start_month: "2026-01-01"
