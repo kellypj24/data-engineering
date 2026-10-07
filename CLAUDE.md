@@ -8,7 +8,7 @@ This is a composable collection of data engineering tools organized by role:
 - `transformation/` — Transform tools (dbt)
 - `delivery/` — Outbound delivery tools (file-export)
 - `stacks/` — Pre-assembled combinations (airbyte-dagster-dbt, dlt-dagster-dbt, dlt-temporal-dbt)
-- `infrastructure/` — Shared Docker/Terraform
+- `infrastructure/` — Shared Docker/Terraform. `terraform/modules/snowflake_rbac/` is the Snowflake role/grant module (read its README for the future-grant precedence rule); `terraform/snowflake/` uses it
 - `docs/` — Architecture patterns, tool comparison matrices, `patterns/` write-ups, and the two roadmaps
 - `archive/` — Previous experiments (reference only, not maintained)
 
@@ -51,6 +51,7 @@ GitHub Actions with cross-paradigm impact detection:
 - airbyte changes trigger orchestrator tests
 - Tool-specific changes trigger only that tool's tests
 - The dbt job builds the full example project (models, data tests, unit test) on duckdb
+- `test-terraform-snowflake` runs fmt/validate/test (mocked provider) on the Snowflake RBAC module and its root config
 - `wiring` (`.github/scripts/check_wiring.py`) fails when a tool is missing from any shared surface
 - `CI Success` fans in every job and is the only required check (no-bypass ruleset). **Add every new job to its `needs`** — it fails if the list drifts
 

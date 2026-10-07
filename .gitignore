@@ -61,3 +61,5 @@ credentials*.json
 
 # Dagster storage written when a base_dir path fails to expand "~"
 /**/~/
+# Reusable modules never commit a provider lock; root configurations do.
+infrastructure/terraform/modules/**/.terraform.lock.hcl
