@@ -46,6 +46,12 @@ updates:
       interval: weekly
     open-pull-requests-limit: 5
 
+  - package-ecosystem: uv
+    directory: /tooling/sensitive-scan
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
   # Lock only: the pyproject floors are tied to `require-dbt-version` and the
   # .pre-commit-config.yaml pins, so they must not move with each bump.
   - package-ecosystem: uv

@@ -27,6 +27,7 @@ jobs:
       airbyte: ${{ steps.filter.outputs.airbyte }}
       file_export: ${{ steps.filter.outputs.file_export }}
       terraform_snowflake: ${{ steps.filter.outputs.terraform_snowflake }}
+      sensitive_scan: ${{ steps.filter.outputs.sensitive_scan }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -49,6 +50,8 @@ jobs:
               - 'extract_load/airbyte/**'
             file_export:
               - 'delivery/file-export/**'
+            sensitive_scan:
+              - 'tooling/sensitive-scan/**'
             terraform_snowflake:
               - 'infrastructure/terraform/snowflake/**'
               - 'infrastructure/terraform/modules/snowflake_rbac/**'
@@ -225,6 +228,19 @@ jobs:
       - name: Terraform test
         run: terraform test
 
+  test-sensitive-scan:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.sensitive_scan == 'true'
+    defaults:
+      run:
+        working-directory: tooling/sensitive-scan
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - run: uv sync --dev
+      - run: uv run pytest tests/ -v --tb=short
+
   exposures-drift:
     runs-on: ubuntu-latest
     needs: detect-changes
@@ -287,6 +303,9 @@ jobs:
             srcs: pipelines/ tests/
           - tool: file-export
             path: delivery/file-export
+            srcs: src/ tests/
+          - tool: sensitive-scan
+            path: tooling/sensitive-scan
             srcs: src/ tests/
     steps:
       - uses: actions/checkout@v7
@@ -391,6 +410,7 @@ jobs:
             orchestration/dagster \
             orchestration/prefect \
             orchestration/temporal \
+            tooling/sensitive-scan \
             transformation/dbt
           do
             if uv lock --check --directory "$dir" >/dev/null 2>&1; then
@@ -433,6 +453,7 @@ jobs:
       - test-dlt
       - test-airbyte
       - test-terraform-snowflake
+      - test-sensitive-scan
       - exposures-drift
       - test-file-export
       - lint
