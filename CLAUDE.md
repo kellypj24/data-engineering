@@ -39,7 +39,8 @@ just test              # Run all test suites
 just lint              # Lint all code
 just fmt               # Format all code (rewrites files)
 just fmt-check         # Verify formatting without rewriting -- run this before pushing
-just check-wiring      # Every tool wired into justfile, ci.yml, dependabot, README
+just check-wiring      # Every tool wired into justfile, ci.yml, dependabot, README, pre-commit
+uvx pre-commit install # once per clone: run the root .pre-commit-config.yaml on every commit (same checks as CI)
 just dagster::test     # Run Dagster tests only (parses the dbt project first)
 just airflow::test     # Run Airflow tests only
 just dbt::test         # pytest + dbt build (seeds first) on the example fixtures
@@ -54,6 +55,7 @@ GitHub Actions with cross-paradigm impact detection:
 - Tool-specific changes trigger only that tool's tests
 - The dbt job builds the full example project (models, data tests, unit test) on duckdb
 - `test-terraform-snowflake` runs fmt/validate/test (mocked provider) on the Snowflake RBAC module and its root config
+- `hooks` runs the root `.pre-commit-config.yaml` on every file (hygiene, terraform fmt, sensitive-scan) and fails if a hook rewrote anything; per-tool lint hooks are skipped there because the lint jobs run the same commands
 - `wiring` (`.github/scripts/check_wiring.py`) fails when a tool is missing from any shared surface
 - `CI Success` fans in every job and is the only required check (no-bypass ruleset). **Add every new job to its `needs`** — it fails if the list drifts
 
@@ -72,7 +74,7 @@ role must provide. It is not a code skeleton; there is nothing to copy.
    `lint` matrix row, `lockfiles` job list
 5. Wire into `.github/dependabot.yml` with `package-ecosystem: uv` (not `pip` —
    `pip` leaves `uv.lock` untouched and the `lockfiles` job will fail)
-6. Update the root README tool table
+6. Update the root README tool table, and add a `lint-<tool>` hook to the root `.pre-commit-config.yaml` (and to the `SKIP` list of ci.yml's `hooks` job)
 7. Verify: `just --list`, `just check-wiring`, `just <tool>::test`, `uv lock --check`
 
 ## Claude Skills

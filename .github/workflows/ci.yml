@@ -476,6 +476,27 @@ jobs:
       - run: uv run --no-project --with pyyaml python .github/scripts/check_wiring.py
       - run: uv run --no-project --with pyyaml --with pytest pytest .github/scripts -q
 
+  # The root .pre-commit-config.yaml, so a green local commit is a green CI
+  # run. The per-tool lint hooks are skipped here because the lint matrix and
+  # lint-dbt run exactly the same commands. A hook that rewrites a file fails
+  # the build (git diff --exit-code) instead of passing silently.
+  hooks:
+    name: Pre-commit hooks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: ">=1.6.0"
+      - name: Run hooks on every file
+        env:
+          SKIP: lint-dagster,lint-airflow,lint-prefect,lint-temporal,lint-dbt,lint-dlt,lint-file-export,lint-sensitive-scan,lint-claude-review,lint-release-diff
+        run: uvx pre-commit run --all-files --show-diff-on-failure
+      - name: No hook rewrote a file
+        if: '!cancelled()'
+        run: git diff --exit-code
+
   # The single required status check. Every other job skips on unrelated PRs,
   # so none of them can be required directly; this one always runs and fails
   # only if a dependency failed or was cancelled (skipped is fine). It is
@@ -505,6 +526,7 @@ jobs:
       - test-dbt
       - lockfiles
       - wiring
+      - hooks
     steps:
       - uses: actions/checkout@v7
       # A job missing from `needs` would never gate a merge, and nothing else

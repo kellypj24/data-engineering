@@ -9,6 +9,7 @@ uv tools must appear in:
   - ci.yml: a paths-filter entry, a `test-<tool>` job running in its
     directory, a lint-matrix row or `lint-<tool>` job, and the lockfiles job;
   - dependabot.yml: a `uv` entry for its directory;
+  - the root .pre-commit-config.yaml: a `lint-<tool>` hook;
   - the README tool table.
 
 Terraform tools must appear in the ci.yml paths-filter, in a ci.yml
@@ -58,6 +59,16 @@ def check(root: Path) -> list[str]:
     ci_jobs = yaml.safe_load((root / ".github/workflows/ci.yml").read_text())["jobs"]
     dependabot = yaml.safe_load((root / ".github/dependabot.yml").read_text())
     readme = (root / "README.md").read_text()
+    hooks_path = root / ".pre-commit-config.yaml"
+    hook_ids = (
+        {
+            hook["id"]
+            for repo in yaml.safe_load(hooks_path.read_text())["repos"]
+            for hook in repo.get("hooks", [])
+        }
+        if hooks_path.exists()
+        else set()
+    )
 
     filter_step = next(
         s
@@ -112,6 +123,8 @@ def check(root: Path) -> list[str]:
                 missing("the ci.yml lockfiles job")
             if ("uv", directory) not in updates:
                 missing("dependabot.yml (package-ecosystem: uv)")
+            if f"lint-{tool}" not in hook_ids:
+                missing(f"the root .pre-commit-config.yaml (hook `lint-{tool}`)")
 
         elif any(path.rglob("*.tf")):
             if f"{directory}/**" not in filter_patterns:
