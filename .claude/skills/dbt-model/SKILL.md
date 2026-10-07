@@ -156,11 +156,10 @@ If the project has a reachable warehouse and real source data, finish with:
 uv run dbt build --select <model_name>
 ```
 
-`dbt build` is the real proof, but it needs the sources to exist. In the
-**toolkit's own** copy they do not — there is no `raw` schema, so `dbt test` and
-`dbt build` fail by design (tracked as task #16 in `docs/ci-cd-hardening.md`).
-There, `parse` + `compile` + `lint` is the complete gauntlet. Downstream, it is
-not — do not stop early and call a model verified.
+`dbt build` is the real proof, and it needs the sources to exist. In the
+**toolkit's own** copy the `raw` tables are fixture seeds (`seeds/example_raw/`,
+duckdb only): build the seeds first (`dbt build --select resource_type:seed`).
+Do not stop at `parse` + `compile` + `lint` and call a model verified.
 
 `profiles.yml` lives in the project directory here, not `~/.dbt`, so
 `DBT_PROFILES_DIR` must point at the dbt root. The `mod.just` exports it; if you
