@@ -1,21 +1,25 @@
+# Every package is bounded above (ci-cd-hardening #19): the weekly
+# dbt-deps-update workflow takes minor and patch releases, never a major one
+# unannounced. For 0.x packages the bound is <1.0.0. Raise a bound deliberately,
+# in its own PR.
 packages:
   - package: dbt-labs/dbt_utils
-    version: ">=1.3.0"
+    version: [">=1.3.0", "<2.0.0"]
 
   # Was calogica/dbt_expectations, which dbt deprecated in favour of the
   # metaplane fork; the old name emits a PackageRedirectDeprecation.
   - package: metaplane/dbt_expectations
-    version: ">=0.10.0"
+    version: [">=0.10.0", "<1.0.0"]
 
   # Was dbt-labs/dbt_audit_helper, which is not in the package index at all --
   # the hub name carries no `dbt_` prefix.
   - package: dbt-labs/audit_helper
-    version: ">=0.9.0"
+    version: [">=0.9.0", "<1.0.0"]
 
   - package: dbt-labs/codegen
-    version: ">=0.12.0"
+    version: [">=0.12.0", "<1.0.0"]
 
   # Was calogica/dbt_date, now godatadriven/dbt_date. Must match the fork that
   # dbt_expectations pulls transitively, or dbt errors on a duplicate project.
   - package: godatadriven/dbt_date
-    version: ">=0.10.0"
+    version: [">=0.10.0", "<1.0.0"]

@@ -59,6 +59,7 @@ GitHub Actions with cross-paradigm impact detection:
 - `hooks` runs the root `.pre-commit-config.yaml` on every file (hygiene, terraform fmt, sensitive-scan) and fails if a hook rewrote anything; per-tool lint hooks are skipped there because the lint jobs run the same commands
 - `dbt-compile-gate.yml` (push to main): parses + compiles the whole dbt project after every merge and keeps one `ci-alarm` issue open while main does not compile. Two green PRs can still break main together; this is the alarm
 - `dbt-deprecations.yml` (weekly): `dbt parse --show-all-deprecations` grouped by type and file (`.github/scripts/dbt_deprecations.py`) into one `dbt-deprecations` issue
+- `dbt-deps-update.yml` (weekly): `dbt deps --upgrade` within the upper bounds in `packages.yml` (every package is bounded; raise a bound in its own PR). Opens one PR with a `DEPS_PR_TOKEN` secret, otherwise a tracker issue
 - `security-audit.yml` (daily, report-only): `pip-audit` of every tool's `uv.lock`; one `security` issue kept open while anything is vulnerable, via the shared living-issue helper `.github/scripts/tracker_issue.py`
 - `wiring` (`.github/scripts/check_wiring.py`) fails when a tool is missing from any shared surface
 - `CI Success` fans in every job and is the only required check (no-bypass ruleset). **Add every new job to its `needs`** — it fails if the list drifts

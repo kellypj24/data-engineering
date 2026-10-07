@@ -1,0 +1,91 @@
+name: dbt package upgrades
+
+# Dependabot does not read packages.yml, so dbt Hub packages are upgraded here,
+# weekly, on Dependabot's day (Monday), within the upper bounds packages.yml
+# sets (ci-cd-hardening #19). One PR, updated in place, never one per run.
+#
+# PRs need a token: this repo does not let GITHUB_TOKEN open PRs, and a PR
+# opened with GITHUB_TOKEN would not trigger CI anyway, so its required CI
+# Success check would never run. Set a DEPS_PR_TOKEN secret (fine-grained,
+# this repo only: contents + pull requests read/write). Without one, the run
+# keeps a tracker issue open with the diff and the command to apply it.
+#
+# workflow_dispatch logs the diff and changes nothing unless open_pr is set.
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+    inputs:
+      open_pr:
+        description: Open/update the PR (or issue) instead of only logging the diff
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+
+# Serialise, never cancel: two runs must not race on the same branch.
+concurrency:
+  group: dbt-deps-update
+  cancel-in-progress: false
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    env:
+      HAS_DEPS_PR_TOKEN: ${{ secrets.DEPS_PR_TOKEN != '' }}
+      PUBLISH: ${{ github.event_name == 'schedule' || inputs.open_pr }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - name: Upgrade within bounds
+        working-directory: transformation/dbt
+        env:
+          DBT_PROFILES_DIR: .
+        run: |
+          uv sync --dev
+          uv run dbt deps --upgrade
+      - id: diff
+        name: Diff the lock
+        run: |
+          set -o pipefail
+          git --no-pager diff -- transformation/dbt/package-lock.yml | tee lock.diff
+          if [ -s lock.diff ]; then echo "changed=true" >> "$GITHUB_OUTPUT"; else echo "changed=false" >> "$GITHUB_OUTPUT"; fi
+      - name: Open or update the PR
+        if: steps.diff.outputs.changed == 'true' && env.PUBLISH == 'true' && env.HAS_DEPS_PR_TOKEN == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.DEPS_PR_TOKEN }}
+          branch: deps/dbt-packages
+          add-paths: transformation/dbt/package-lock.yml
+          commit-message: "chore(deps): upgrade dbt packages within bounds"
+          title: "chore(deps): upgrade dbt packages within bounds"
+          body: |
+            Weekly `dbt deps --upgrade` within the bounds in `transformation/dbt/packages.yml`
+            (`.github/workflows/dbt-deps-update.yml`). Review the release notes of each bumped
+            package; CI builds the whole project on the fixtures.
+          delete-branch: true
+      - name: Without a token, keep an issue instead
+        if: env.PUBLISH == 'true' && env.HAS_DEPS_PR_TOKEN != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo "dbt package upgrades are available within the bounds in \`transformation/dbt/packages.yml\`."
+            echo "No \`DEPS_PR_TOKEN\` secret is set, so no PR was opened. Apply them with:"
+            echo
+            echo '```bash'
+            echo 'cd transformation/dbt && DBT_PROFILES_DIR=. uv run dbt deps --upgrade'
+            echo '```'
+            echo
+            echo '```diff'
+            cat lock.diff
+            echo '```'
+          } > deps-issue.md
+          python3 .github/scripts/tracker_issue.py \
+            --marker "[dbt-deps-update]" --label dependencies \
+            --title "dbt package upgrades available" \
+            --body-file deps-issue.md \
+            --state ${{ steps.diff.outputs.changed == 'true' && 'open' || 'closed' }}

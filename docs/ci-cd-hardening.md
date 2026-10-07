@@ -43,7 +43,7 @@ is why the status lives here rather than on the section headings.)
 
 - [x] 6. [Add a scheduled dependency/security audit](#6-add-a-scheduled-dependencysecurity-audit)
 - [x] 7. [Add secret scanning](#7-add-secret-scanning)
-- [ ] 19. [Weekly dbt package upgrade PR, with bounded version ranges](#19-weekly-dbt-package-upgrade-pr-with-bounded-version-ranges)
+- [x] 19. [Weekly dbt package upgrade PR, with bounded version ranges](#19-weekly-dbt-package-upgrade-pr-with-bounded-version-ranges)
 - [x] 27. [Stop dependabot raising the dbt tool's version floors](#27-stop-dependabot-raising-the-dbt-tools-version-floors)
 - [x] 20. [Weekly dbt deprecations tracker issue](#20-weekly-dbt-deprecations-tracker-issue)
 
@@ -573,6 +573,13 @@ opening a PR.
 
 **Acceptance.** A stale lockfile produces one PR; an up-to-date one produces
 none; re-running updates the existing PR instead of opening another.
+
+> **As built:** the PR is opened only when a `DEPS_PR_TOKEN` secret exists. This
+> repo does not let `GITHUB_TOKEN` create PRs, and a PR opened with
+> `GITHUB_TOKEN` would not trigger CI, so its required `CI Success` could never
+> run. Without the secret, the run keeps a `[dbt-deps-update]` tracker issue
+> with the diff and the command to apply it. `peter-evans/create-pull-request`
+> on one branch gives "one PR, updated in place".
 
 ---
 
