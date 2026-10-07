@@ -1,0 +1,11 @@
+# For adopters who vendor this tool. pre-commit only reads this file at a
+# repository root, so from inside this toolkit use the `repo: local` snippet in
+# README.md instead.
+- id: claude-review
+  name: claude-review (CLAUDE_REVIEW=1)
+  description: Opt-in Claude review of the push; blocks only on a critical verdict
+  entry: claude-review
+  language: python
+  stages: [pre-push]
+  pass_filenames: false
+  always_run: true
