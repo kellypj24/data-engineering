@@ -1,0 +1,24 @@
+[project]
+name = "release-diff"
+version = "0.1.0"
+description = "Compare two captures of a dataset: rows added, removed, changed, with checked arithmetic"
+requires-python = ">=3.11"
+dependencies = [
+    "duckdb>=1.3.0",  # the engine only; release_diff.core is stdlib
+]
+
+[project.scripts]
+release-diff = "release_diff.engine:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "ruff>=0.16.10",
+]
+
+[build-system]
+requires = ["setuptools>=84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
