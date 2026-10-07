@@ -2,6 +2,8 @@ version: 2
 
 models:
   - name: fct_monthly_cost
+    config:
+      tags: [cost, warehouse_spend]  # workload, entity (docs/patterns/tagging.md)
     description: >
       Snowflake spend per month, team, workload, and warehouse, in the invoice
       currency. Durable: keeps months after ACCOUNT_USAGE drops their source
@@ -60,27 +62,9 @@ models:
               control_value_column: usage_in_currency
               tolerance: 0.01
 
-  - name: int_cost_daily_allocation
-    description: >
-      Each day's invoiced amount per usage type split into team / workload /
-      warehouse shares. See the model's header for the rules.
-    columns:
-      - name: usage_date
-        description: Day
-      - name: team
-        description: Owning team, SHARED, or NEEDS_OWNER_REVIEW
-        tests:
-          - not_null
-      - name: workload
-        description: Workload bucket
-        tests:
-          - not_null
-      - name: cost
-        description: Share of the day's invoiced amount
-        tests:
-          - not_null
-
   - name: mart_monthly_cost_summary
+    config:
+      tags: [cost, warehouse_spend]  # workload, entity (docs/patterns/tagging.md)
     description: Monthly total with its SHARED and NEEDS_OWNER_REVIEW shares, reported rather than hidden
     columns:
       - name: cost_month

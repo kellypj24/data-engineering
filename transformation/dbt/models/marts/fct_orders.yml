@@ -2,6 +2,8 @@ version: 2
 
 models:
   - name: fct_orders
+    config:
+      tags: [revenue, order]  # workload, entity (docs/patterns/tagging.md)
     description: >
       One row per order. Read by the example file exports
       (delivery/file-export/configs/); every column an export references must

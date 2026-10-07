@@ -2,6 +2,8 @@ version: 2
 
 models:
   - name: stg_example
+    config:
+      tags: [revenue, order]  # workload, entity (docs/patterns/tagging.md)
     description: Staged orders with cleaned strings and audit columns
     columns:
       - name: order_id

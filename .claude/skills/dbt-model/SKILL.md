@@ -167,6 +167,11 @@ are calling `dbt` directly, export it yourself.
 
 ## Common mistakes
 
+- **A model in a new `models/` subdirectory with no layer tag.** The layer tag
+  comes from the directory's `+tags` in `dbt_project.yml`; without one,
+  `dbt run-operation check_tag_contract` fails. Add workload and entity tags in
+  the model's `.yml` from the `tag_taxonomy` var.
+
 - **Putting `{{ audit_columns() }}` mid-`SELECT`.** It emits two columns with no
   trailing comma, so anything after it is a syntax error. It goes last.
 - **Writing `WHERE 1 = 1`.** Nothing in this project needs it any more —

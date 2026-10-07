@@ -2,6 +2,8 @@ version: 2
 
 models:
   - name: stg_delivery_confirmations
+    config:
+      tags: [delivery, export_file]  # workload, entity (docs/patterns/tagging.md)
     description: Transfers a transport confirmed, one row per file seen arriving
     columns:
       - name: recipient

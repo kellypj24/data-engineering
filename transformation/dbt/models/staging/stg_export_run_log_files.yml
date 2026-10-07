@@ -2,6 +2,8 @@ version: 2
 
 models:
   - name: stg_export_run_log_files
+    config:
+      tags: [delivery, export_file]  # workload, entity (docs/patterns/tagging.md)
     description: One row per file a successful file-export run wrote
     columns:
       - name: run_id
