@@ -59,6 +59,11 @@ vars:
   # clone.
   preservation_manifest: []
 
+  # Cost attribution (models/cost/): first month of the month spine, months the
+  # durable fact restates, and an optional per-unit denominator model.
+  cost_start_month: "2026-01-01"
+  cost_restate_months: 2
+
 models:
   data_warehouse:
     staging:
@@ -73,6 +78,14 @@ models:
     validation:
       +materialized: table
       +schema: validation
+    # Snowflake cost attribution (E27). Reads SNOWFLAKE.ACCOUNT_USAGE on
+    # Snowflake, the seeds/example_raw fixtures on duckdb; off on other adapters.
+    cost:
+      +materialized: table
+      +schema: cost
+      +enabled: "{{ target.type in ['snowflake', 'duckdb'] }}"
+      staging:
+        +materialized: view
 
 seeds:
   data_warehouse:

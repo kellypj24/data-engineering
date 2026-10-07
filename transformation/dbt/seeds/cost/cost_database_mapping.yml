@@ -1,0 +1,24 @@
+version: 2
+
+seeds:
+  - name: cost_database_mapping
+    description: >
+      Owning team per database: attributes storage, and the queries of users
+      flagged resolve_by_database in cost_user_mapping. Unmapped databases land
+      in NEEDS_OWNER_REVIEW.
+    config:
+      meta:
+        owner: data-platform
+      column_types:
+        database_name: varchar
+        team: varchar
+    columns:
+      - name: database_name
+        description: Snowflake database name
+        tests:
+          - unique
+          - not_null
+      - name: team
+        description: Owning team
+        tests:
+          - not_null

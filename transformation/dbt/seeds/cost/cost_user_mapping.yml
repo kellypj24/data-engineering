@@ -1,0 +1,35 @@
+version: 2
+
+seeds:
+  - name: cost_user_mapping
+    description: >
+      Cost attribution vocabulary: which team and workload each Snowflake user's
+      queries belong to. `resolve_by_database` (true, with team left empty) is
+      for genuinely shared service accounts only: their queries take the team
+      of the database they ran in (cost_database_mapping). Never use it as the
+      default for service accounts -- it hides who is spending. Users missing
+      here land in NEEDS_OWNER_REVIEW.
+    config:
+      meta:
+        owner: data-platform
+      column_types:
+        user_name: varchar
+        team: varchar
+        workload: varchar
+        resolve_by_database: boolean
+    columns:
+      - name: user_name
+        description: Snowflake user name, as in ACCOUNT_USAGE
+        tests:
+          - unique
+          - not_null
+      - name: team
+        description: Owning team; empty only when resolve_by_database is true
+      - name: workload
+        description: Workload the user's queries are
+        tests:
+          - not_null
+      - name: resolve_by_database
+        description: Take the team from the query's database instead
+        tests:
+          - not_null

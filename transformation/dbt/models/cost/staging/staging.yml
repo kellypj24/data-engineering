@@ -1,0 +1,34 @@
+version: 2
+
+models:
+  - name: stg_snowflake__query_attribution
+    description: Query-attributed compute credits with the query's user and database
+    columns:
+      - name: query_id
+        description: Query id
+        tests:
+          - unique
+          - not_null
+  - name: stg_snowflake__warehouse_metering
+    description: Hourly metered credits per warehouse
+    columns:
+      - name: warehouse_name
+        description: Warehouse
+        tests:
+          - not_null
+  - name: stg_snowflake__database_storage
+    description: Daily bytes per database, including failsafe
+    columns:
+      - name: database_name
+        description: Database
+        tests:
+          - not_null
+  - name: stg_snowflake__usage_in_currency_daily
+    description: Daily invoiced amount per usage type, with its month; the cost control total
+    columns:
+      - name: usage_in_currency
+        description: Cost in the invoice currency
+        tests:
+          - not_null
+      - name: usage_month
+        description: Month of usage_date
