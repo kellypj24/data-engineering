@@ -6,8 +6,19 @@ adapters; dry runs work everywhere.
 | Macro | What |
 |-------|------|
 | `clone_database` | Zero-copy clone, replacing the target; re-applies the replaced database's own grants. Refuses the prod database by name |
-| `refresh_environment` | `clone_database` from prod into a shared environment (`environment_databases` var), then restores the preservation manifest |
+| `refresh_environment` | `clone_database` from prod into a shared environment (`environment_databases` var), then `normalize_object_ownership`, then restores the preservation manifest |
 | `refresh_dev_database` | `clone_database` from prod into `<PROD>_<USERNAME>` (E31) |
+| `audit_object_ownership` | Read-only: schemas/tables/views not owned by `<DATABASE>_OWNER`, and an owner role that cannot create schemas |
+| `normalize_object_ownership` | Transfers that ownership (`COPY CURRENT GRANTS`) and grants `CREATE SCHEMA`. Dry run by default |
+
+## Ownership after a clone
+
+A clone keeps every object's owner. Clone prod into stage and stage's objects
+still belong to `ANALYTICS_PROD_OWNER`, so stage's dbt role cannot `create or
+replace` an existing model, or create the `__dbt_tmp` tables incrementals and
+snapshots need. `refresh_environment` normalizes ownership after each clone.
+The audit and the repair share one rule (`ownership_drift`), so a repair always
+leaves a clean audit.
 
 ## Preservation manifest
 
