@@ -31,15 +31,36 @@ This project ships with profile templates for four warehouses in `profiles.yml`.
 
 ### Snowflake
 
+Two targets, with opposite rules about defaults.
+
+**`snowflake` — your development target.** Defaults come from who you are:
+
 ```bash
-export SNOWFLAKE_ACCOUNT=xy12345.us-east-1
-export SNOWFLAKE_USER=transformer
-export SNOWFLAKE_PASSWORD=secret
-export SNOWFLAKE_ROLE=TRANSFORMER
-export SNOWFLAKE_DATABASE=ANALYTICS
-export SNOWFLAKE_WAREHOUSE=TRANSFORMING
-export SNOWFLAKE_SCHEMA=PUBLIC
+export SNOWFLAKE_ACCOUNT=myorg-myaccount
+export SNOWFLAKE_USER=jdoe          # everything else defaults:
+# database ANALYTICS_PROD_JDOE, schema JDOE_DEV, role ANALYTICS_DEV_WRITE,
+# warehouse TRANSFORMING, authenticator externalbrowser (SSO)
+just dbt::dev-database              # clone prod into ANALYTICS_PROD_JDOE (re-run to refresh)
+DBT_TARGET=snowflake dbt build
 ```
+
+Each engineer gets a personal zero-copy clone of production, so nobody
+overwrites anyone else's work. `just dbt::dev-database experiment_x` makes a
+named one (`ANALYTICS_PROD_EXPERIMENT_X`).
+
+**`snowflake_prod` — the production target.** No defaults at all. Every value
+must be set, so a missing variable fails rather than resolving to something.
+Key-pair auth:
+
+```bash
+export SNOWFLAKE_ACCOUNT=... SNOWFLAKE_USER=DBT_PROD SNOWFLAKE_PRIVATE_KEY_PATH=...
+export SNOWFLAKE_ROLE=ANALYTICS_PROD_WRITE SNOWFLAKE_DATABASE=ANALYTICS_PROD
+export SNOWFLAKE_WAREHOUSE=TRANSFORMING SNOWFLAKE_SCHEMA=PUBLIC
+DBT_TARGET=snowflake_prod DBT_ENV=prod dbt build
+```
+
+Shared environments (stage) are refreshed from prod by `refresh_environment`
+(`macros/snowflake/clone_database.sql`).
 
 ### DuckDB
 
@@ -69,7 +90,7 @@ export BIGQUERY_LOCATION=US
 Then select the target with `DBT_TARGET` (default `duckdb`):
 
 ```bash
-DBT_TARGET=snowflake dbt build
+DBT_TARGET=postgres dbt build
 ```
 
 ## Target vs. environment

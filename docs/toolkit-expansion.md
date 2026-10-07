@@ -63,7 +63,7 @@
 **P3 — Warehouse environments & cost (Snowflake extra)**
 
 - [x] E9. [Snowflake RBAC as code](#e9-snowflake-rbac-as-code)
-- [ ] E31. [Personal development databases](#e31-personal-development-databases)
+- [x] E31. [Personal development databases](#e31-personal-development-databases)
 - [x] E10. [Zero-copy shared-environment refresh](#e10-zero-copy-shared-environment-refresh)
 - [ ] E11. [Preservation manifest for non-dbt objects](#e11-preservation-manifest-for-non-dbt-objects)
 - [ ] E12. [Ownership drift audit and repair](#e12-ownership-drift-audit-and-repair)

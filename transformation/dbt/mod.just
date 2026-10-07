@@ -14,6 +14,12 @@ test:
     DBT_ENV=prod uv run dbt build --select resource_type:seed
     DBT_ENV=prod uv run dbt build --exclude resource_type:seed
 
+# The database is the `snowflake` dev target's default; re-running replaces it.
+# Pass a name for a named experiment: `just dbt::dev-database experiment_x`.
+# Clone prod into your personal Snowflake database, ANALYTICS_PROD_<USER>
+dev-database username="":
+    DBT_TARGET=snowflake uv run dbt run-operation refresh_dev_database --args '{username: "{{ username }}", dry_run: false}'
+
 # Run dbt models
 run:
     uv run dbt run

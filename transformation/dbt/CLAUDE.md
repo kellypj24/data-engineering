@@ -7,7 +7,7 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 
 - `pyproject.toml` — Dependencies: dbt-core, dbt-snowflake, dbt-duckdb; dev: sqlfluff + dbt templater, yamllint, pre-commit, pytest. Extras: `postgres`, `bigquery`
 - `dbt_project.yml` — Project config: name=data_warehouse, models materialization by layer
-- `profiles.yml` — One profile, four outputs (duckdb, snowflake, postgres, bigquery), selected by `DBT_TARGET`. **Defaults to duckdb** so everything runs without credentials
+- `profiles.yml` — One profile, outputs duckdb, snowflake (dev), snowflake_prod, postgres, bigquery, selected by `DBT_TARGET`. **Defaults to duckdb** so everything runs without credentials. `snowflake` (dev) derives database `ANALYTICS_PROD_<USER>` / schema `<USER>_DEV` from `SNOWFLAKE_USER`; `snowflake_prod` has **no defaults** (every env var required, key-pair auth) — keep it that way
 - `packages.yml` / `package-lock.yml` — dbt_utils, dbt_expectations (metaplane), audit_helper, codegen, dbt_date (godatadriven). The lock file is committed
 - `.sqlfluff` — SQL linting: Snowflake dialect, uppercase keywords, trailing commas forbidden
 - `.pre-commit-config.yaml` — sqlfluff, yamllint, dbt-checkpoint hooks
@@ -16,7 +16,7 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `macros/utils/safe_divide.sql` — Null/zero-safe division
 - `macros/utils/mint_surrogate_key.sql` — Versioned, collision-free UUID-shaped surrogate keys (`mint_surrogate_key`, `surrogate_key_version`). Use instead of `dbt_utils.generate_surrogate_key`
 - `macros/utils/backfill_surrogate_keys.sql` — `run-operation` that fills or upgrades key columns in place (no source reads, no `--full-refresh`). Dry run by default; dependent keys in a second UPDATE; version column written last
-- `macros/snowflake/clone_database.sql` — **Snowflake extra.** `clone_database(source, target, copy_grants, dry_run)` and `refresh_environment(env, dry_run)` run-operations: zero-copy clone of prod over a shared environment. Dry run by default. Refuse the prod database by name (`environment_databases` var), so `refresh_environment` refuses `prod`. `copy_grants` re-applies the replaced database's own grants (Snowflake has no COPY GRANTS for databases), ownership last
+- `macros/snowflake/clone_database.sql` — **Snowflake extra.** `clone_database(source, target, copy_grants, dry_run)` and `refresh_environment(env, dry_run)` run-operations: zero-copy clone of prod over a shared environment. Dry run by default. Refuse the prod database by name (`environment_databases` var), so `refresh_environment` refuses `prod`. `copy_grants` re-applies the replaced database's own grants (Snowflake has no COPY GRANTS for databases), ownership last. `refresh_dev_database(username, dry_run)` clones prod into `<PROD>_<USERNAME>` (default `CURRENT_USER()`); `just dbt::dev-database`
 - `tests/python/` — pytest suite that runs dbt in-process (`dbtRunner`) on a throwaway copy of the project and duckdb file (`conftest.py`): run-operations, seeds, the durable fact, and a whole-project `dbt build`
 - `tests/macros/` — Singular tests over literal rows that pin macro behaviour; no sources, so they run on duckdb in CI
 - `macros/staging/audit_columns.sql` — _loaded_at (EL timestamp or fallback), _dbt_updated_at columns
@@ -47,6 +47,7 @@ just dbt::test         # pytest, then `dbt build` of the seeds, then of everythi
 just dbt::lint         # sqlfluff + yamllint --strict (same as CI)
 just dbt::fix          # sqlfluff fix
 just dbt::docs         # dbt docs generate + serve
+just dbt::dev-database # Snowflake: clone prod into ANALYTICS_PROD_<USER>
 ```
 
 All of the above run against duckdb by default — no warehouse credentials

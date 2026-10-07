@@ -12,18 +12,37 @@ data_warehouse:
       path: "{{ env_var('DUCKDB_PATH', 'dev.duckdb') }}"
       threads: 4
 
-    # --- Snowflake ---
-    # Production. Set DBT_TARGET=snowflake and supply SNOWFLAKE_* env vars.
+    # --- Snowflake, development ---
+    # Set DBT_TARGET=snowflake. Defaults are derived from who you are, so a
+    # fresh personal clone (`just dbt::dev-database`) needs no configuration:
+    # database ANALYTICS_PROD_<SNOWFLAKE_USER>, schema <SNOWFLAKE_USER>_DEV.
+    # The database prefix must match `environment_databases.prod` in
+    # dbt_project.yml (refresh_dev_database clones into the same name).
     snowflake:
       type: snowflake
       account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
       user: "{{ env_var('SNOWFLAKE_USER') }}"
-      password: "{{ env_var('SNOWFLAKE_PASSWORD') }}"
-      role: "{{ env_var('SNOWFLAKE_ROLE', 'TRANSFORMER') }}"
+      authenticator: "{{ env_var('SNOWFLAKE_AUTHENTICATOR', 'externalbrowser') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE', 'ANALYTICS_DEV_WRITE') }}"
+      database: "{{ env_var('SNOWFLAKE_DATABASE', 'ANALYTICS_PROD_' ~ env_var('SNOWFLAKE_USER') | upper) }}"
+      warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE', 'TRANSFORMING') }}"
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA', env_var('SNOWFLAKE_USER') | upper ~ '_DEV') }}"
+      threads: 4
+
+    # --- Snowflake, production ---
+    # Set DBT_TARGET=snowflake_prod. NO defaults: every value must come from
+    # the environment, so a missing variable fails loudly instead of quietly
+    # resolving to something. Key-pair auth for the service user.
+    snowflake_prod:
+      type: snowflake
+      account: "{{ env_var('SNOWFLAKE_ACCOUNT') }}"
+      user: "{{ env_var('SNOWFLAKE_USER') }}"
+      private_key_path: "{{ env_var('SNOWFLAKE_PRIVATE_KEY_PATH') }}"
+      role: "{{ env_var('SNOWFLAKE_ROLE') }}"
       database: "{{ env_var('SNOWFLAKE_DATABASE') }}"
       warehouse: "{{ env_var('SNOWFLAKE_WAREHOUSE') }}"
-      schema: "{{ env_var('SNOWFLAKE_SCHEMA', 'PUBLIC') }}"
-      threads: 4
+      schema: "{{ env_var('SNOWFLAKE_SCHEMA') }}"
+      threads: 8
 
     # --- PostgreSQL ---
     # Set DBT_TARGET=postgres and supply POSTGRES_* env vars.

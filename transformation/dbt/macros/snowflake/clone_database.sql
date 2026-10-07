@@ -128,3 +128,33 @@
     {%- endif -%}
     {%- do clone_database(databases['prod'], databases[env], copy_grants=true, dry_run=dry_run) -%}
 {% endmacro %}
+
+
+{#-
+    Clone production into your personal development database:
+
+        dbt run-operation refresh_dev_database                                  # dry run
+        dbt run-operation refresh_dev_database --args '{dry_run: false}'
+        dbt run-operation refresh_dev_database --args '{username: experiment_x, dry_run: false}'
+
+    `username` defaults to CURRENT_USER(); the target is
+    <environment_databases.prod>_<USERNAME>, the same name the `snowflake`
+    dev target in profiles.yml defaults to. Re-running replaces the clone.
+-#}
+{% macro refresh_dev_database(username=none, dry_run=true) %}
+    {%- set prod_db = var('environment_databases', {}).get('prod') -%}
+    {%- if not prod_db -%}
+        {{ exceptions.raise_compiler_error("refresh_dev_database: environment_databases.prod is not set") }}
+    {%- endif -%}
+    {%- if not username -%}
+        {%- if adapter.type() == 'snowflake' -%}
+            {%- set username = run_query('SELECT CURRENT_USER()').columns[0].values()[0] -%}
+        {%- else -%}
+            {{ exceptions.raise_compiler_error(
+                "refresh_dev_database: pass `username` (CURRENT_USER() needs Snowflake)"
+            ) }}
+        {%- endif -%}
+    {%- endif -%}
+    {%- set dev_db = (prod_db ~ '_' ~ username) | upper -%}
+    {%- do clone_database(prod_db, dev_db, copy_grants=true, dry_run=dry_run) -%}
+{% endmacro %}
