@@ -1,0 +1,9 @@
+# For adopters who vendor this tool. pre-commit only reads this file at a
+# repository root, so from inside this toolkit use the `repo: local` snippet in
+# README.md instead.
+- id: sensitive-scan
+  name: sensitive-scan
+  description: Block secrets, PII, and identity literals from being committed
+  entry: sensitive-scan
+  language: python
+  types: [text]

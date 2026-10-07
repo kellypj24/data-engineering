@@ -2,7 +2,7 @@
 
 > **This is a specification, not a skeleton.** It states what a tool of this
 > role must provide. Read it as a requirements checklist, then create the
-> files. `tooling/secret-guard/` (E16) is the model of what "finished" looks like.
+> files. `tooling/sensitive-scan/` is the model of what "finished" looks like.
 
 ## What This Role Does
 

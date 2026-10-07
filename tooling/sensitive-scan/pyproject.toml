@@ -1,0 +1,22 @@
+[project]
+name = "sensitive-scan"
+version = "0.1.0"
+description = "High-precision sensitive-data commit guard: secrets, PII, and identity literals; pre-commit hook and CI step"
+requires-python = ">=3.11"
+dependencies = []  # stdlib only: it runs as a git hook without a venv
+
+[project.scripts]
+sensitive-scan = "sensitive_scan.scan:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "ruff>=0.16.10",
+]
+
+[build-system]
+requires = ["setuptools>=84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

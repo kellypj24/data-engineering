@@ -1,0 +1,14 @@
+# Copy to `.sensitive-scan.toml` at your repository root.
+[sensitive-scan]
+# Any of: secrets, pii, identity-literals. Default: all three.
+packs = ["secrets", "pii", "identity-literals"]
+
+# Columns whose values identify a person or account. A literal UUID compared
+# against one of these (`WHERE customer_id = '<uuid>'`) is a finding.
+identity_columns = ["customer_id", "patient_id", "member_id", "user_id"]
+
+# Use gitleaks for the secrets pack when it is on PATH (default true).
+use_gitleaks = true
+
+# There is deliberately no exclude/skip/ignore-paths key: the loader rejects
+# one. Mark a synthetic fixture line with `sensitive-scan:ignore` instead.
