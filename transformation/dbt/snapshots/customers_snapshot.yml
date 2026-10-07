@@ -1,0 +1,19 @@
+version: 2
+
+snapshots:
+  - name: customers_snapshot
+    description: >
+      Type-2 history of raw.customers (check strategy on email; hard deletes
+      invalidate the current row). Query a point in time with
+      dbt_valid_from <= t AND (t < dbt_valid_to OR dbt_valid_to IS NULL).
+    columns:
+      - name: id
+        description: Customer id; unique among current rows
+      - name: email
+        description: Email as of this version
+      - name: dbt_valid_from
+        description: When this version became current
+        tests:
+          - not_null
+      - name: dbt_valid_to
+        description: When it stopped being current; null for the current version
