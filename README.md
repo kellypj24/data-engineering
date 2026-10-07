@@ -90,7 +90,7 @@ data-engineering/
 ├── delivery/               # Outbound delivery tools
 │   ├── file-export/
 │   └── _template/
-├── infrastructure/         # Shared infra (Docker, Terraform, etc.)
+├── infrastructure/         # Shared infra: Docker, Terraform (Snowflake RBAC module in terraform/modules/snowflake_rbac)
 ├── stacks/                 # Pre-assembled tool combinations
 │   ├── airbyte-dagster-dbt/
 │   ├── dlt-dagster-dbt/

@@ -62,7 +62,7 @@
 
 **P3 — Warehouse environments & cost (Snowflake extra)**
 
-- [ ] E9. [Snowflake RBAC as code](#e9-snowflake-rbac-as-code)
+- [x] E9. [Snowflake RBAC as code](#e9-snowflake-rbac-as-code)
 - [ ] E31. [Personal development databases](#e31-personal-development-databases)
 - [ ] E10. [Zero-copy shared-environment refresh](#e10-zero-copy-shared-environment-refresh)
 - [ ] E11. [Preservation manifest for non-dbt objects](#e11-preservation-manifest-for-non-dbt-objects)

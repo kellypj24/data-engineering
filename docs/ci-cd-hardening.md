@@ -818,6 +818,10 @@ aren't validated — `ci.yml`'s `test-airbyte` job covers
 entry and a `ci.yml` job (in `ci-success` needs) to cover `infrastructure/terraform/**`, and add
 `tflint init` + `tflint` alongside the existing `fmt`/`validate`/`test`.
 
+Progress: `infrastructure/terraform/snowflake/` and `modules/snowflake_rbac/`
+are covered by `test-terraform-snowflake` (E9). Still open: `aws/` once it has
+content, and `tflint`.
+
 ### 15. Consider ARM runners for cost/speed
 
 `ubuntu-24.04-arm` runners are cheaper and often faster. Low-effort swap for the
