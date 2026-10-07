@@ -94,6 +94,26 @@ def test_only_the_restatement_window_is_reprocessed(warehouse):
     assert rows["2026-01-06"] == 40.0, "new day is appended"
 
 
+def test_backfill_window_reprocesses_exactly_those_days(warehouse):
+    # Corrections on an old day (outside the restate window) and a recent one.
+    sql(warehouse, "UPDATE example_raw.orders SET amount = 99 WHERE id IN (1, 6)")
+    window = "{dbt_env: prod, backfill_start: 2026-01-01, backfill_end: 2026-01-01}"
+    assert warehouse.dbt("run", "--select", MODEL, "--vars", window)
+
+    rows = {day: revenue for day, _, revenue in fact(warehouse)}
+    assert rows["2026-01-01"] == 114.0, "the backfilled day is reprocessed"
+    assert rows["2026-01-05"] == 35.0, "a day outside the backfill window is untouched"
+
+
+@pytest.mark.parametrize(
+    "window",
+    ["{dbt_env: prod, backfill_start: 2026-01-01}", "{dbt_env: prod, backfill_start: 2026-01-05, backfill_end: 2026-01-01}"],
+    ids=["half-set", "inverted"],
+)
+def test_backfill_window_must_be_complete_and_ordered(warehouse, window):
+    assert not warehouse.dbt("run", "--select", MODEL, "--vars", window)
+
+
 @pytest.mark.parametrize(
     ("control_rows", "passes"),
     [

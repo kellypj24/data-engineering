@@ -33,6 +33,12 @@ with a control relation, such as a ledger or an invoice:
 - It **fails when zero periods are compared**. An empty control, or a join on
   mismatched types that matches nothing, cannot pass vacuously.
 
+## Backfilling a date range
+
+`--vars '{backfill_start: ..., backfill_end: ...}'` reprocesses exactly those
+days and leaves the rest untouched; run long ranges in bounded batches with
+the `backfill-runbook` skill.
+
 ## Deliberately rebuilding
 
 Confirm the source still covers the full history, then drop the table by hand

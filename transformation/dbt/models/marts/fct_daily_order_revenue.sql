@@ -15,6 +15,11 @@
     To deliberately rebuild, drop the table by hand after confirming the source
     still covers the full history. See docs/patterns/durable-facts.md.
 
+    Backfill: `--vars '{backfill_start: 2026-01-01, backfill_end: 2026-01-07}'`
+    reprocesses exactly those days (inclusive) instead of the restate window.
+    Days outside it are untouched. Run long ranges in bounded batches (the
+    `backfill-runbook` skill).
+
     delete+insert is supported on duckdb, Snowflake, and Postgres; on BigQuery
     use merge or insert_overwrite.
 -#}
@@ -32,7 +37,17 @@ WITH orders AS (
         CAST(created_at AS DATE) AS order_date,
         amount
     FROM {{ ref('stg_example') }}
-    {% if is_incremental() %}
+    {% set backfill_start = var('backfill_start', none) %}
+    {% set backfill_end = var('backfill_end', none) %}
+    {% if (backfill_start is none) != (backfill_end is none) %}
+        {{ exceptions.raise_compiler_error("set both backfill_start and backfill_end, or neither") }}
+    {% endif %}
+    {% if backfill_start is not none and backfill_start | string > backfill_end | string %}
+        {{ exceptions.raise_compiler_error("backfill_start is after backfill_end") }}
+    {% endif %}
+    {% if is_incremental() and backfill_start is not none %}
+        WHERE CAST(created_at AS DATE) BETWEEN CAST('{{ backfill_start }}' AS DATE) AND CAST('{{ backfill_end }}' AS DATE)
+    {% elif is_incremental() %}
         WHERE CAST(created_at AS DATE) > (
             SELECT {{ dbt.dateadd('day', -var('fct_daily_order_revenue_restate_periods', 2), 'MAX(order_date)') }}
             FROM {{ this }}
