@@ -476,6 +476,31 @@ jobs:
       - run: uv run --no-project --with pyyaml python .github/scripts/check_wiring.py
       - run: uv run --no-project --with pyyaml --with pytest pytest .github/scripts -q
 
+  # Unconditional and server-side, so it cannot be skipped with --no-verify:
+  # gitleaks over the full history with .gitleaks.toml (the default rules plus
+  # literal warehouse/database passwords). ~1s for this repo. Pinned release,
+  # checksum-verified.
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    env:
+      GITLEAKS_VERSION: 8.30.1
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          base="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}"
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -sSfL -o "$tarball" "$base/$tarball"
+          curl -sSfL -o checksums.txt "$base/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          grep " $tarball\$" checksums.txt | sha256sum -c -
+          tar xzf "$tarball" gitleaks
+      - name: Scan history
+        run: ./gitleaks git --no-banner --redact --config .gitleaks.toml --exit-code 1 .
+
   # The root .pre-commit-config.yaml, so a green local commit is a green CI
   # run. The per-tool lint hooks are skipped here because the lint matrix and
   # lint-dbt run exactly the same commands. A hook that rewrites a file fails
@@ -527,6 +552,7 @@ jobs:
       - lockfiles
       - wiring
       - hooks
+      - secrets
     steps:
       - uses: actions/checkout@v7
       # A job missing from `needs` would never gate a merge, and nothing else

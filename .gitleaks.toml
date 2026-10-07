@@ -1,0 +1,35 @@
+# gitleaks config for this repo (ci-cd-hardening #7). Extends the default rules
+# with what they miss for a data stack: warehouse/database passwords written as
+# literals in profiles, env files, and connector configs. Templated values
+# ({{ env_var(...) }}, ${VAR}, <placeholder>) are not secrets and do not match.
+[extend]
+useDefault = true
+
+[[rules]]
+id = "warehouse-password"
+description = "Literal warehouse or database password"
+regex = '''(?i)\b(?:[a-z0-9]+_)*(?:password|passwd|pwd)["']?\s*[:=]\s*["']?([^\s"'{}$<>]{8,})'''
+secretGroup = 1
+keywords = ["password", "passwd", "pwd"]
+
+# Not secrets: placeholder words, and code that READS a password -- a function
+# call (os.environ.get(...), get_secret(...)), a lookup (params["password"]), or a
+# variable reference (var.x).
+[[rules.allowlists]]
+regexTarget = "match"
+regexes = [
+  '''(?i)(?:password|passwd|pwd)["']?\s*[:=]\s*["']?(?:changeme|password|secret|example|your[_-]?password|xxx+|\*+)\b''',
+  '''(?i)(?:password|passwd|pwd)["']?\s*[:=]\s*[\w.\[\]"']*\(''',
+  '''(?i)(?:password|passwd|pwd)["']?\s*[:=]\s*\w+\[''',
+  '''(?i)(?:password|passwd|pwd)["']?\s*[:=]\s*(?:var|local|module|data|os|self|settings|config)\.''',
+]
+
+# Local-only development services whose throwaway credentials are part of the
+# example (the Temporal dev stack's Postgres). Nothing here reaches a real
+# environment; a real secret belongs in an env var, never in these files.
+[[rules.allowlists]]
+paths = [
+  '''^orchestration/temporal/docker-compose\.yml$''',
+  # Templates showing which keys to set; gitleaks' default rules still scan them.
+  '''\.example$''',
+]
