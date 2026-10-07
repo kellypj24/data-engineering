@@ -60,6 +60,9 @@ All five, or the tool is invisible to some part of the system.
    `pyproject.toml` but leaves `uv.lock` untouched, and the `lockfiles` CI job
    will fail on the resulting drift.
 4. **Root `README.md`** — add a row to the tool table (`| Role | Tool | Description | Status |`).
+   **Root `.pre-commit-config.yaml`** — a `lint-<tool-name>` hook calling
+   `just <tool-name>::lint && just <tool-name>::fmt-check`, `files: ^<role>/<tool-name>/`;
+   add its id to the `SKIP` list of ci.yml's `hooks` job.
 5. **Root `CLAUDE.md`** — only if the tool introduces a new convention. Usually
    it does not.
 

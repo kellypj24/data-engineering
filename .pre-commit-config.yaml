@@ -1,0 +1,91 @@
+exclude: ^archive/
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+
+  # Each tool's own linters, via its `just` recipes: the same pinned versions
+  # and commands CI's lint jobs run. CI skips these in the `hooks` job because
+  # the lint matrix already runs them (SKIP in ci.yml).
+  - repo: local
+    hooks:
+      - id: lint-dagster
+        name: lint dagster
+        entry: bash -c 'just dagster::lint && just dagster::fmt-check'
+        language: system
+        files: ^orchestration/dagster/
+        pass_filenames: false
+      - id: lint-airflow
+        name: lint airflow
+        entry: bash -c 'just airflow::lint && just airflow::fmt-check'
+        language: system
+        files: ^orchestration/airflow/
+        pass_filenames: false
+      - id: lint-prefect
+        name: lint prefect
+        entry: bash -c 'just prefect::lint && just prefect::fmt-check'
+        language: system
+        files: ^orchestration/prefect/
+        pass_filenames: false
+      - id: lint-temporal
+        name: lint temporal
+        entry: bash -c 'just temporal::lint && just temporal::fmt-check'
+        language: system
+        files: ^orchestration/temporal/
+        pass_filenames: false
+      - id: lint-dbt
+        name: lint dbt
+        entry: bash -c 'just dbt::lint'
+        language: system
+        files: ^transformation/dbt/
+        pass_filenames: false
+      - id: lint-dlt
+        name: lint dlt
+        entry: bash -c 'just dlt::lint && just dlt::fmt-check'
+        language: system
+        files: ^extract_load/dlt/
+        pass_filenames: false
+      - id: lint-file-export
+        name: lint file-export
+        entry: bash -c 'just file-export::lint && just file-export::fmt-check'
+        language: system
+        files: ^delivery/file\-export/
+        pass_filenames: false
+      - id: lint-sensitive-scan
+        name: lint sensitive-scan
+        entry: bash -c 'just sensitive-scan::lint && just sensitive-scan::fmt-check'
+        language: system
+        files: ^tooling/sensitive\-scan/
+        pass_filenames: false
+      - id: lint-claude-review
+        name: lint claude-review
+        entry: bash -c 'just claude-review::lint && just claude-review::fmt-check'
+        language: system
+        files: ^tooling/claude\-review/
+        pass_filenames: false
+      - id: lint-release-diff
+        name: lint release-diff
+        entry: bash -c 'just release-diff::lint && just release-diff::fmt-check'
+        language: system
+        files: ^tooling/release\-diff/
+        pass_filenames: false
+      - id: terraform-fmt
+        name: terraform fmt
+        entry: terraform fmt -check -recursive
+        language: system
+        files: \.tf$
+        pass_filenames: false
+      # This toolkit's own commit guard (tooling/sensitive-scan), on its own repo.
+      - id: sensitive-scan
+        name: sensitive-scan
+        entry: uv run --quiet --project tooling/sensitive-scan sensitive-scan
+        language: system
+        types: [text]
