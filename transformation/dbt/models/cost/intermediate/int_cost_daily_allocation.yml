@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: int_cost_daily_allocation
+    description: >
+      Each day's invoiced amount per usage type split into team / workload /
+      warehouse shares. See the model's header for the rules.
+    columns:
+      - name: usage_date
+        description: Day
+      - name: team
+        description: Owning team, SHARED, or NEEDS_OWNER_REVIEW
+        tests:
+          - not_null
+      - name: workload
+        description: Workload bucket
+        tests:
+          - not_null
+      - name: cost
+        description: Share of the day's invoiced amount
+        tests:
+          - not_null

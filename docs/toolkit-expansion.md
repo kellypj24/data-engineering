@@ -82,7 +82,7 @@
 - [x] E17. [`data-profiling` stack skill](#e17-data-profiling-stack-skill)
 - [x] E18. [`dbt-test` stack skill](#e18-dbt-test-stack-skill)
 - [x] E19. [`backfill-runbook` stack skill](#e19-backfill-runbook-stack-skill)
-- [ ] E33. [Three-dimensional tagging contract](#e33-three-dimensional-tagging-contract)
+- [x] E33. [Three-dimensional tagging contract](#e33-three-dimensional-tagging-contract)
 - [ ] E32. [Snapshot design guide](#e32-snapshot-design-guide)
 - [ ] E20. [State migrations on promotion](#e20-state-migrations-on-promotion)
 - [x] E21. [Architecture decision records](#e21-architecture-decision-records)

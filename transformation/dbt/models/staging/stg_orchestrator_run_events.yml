@@ -2,6 +2,8 @@ version: 2
 
 models:
   - name: stg_orchestrator_run_events
+    config:
+      tags: [observability, run]  # workload, entity (docs/patterns/tagging.md)
     description: >
       Orchestrator run lifecycle events, one row per event. Rows are appended,
       so a run can have more than one STARTED row.

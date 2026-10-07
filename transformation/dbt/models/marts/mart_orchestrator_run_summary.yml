@@ -2,6 +2,8 @@ version: 2
 
 models:
   - name: mart_orchestrator_run_summary
+    config:
+      tags: [observability, run]  # workload, entity (docs/patterns/tagging.md)
     description: >
       One row per orchestrator run, for trends the orchestrator UI does not
       answer: duration over time, failure rates by job and weekday, test

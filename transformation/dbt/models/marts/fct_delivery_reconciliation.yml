@@ -2,6 +2,8 @@ version: 2
 
 models:
   - name: fct_delivery_reconciliation
+    config:
+      tags: [delivery, export_file]  # workload, entity (docs/patterns/tagging.md)
     description: >
       Expected deliveries (files successful file-export runs wrote) against
       confirmed transfers. One row per expected file that is due or confirmed,

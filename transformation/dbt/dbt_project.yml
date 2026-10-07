@@ -59,6 +59,14 @@ vars:
   # clone.
   preservation_manifest: []
 
+  # The allowed tags, per axis (docs/patterns/tagging.md). check_tag_contract
+  # fails on any model tag not listed here, and on a model without exactly one
+  # layer tag. A value may belong to one axis only.
+  tag_taxonomy:
+    layer: [staging, intermediate, marts, validation]
+    workload: [revenue, delivery, observability, cost, data_quality]
+    entity: [order, customer, run, export_file, warehouse_spend]
+
   # Cost attribution (models/cost/): first month of the month spine, months the
   # durable fact restates, and an optional per-unit denominator model.
   cost_start_month: "2026-01-01"
@@ -66,18 +74,26 @@ vars:
 
 models:
   data_warehouse:
+    # Layer tags are set here, by directory, and nowhere else: exactly one per
+    # model, enforced by `dbt run-operation check_tag_contract`. Workload and
+    # entity tags are set by hand in each model's .yml. See
+    # docs/patterns/tagging.md and docs/adr/0006-three-axis-tags.md.
     staging:
       +materialized: view
       +schema: staging
+      +tags: [staging]
     intermediate:
       +materialized: view
       +schema: intermediate
+      +tags: [intermediate]
     marts:
       +materialized: table
       +schema: marts
+      +tags: [marts]
     validation:
       +materialized: table
       +schema: validation
+      +tags: [validation]
     # Snowflake cost attribution (E27). Reads SNOWFLAKE.ACCOUNT_USAGE on
     # Snowflake, the seeds/example_raw fixtures on duckdb; off on other adapters.
     cost:
@@ -86,6 +102,11 @@ models:
       +enabled: "{{ target.type in ['snowflake', 'duckdb'] }}"
       staging:
         +materialized: view
+        +tags: [staging]
+      intermediate:
+        +tags: [intermediate]
+      marts:
+        +tags: [marts]
 
 seeds:
   data_warehouse:

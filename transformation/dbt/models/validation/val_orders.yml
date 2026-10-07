@@ -2,6 +2,8 @@ version: 2
 
 models:
   - name: val_orders
+    config:
+      tags: [data_quality, order]  # workload, entity (docs/patterns/tagging.md)
     description: >
       Example validation rule set over stg_example: one row per order with a
       pass/fail and severity column per rule, the worst failed severity, and an

@@ -19,6 +19,7 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `macros/snowflake/clone_database.sql` — **Snowflake extra.** `clone_database(source, target, copy_grants, dry_run)` and `refresh_environment(env, dry_run)` run-operations: zero-copy clone of prod over a shared environment. Dry run by default. Refuse the prod database by name (`environment_databases` var), so `refresh_environment` refuses `prod`. `copy_grants` re-applies the replaced database's own grants (Snowflake has no COPY GRANTS for databases), ownership last. `refresh_dev_database(username, dry_run)` clones prod into `<PROD>_<USERNAME>` (default `CURRENT_USER()`); `just dbt::dev-database`
 - `macros/snowflake/object_ownership.sql` — **Snowflake extra.** `audit_object_ownership` (read-only) and `normalize_object_ownership` (dry run by default) over one shared rule, `ownership_drift`: schemas/tables/views not owned by `<DATABASE>_OWNER`, plus a missing CREATE SCHEMA. `refresh_environment` normalizes after cloning
 - `macros/utils/preserve_objects.sql` — `preserve_objects(mode, database, dry_run)`: verify / provision / restore the objects in the `preservation_manifest` var (stages, UDFs, ... dbt does not manage). Each entry brings its own `exists_sql`, so the engine is adapter-neutral; `{database}` is substituted. `refresh_environment` restores after cloning. Snowflake example: `macros/snowflake/README.md`
+- `macros/utils/check_tag_contract.sql` — `dbt run-operation check_tag_contract`: every model has exactly one layer tag and only `tag_taxonomy` tags (docs/patterns/tagging.md). Run in CI via `tests/python/test_tag_contract.py`
 - `tests/python/` — pytest suite that runs dbt in-process (`dbtRunner`) on a throwaway copy of the project and duckdb file (`conftest.py`): run-operations, seeds, the durable fact, and a whole-project `dbt build`
 - `tests/macros/` — Singular tests over literal rows that pin macro behaviour; no sources, so they run on duckdb in CI
 - `macros/staging/audit_columns.sql` — _loaded_at (EL timestamp or fallback), _dbt_updated_at columns
@@ -63,6 +64,7 @@ e.g. `uv sync --extra postgres`.
 - `require-dbt-version: ">=1.8.0"` for unit test support
 - Macros organized: `overrides/` (built-in overrides), `utils/` (helpers), `staging/` (staging-specific), `validation/` (validation framework), `snowflake/` (Snowflake-only features; they refuse to execute on other adapters)
 - A macro argument named `target` shadows dbt's `target`; inside such a macro use `adapter.type()`
+- **Tags: three axes** (layer by directory, workload and entity by hand), values only from the `tag_taxonomy` var. A new `models/` subdirectory needs a layer tag in `dbt_project.yml`; never nest one layer folder inside another (tags accumulate). Select production jobs by tag, not path
 - **Environment is `DBT_ENV`, not the target.** A target picks a *warehouse*
   (`duckdb`, `snowflake`, …); the `dbt_env` var in `dbt_project.yml` picks an
   *environment* (`dev` default, `prod`). Macros branch on `var('dbt_env')`.

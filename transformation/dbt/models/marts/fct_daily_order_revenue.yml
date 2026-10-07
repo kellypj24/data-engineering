@@ -2,6 +2,8 @@ version: 2
 
 models:
   - name: fct_daily_order_revenue
+    config:
+      tags: [revenue, order]  # workload, entity (docs/patterns/tagging.md)
     description: >
       Daily order count and revenue. A durable fact: it keeps history longer
       than raw.orders retains it, so it refuses --full-refresh and only

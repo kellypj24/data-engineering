@@ -41,3 +41,4 @@ What follows, including the costs and what it rules out.
 | [0003](0003-duckdb-default-target.md) | duckdb as the credential-free default dbt target | Accepted |
 | [0004](0004-dbt-env-independent-of-target.md) | `dbt_env` var, independent of `target.name` | Accepted |
 | [0005](0005-skills-are-procedure.md) | Skills are procedure, `CLAUDE.md` is convention | Accepted |
+| [0006](0006-three-axis-tags.md) | Three-axis model tags, enforced | Accepted |
