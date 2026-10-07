@@ -1,0 +1,82 @@
+name: dbt compile gate
+
+# An ALARM, not prevention (ci-cd-hardening #18). Two PRs can each pass CI
+# and merge cleanly while breaking main together -- one removes a var() from
+# dbt_project.yml, the other adds a model using it -- because PR CI compiles
+# each against the base as it was. This compiles the WHOLE project after every
+# merge and keeps one "main is not compiling" issue open while it fails.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "transformation/dbt/**"
+      - ".python-version"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+# Event and ref are in the group: GitHub keeps one pending run per group, so a
+# shared group would let a dispatch evict a queued push whose breakage then
+# goes unreported.
+concurrency:
+  group: dbt-compile-gate-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: transformation/dbt
+    env:
+      DBT_PROFILES_DIR: .
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - run: uv sync --dev
+      - run: uv run dbt deps
+      - id: compile
+        name: Parse and compile the whole project
+        # parse catches duplicate resources cheaply but does not render model
+        # bodies; an undefined var() only fails at compile. Run both.
+        run: |
+          set -o pipefail
+          {
+            uv run dbt parse && uv run dbt compile
+          } 2>&1 | tee compile.log
+      - name: Write the issue body
+        if: always()
+        working-directory: .
+        run: |
+          set -o pipefail
+          {
+            echo "\`dbt parse\` / \`dbt compile\` of the whole project on \`main\` at ${GITHUB_SHA}: **${{ steps.compile.outcome }}**."
+            echo
+            echo "Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            echo
+            if [ "${{ steps.compile.outcome }}" != "success" ]; then
+              echo '```'
+              if [ -f transformation/dbt/compile.log ]; then
+                grep -v '^\s*$' transformation/dbt/compile.log | tail -n 60
+              else
+                echo "no compile log was produced"
+              fi
+              echo '```'
+            fi
+          } > compile-issue.md
+      - name: Sync the alarm issue (push to main only)
+        # Only a push to main may open or close the alarm: a dispatch against an
+        # old green commit must not close it while main is still broken.
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        working-directory: .
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          python3 .github/scripts/tracker_issue.py
+          --marker "[dbt-compile-gate]" --label ci-alarm
+          --title "main is not compiling (dbt)"
+          --body-file compile-issue.md
+          --state ${{ steps.compile.outcome == 'success' && 'closed' || 'open' }}
