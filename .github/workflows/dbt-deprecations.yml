@@ -1,0 +1,46 @@
+name: dbt deprecations
+
+# Weekly: every dbt deprecation in the project, grouped by type and source
+# file, in one `dbt-deprecations` tracker issue, closed when there are none
+# (ci-cd-hardening #20). Deprecations are warnings until the release that
+# removes them; grouped, they can be fixed in batches before then.
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: dbt-deprecations
+  cancel-in-progress: false
+
+jobs:
+  deprecations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - name: Parse with every deprecation shown
+        working-directory: transformation/dbt
+        env:
+          DBT_PROFILES_DIR: .
+        run: |
+          set -o pipefail
+          uv sync --dev
+          uv run dbt deps
+          uv run dbt parse --show-all-deprecations --no-partial-parse 2>&1 | tee ../../parse.log
+      - id: group
+        run: python3 .github/scripts/dbt_deprecations.py --out deprecations.md parse.log
+      - name: Sync the tracker issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          python3 .github/scripts/tracker_issue.py
+          --marker "[dbt-deprecations]" --label dbt-deprecations
+          --title "dbt deprecations to fix before the next dbt release"
+          --body-file deprecations.md
+          --state ${{ steps.group.outputs.has_deprecations == 'true' && 'open' || 'closed' }}
