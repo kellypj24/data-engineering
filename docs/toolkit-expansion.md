@@ -80,7 +80,7 @@
 **P5 — Skills, docs, and optional extras**
 
 - [x] E17. [`data-profiling` stack skill](#e17-data-profiling-stack-skill)
-- [ ] E18. [`dbt-test` stack skill](#e18-dbt-test-stack-skill)
+- [x] E18. [`dbt-test` stack skill](#e18-dbt-test-stack-skill)
 - [ ] E19. [`backfill-runbook` stack skill](#e19-backfill-runbook-stack-skill)
 - [ ] E33. [Three-dimensional tagging contract](#e33-three-dimensional-tagging-contract)
 - [ ] E32. [Snapshot design guide](#e32-snapshot-design-guide)

@@ -5,7 +5,7 @@ models:
     description: Month spine from the cost_start_month var to next month; not derived from the fact
     columns:
       - name: cost_month
-        description: Month, first day
+        description: '{{ doc("cost_month") }}'
         tests:
           - unique
           - not_null
@@ -13,7 +13,7 @@ models:
     description: Teams from the mapping seeds, plus SHARED and NEEDS_OWNER_REVIEW
     columns:
       - name: team
-        description: Team
+        description: '{{ doc("cost_team") }}'
         tests:
           - unique
           - not_null
@@ -21,7 +21,7 @@ models:
     description: Workloads from cost_user_mapping, plus the allocation's fixed buckets
     columns:
       - name: workload
-        description: Workload
+        description: '{{ doc("cost_workload") }}'
         tests:
           - unique
           - not_null
@@ -29,7 +29,7 @@ models:
     description: Accumulating list of every warehouse ever metered, plus NONE
     columns:
       - name: warehouse_name
-        description: Warehouse
+        description: '{{ doc("cost_warehouse_name") }}'
         tests:
           - unique
           - not_null

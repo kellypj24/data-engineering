@@ -99,6 +99,7 @@ layout:
 - `dlt-pipeline` — scaffold a dlt source/resource/pipeline with an offline
   mocked test
 - `data-profiling` — profile a raw table (nulls, whitespace, casing, distributions, outliers) with generic SQL via `dbt show`, and map findings to tests and cleaning
+- `dbt-test` — establish and prove a model's grain, then write its uniqueness test, doc-block descriptions, and only the tests the data supports
 - `run-stack` — bring a stack up locally and prove each hop, in the order that
   avoids the silent dbt-manifest failure
 
