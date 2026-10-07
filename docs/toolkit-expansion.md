@@ -72,7 +72,7 @@
 
 **P4 — Shippable quality tools**
 
-- [ ] E14. [Add a `tooling/` role](#e14-add-a-tooling-role)
+- [x] E14. [Add a `tooling/` role](#e14-add-a-tooling-role)
 - [ ] E15. [Local Claude pre-push review](#e15-local-claude-pre-push-review)
 - [ ] E16. [Configurable sensitive-data commit guard](#e16-configurable-sensitive-data-commit-guard)
 - [ ] E34. [Release-to-release dataset diff](#e34-release-to-release-dataset-diff)

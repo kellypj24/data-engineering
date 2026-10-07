@@ -88,6 +88,7 @@ data-engineering/
 │   ├── dbt/
 │   └── _template/
 ├── delivery/               # Outbound delivery tools
+├── tooling/                # Developer-side tools: git hooks, review, dataset diffs
 │   ├── file-export/
 │   └── _template/
 ├── infrastructure/         # Shared infra: Docker, Terraform (Snowflake RBAC module in terraform/modules/snowflake_rbac)
