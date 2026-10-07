@@ -1,0 +1,36 @@
+name: Security audit
+
+# Report-only: never gates a PR. Audits every tool's locked dependencies daily
+# and keeps one `security` issue open while anything is vulnerable (or could
+# not be audited), closing it when the audit is clean. See ci-cd-hardening #6.
+
+on:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: security-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - id: audit
+        run: python3 .github/scripts/security_audit.py --out audit.md
+      - name: Sync the tracker issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          python3 .github/scripts/tracker_issue.py
+          --marker "[security-audit]" --label security
+          --title "Known vulnerabilities in locked dependencies"
+          --body-file audit.md
+          --state ${{ steps.audit.outputs.has_findings == 'true' && 'open' || 'closed' }}

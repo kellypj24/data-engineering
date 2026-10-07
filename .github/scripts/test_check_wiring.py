@@ -13,7 +13,12 @@ REPO = Path(__file__).resolve().parents[2]
 
 @pytest.fixture
 def repo(tmp_path):
-    for name in ("justfile", "README.md", ".github/dependabot.yml", ".pre-commit-config.yaml"):
+    for name in (
+        "justfile",
+        "README.md",
+        ".github/dependabot.yml",
+        ".pre-commit-config.yaml",
+    ):
         (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
         shutil.copy(REPO / name, tmp_path / name)
     shutil.copytree(REPO / ".github/workflows", tmp_path / ".github/workflows")

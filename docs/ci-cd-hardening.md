@@ -41,7 +41,7 @@ is why the status lives here rather than on the section headings.)
 
 **P2 — security & supply chain**
 
-- [ ] 6. [Add a scheduled dependency/security audit](#6-add-a-scheduled-dependencysecurity-audit)
+- [x] 6. [Add a scheduled dependency/security audit](#6-add-a-scheduled-dependencysecurity-audit)
 - [ ] 7. [Add secret scanning](#7-add-secret-scanning)
 - [ ] 19. [Weekly dbt package upgrade PR, with bounded version ranges](#19-weekly-dbt-package-upgrade-pr-with-bounded-version-ranges)
 - [x] 27. [Stop dependabot raising the dbt tool's version floors](#27-stop-dependabot-raising-the-dbt-tools-version-floors)
@@ -511,6 +511,12 @@ For `uv` tools, audit the resolved lockfile rather than the declared ranges:
 
 **Acceptance.** A known-vulnerable pin surfaces as a labeled `security` issue;
 the issue auto-closes when the vuln is resolved. No effect on PR status.
+
+> **As built:** the living-issue helper is `.github/scripts/tracker_issue.py`
+> (stdlib Python against the REST API) rather than a `github-script` JS file:
+> same inputs (marker, label, title, body, state), and unit-tested in the
+> `wiring` job's `pytest .github/scripts` run. `security_audit.py` reports a
+> tool it could not audit as a finding, never as clean.
 
 ---
 
