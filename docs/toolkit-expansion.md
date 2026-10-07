@@ -65,7 +65,7 @@
 - [x] E9. [Snowflake RBAC as code](#e9-snowflake-rbac-as-code)
 - [x] E31. [Personal development databases](#e31-personal-development-databases)
 - [x] E10. [Zero-copy shared-environment refresh](#e10-zero-copy-shared-environment-refresh)
-- [ ] E11. [Preservation manifest for non-dbt objects](#e11-preservation-manifest-for-non-dbt-objects)
+- [x] E11. [Preservation manifest for non-dbt objects](#e11-preservation-manifest-for-non-dbt-objects)
 - [ ] E12. [Ownership drift audit and repair](#e12-ownership-drift-audit-and-repair)
 - [ ] E13. [Write-boundary proof and identity probe](#e13-write-boundary-proof-and-identity-probe)
 - [ ] E27. [Query-level cost attribution reconciled to the invoice](#e27-query-level-cost-attribution-reconciled-to-the-invoice)

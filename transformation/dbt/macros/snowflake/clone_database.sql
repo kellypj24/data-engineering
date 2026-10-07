@@ -115,6 +115,8 @@
 
     Environments map to databases in the `environment_databases` var. Refuses
     env 'prod', an unknown env, and any env mapped to the production database.
+    After the clone, objects in the `preservation_manifest` var are restored
+    (preserve_objects, mode restore), since a clone only has what prod has.
 -#}
 {% macro refresh_environment(env, dry_run=true) %}
     {%- set databases = var('environment_databases', {}) -%}
@@ -127,6 +129,9 @@
         ) }}
     {%- endif -%}
     {%- do clone_database(databases['prod'], databases[env], copy_grants=true, dry_run=dry_run) -%}
+    {%- if var('preservation_manifest', []) -%}
+        {%- do preserve_objects('restore', databases[env], dry_run=dry_run) -%}
+    {%- endif -%}
 {% endmacro %}
 
 
