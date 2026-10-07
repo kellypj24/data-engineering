@@ -139,7 +139,7 @@ def test_telemetry_error_does_not_fail_the_job(instance):
             type(
                 "Ctx",
                 (),
-                {"instance": BrokenInstance(), "run_id": "x", "log": context.log},
+                {"instance": BrokenInstance(), "run": context.run, "log": context.log},
             )(),
             ["build"],
         )

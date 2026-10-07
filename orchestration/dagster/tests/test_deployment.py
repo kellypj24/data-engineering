@@ -13,7 +13,7 @@ from src.utils.deployment import (
 
 
 def test_prod_maps_to_prod():
-    assert target_database("prod") == "ANALYTICS"
+    assert target_database("prod") == "ANALYTICS_PROD"
 
 
 def test_stage_maps_to_stage():

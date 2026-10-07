@@ -2,6 +2,7 @@
 
 from src.jobs.chain import extract_job, transform_job
 from src.jobs.dbt_docs import publish_dbt_docs_job
+from src.jobs.environment_refresh import refresh_stage_environment_job
 from src.jobs.landing import process_landing_file_job
 
 all_jobs = [
@@ -9,4 +10,5 @@ all_jobs = [
     transform_job,
     process_landing_file_job,
     publish_dbt_docs_job,
+    refresh_stage_environment_job,
 ]

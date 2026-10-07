@@ -160,7 +160,7 @@ def tag_dbt_command(context, args: list[str]) -> None:
     """Record the dbt command on the run, for the telemetry rows. Best effort."""
     try:
         context.instance.add_run_tags(
-            context.run_id, {DBT_COMMAND_TAG: "dbt " + " ".join(args)}
+            context.run.run_id, {DBT_COMMAND_TAG: "dbt " + " ".join(args)}
         )
     except Exception as exc:  # noqa: BLE001 -- telemetry must never fail a run
         context.log.warning(f"dbt command not tagged on the run: {exc!r}")

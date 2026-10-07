@@ -45,6 +45,14 @@ vars:
   # many minutes of its export run finishing, or it is late (or missing).
   delivery_grace_minutes: 60
 
+  # Environment -> database, for refresh_environment / clone_database
+  # (macros/snowflake/). Matches infrastructure/terraform/snowflake and the
+  # Dagster deployment routing. `prod` is the clone source and is never a target.
+  environment_databases:
+    prod: ANALYTICS_PROD
+    stage: ANALYTICS_STAGE
+    dev: ANALYTICS_DEV
+
 models:
   data_warehouse:
     staging:

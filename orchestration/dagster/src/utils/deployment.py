@@ -25,7 +25,7 @@ from collections.abc import Mapping
 
 PROD_DEPLOYMENT = "prod"
 DATABASES = {
-    PROD_DEPLOYMENT: "ANALYTICS",
+    PROD_DEPLOYMENT: "ANALYTICS_PROD",
     "stage": "ANALYTICS_STAGE",
 }
 NON_PROD_DATABASE = "ANALYTICS_DEV"
