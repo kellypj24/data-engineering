@@ -1,0 +1,131 @@
+version: 2
+
+models:
+  - name: fct_delivery_reconciliation
+    description: >
+      Expected deliveries (files successful file-export runs wrote) against
+      confirmed transfers. One row per expected file that is due or confirmed,
+      plus one per confirmation matching no written file. A successful run-log
+      row proves a file was written, not that it arrived. A scheduled run that
+      never happened has no run-log row and is not covered here; run telemetry
+      (mart_orchestrator_run_summary) covers that.
+    columns:
+      - name: export_name
+        description: Export config name; null for unexpected
+      - name: recipient
+        description: Recipient
+        tests:
+          - not_null
+      - name: file_name
+        description: Base name of the file
+        tests:
+          - not_null
+      - name: run_id
+        description: Export run that wrote the file; null for unexpected
+      - name: written_at
+        description: When the export run finished, UTC
+      - name: due_at
+        description: written_at plus the delivery_grace_minutes var
+      - name: confirmed_at
+        description: First confirmation of the file, UTC
+      - name: transport
+        description: Transport of the first confirmation
+      - name: confirmation_count
+        description: Confirmations matched to this file (re-sends count)
+      - name: delivery_state
+        description: delivered, late, missing, or unexpected
+        tests:
+          - not_null
+          - accepted_values:
+              values: ["delivered", "late", "missing", "unexpected"]
+      - name: minutes_late
+        description: Minutes past due_at, for late files
+
+unit_tests:
+  - name: test_delivery_reconciliation_states
+    description: >
+      One of each state; a file not yet due is left out; a fixed file name
+      sent on two days reconciles run by run; a re-send counts but keeps the
+      first confirmation.
+    model: fct_delivery_reconciliation
+    overrides:
+      vars:
+        delivery_grace_minutes: 60
+        reconciliation_as_of: "2026-01-06 12:00:00"
+    given:
+      - input: ref('stg_export_run_log_files')
+        rows:
+          - run_id: r1
+            export_name: orders
+            recipient: north
+            file_name: orders.csv
+            written_at: "2026-01-05 06:00:00"
+          - run_id: r1
+            export_name: orders
+            recipient: north
+            file_name: orders.csv.ctl
+            written_at: "2026-01-05 06:00:00"
+          - run_id: r2
+            export_name: revenue
+            recipient: north
+            file_name: revenue.csv
+            written_at: "2026-01-05 05:00:00"
+          - run_id: r3
+            export_name: orders
+            recipient: north
+            file_name: orders.csv
+            written_at: "2026-01-06 06:00:00"
+          - run_id: r4
+            export_name: revenue
+            recipient: north
+            file_name: revenue_late_run.csv
+            written_at: "2026-01-06 11:30:00"
+      - input: ref('stg_delivery_confirmations')
+        rows:
+          - recipient: north
+            file_name: orders.csv
+            confirmed_at: "2026-01-05 06:20:00"
+            transport: sftp
+          - recipient: north
+            file_name: orders.csv
+            confirmed_at: "2026-01-05 06:40:00"
+            transport: sftp
+          - recipient: north
+            file_name: orders.csv.ctl
+            confirmed_at: "2026-01-05 08:15:00"
+            transport: sftp
+          - recipient: north
+            file_name: orders.csv
+            confirmed_at: "2026-01-06 06:05:00"
+            transport: sftp
+          - recipient: south
+            file_name: orders.csv
+            confirmed_at: "2026-01-05 06:10:00"
+            transport: sftp
+    expect:
+      rows:
+        - run_id: r1
+          file_name: orders.csv
+          delivery_state: delivered
+          confirmation_count: 2
+          confirmed_at: "2026-01-05 06:20:00"
+        - run_id: r1
+          file_name: orders.csv.ctl
+          delivery_state: late
+          confirmation_count: 1
+          confirmed_at: "2026-01-05 08:15:00"
+        - run_id: r2
+          file_name: revenue.csv
+          delivery_state: missing
+          confirmation_count: 0
+          confirmed_at: null
+        - run_id: r3
+          file_name: orders.csv
+          delivery_state: delivered
+          confirmation_count: 1
+          confirmed_at: "2026-01-06 06:05:00"
+        - run_id: null
+          file_name: orders.csv
+          delivery_state: unexpected
+          confirmation_count: 1
+          confirmed_at: "2026-01-05 06:10:00"

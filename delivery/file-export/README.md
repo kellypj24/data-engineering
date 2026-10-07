@@ -163,6 +163,21 @@ project) and as a local pre-commit hook in `transformation/dbt`. The generated
 file is `transformation/dbt/models/exports/_generated_exposures.yml`. Never
 edit it by hand.
 
+## Delivery reconciliation
+
+A successful run-log row proves a file was *written*, not that it *arrived*.
+The dbt model `fct_delivery_reconciliation` compares every file a successful
+run wrote (the run log's `files`) with `raw.delivery_confirmations`, the files
+a transport recorded arriving. Each file is classed `delivered`, `late`,
+`missing`, or `unexpected` against `written_at + delivery_grace_minutes`.
+
+Filling `delivery_confirmations` (recipient, file name, confirmed_at,
+transport) from an SFTP log, object-store events, or API acknowledgements is
+per-transport glue and is not shipped here. A scheduled run that never
+happened writes no run-log row; run telemetry reports that, not this model.
+`tests/test_runlog_contract.py` keeps the run-log columns in step with the dbt
+fixture.
+
 ## Warehouses
 
 Execution runs on duckdb (`COPY ... TO`). `SnowflakeDialect(stage=...)`

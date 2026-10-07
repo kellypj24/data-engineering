@@ -41,6 +41,10 @@ vars:
   # monitoring models would otherwise report on itself.
   orchestrator_monitoring_jobs: ["refresh_monitoring"]
 
+  # fct_delivery_reconciliation: a written file must be confirmed within this
+  # many minutes of its export run finishing, or it is late (or missing).
+  delivery_grace_minutes: 60
+
 models:
   data_warehouse:
     staging:

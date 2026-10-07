@@ -67,3 +67,50 @@ sources:
                   values: ["STARTED", "SUCCESS", "FAILURE"]
           - name: event_at
             description: When the event happened, UTC
+      - name: delivery_confirmations
+        description: >
+          Transfers a transport confirmed: one row per file seen arriving
+          (SFTP server log, object-store event, API acknowledgement). Filled by
+          per-transport glue; this contract is the portable part. Read by
+          fct_delivery_reconciliation.
+        columns:
+          - name: recipient
+            description: Recipient name, as in the file-export config
+            tests:
+              - not_null
+          - name: file_name
+            description: Base name of the file that arrived
+            tests:
+              - not_null
+          - name: confirmed_at
+            description: When the transport confirmed the file, UTC
+            tests:
+              - not_null
+          - name: transport
+            description: Which transport confirmed it, e.g. sftp or s3
+
+  - name: file_export
+    description: >
+      Tables written by delivery/file-export. On duckdb the example seeds in
+      seeds/example_raw/ stand in, as for the `raw` source.
+    schema: >-
+      {{ var('file_export_schema',
+             ('example_raw' if var('dbt_env') == 'prod' or env_var('DBT_ENV', 'dev') == 'prod'
+              else target.schema ~ '_example_raw')
+             if target.type == 'duckdb' else 'file_export') }}
+    tables:
+      - name: export_run_log
+        description: >
+          One row per export attempt (delivery/file-export/src/file_export/runlog.py).
+          `files` is a newline-separated list of the paths written.
+        columns:
+          - name: run_id
+            description: Export run id
+            tests:
+              - unique
+              - not_null
+          - name: status
+            description: success or failure
+            tests:
+              - accepted_values:
+                  values: ["success", "failure"]

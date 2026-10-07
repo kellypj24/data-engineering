@@ -49,7 +49,7 @@
 
 - [x] E23. [Config-driven file export engine](#e23-config-driven-file-export-engine)
 - [x] E24. [Generated dbt exposures for every delivered file, with a drift gate](#e24-generated-dbt-exposures-for-every-delivered-file-with-a-drift-gate)
-- [ ] E25. [Delivery reconciliation (follow-up to E23)](#e25-delivery-reconciliation-follow-up-to-e23)
+- [x] E25. [Delivery reconciliation (follow-up to E23)](#e25-delivery-reconciliation-follow-up-to-e23)
 
 **P2 — Dagster patterns & observability**
 

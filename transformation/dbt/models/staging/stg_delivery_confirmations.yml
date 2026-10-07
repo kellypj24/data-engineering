@@ -1,0 +1,18 @@
+version: 2
+
+models:
+  - name: stg_delivery_confirmations
+    description: Transfers a transport confirmed, one row per file seen arriving
+    columns:
+      - name: recipient
+        description: Recipient name, as in the file-export config
+        tests:
+          - not_null
+      - name: file_name
+        description: Base name of the file that arrived
+        tests:
+          - not_null
+      - name: confirmed_at
+        description: When the transport confirmed the file, UTC
+      - name: transport
+        description: Which transport confirmed it
