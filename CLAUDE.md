@@ -10,7 +10,7 @@ This is a composable collection of data engineering tools organized by role:
 - `tooling/` — Developer-side tools a project adopts alongside a stack: git hooks, review, dataset diffs (see `tooling/_template/README.md`)
 - `stacks/` — Pre-assembled combinations (airbyte-dagster-dbt, dlt-dagster-dbt, dlt-temporal-dbt)
 - `infrastructure/` — Shared Docker/Terraform. `terraform/modules/snowflake_rbac/` is the Snowflake role/grant module (read its README for the future-grant precedence rule); `terraform/snowflake/` uses it
-- `docs/` — Architecture patterns, tool comparison matrices, `patterns/` write-ups, and the two roadmaps
+- `docs/` — Architecture patterns, tool comparison matrices, `patterns/` write-ups, `adr/` (architecture decision records: read before reversing a structural choice; supersede, never edit), and the two roadmaps
 - `archive/` — Previous experiments (reference only, not maintained)
 
 ## Conventions
