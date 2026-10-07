@@ -31,4 +31,5 @@ just file-export::exposures-check
 - Resolve window bounds to literals before querying; record exactly those in the run log
 - Changing a config means regenerating exposures in the same PR; CI's `exposures-drift` fails otherwise
 - Every column an export references must be documented on its dbt model
+- The run log's columns are a contract with dbt's `fct_delivery_reconciliation` (via `seeds/example_raw/export_run_log.csv`); changing `runlog.py` DDL means changing that fixture, or `test_runlog_contract.py` fails
 - Tests use an injected `Clock` (tests/conftest.py) so windows and file names are deterministic

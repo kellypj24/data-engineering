@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: stg_export_run_log_files
+    description: One row per file a successful file-export run wrote
+    columns:
+      - name: run_id
+        description: Export run that wrote the file
+        tests:
+          - not_null
+      - name: export_name
+        description: Export config name
+      - name: recipient
+        description: Recipient the file was written for
+      - name: file_path
+        description: Path the file was written to
+      - name: written_at
+        description: When the run finished, UTC
+      - name: file_name
+        description: Base name of file_path; what a transport reports
+        tests:
+          - not_null

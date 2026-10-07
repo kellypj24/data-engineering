@@ -1,0 +1,5 @@
+run_id,export_name,recipient,status,window_start,window_end,row_count,files,error,started_at,finished_at
+run-north-orders,orders_shared,north,success,2026-01-04,2026-01-05,120,"/exports/north/orders_2026-01-05.csv
+/exports/north/orders_2026-01-05.csv.ctl",,2026-01-05 05:58:00,2026-01-05 06:00:00
+run-north-revenue,daily_revenue,north,success,,,31,/exports/north/daily_revenue_2026-01-05.csv,,2026-01-05 05:00:00,2026-01-05 05:01:00
+run-south-orders,orders_shared,south,failure,2026-01-04,2026-01-05,,,TenantIsolationError: 2 row(s) outside tenant keys,2026-01-05 06:00:00,2026-01-05 06:00:30

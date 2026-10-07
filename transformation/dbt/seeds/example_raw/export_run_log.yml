@@ -1,0 +1,30 @@
+version: 2
+
+seeds:
+  - name: export_run_log
+    description: >
+      Example fixture standing in for file_export.export_run_log, the
+      delivery/file-export run log. Two successful runs (one writing a data
+      file and its control file) and one failure, which writes nothing. Delete
+      seeds/example_raw/ in a real project.
+    config:
+      meta:
+        owner: data-platform
+      column_types:
+        run_id: varchar
+        export_name: varchar
+        recipient: varchar
+        status: varchar
+        window_start: varchar
+        window_end: varchar
+        row_count: bigint
+        files: varchar
+        error: varchar
+        started_at: timestamp
+        finished_at: timestamp
+    columns:
+      - name: run_id
+        description: Export run id
+        tests:
+          - unique
+          - not_null

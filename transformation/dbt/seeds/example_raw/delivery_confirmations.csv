@@ -1,0 +1,4 @@
+recipient,file_name,confirmed_at,transport
+north,orders_2026-01-05.csv,2026-01-05 06:20:00,sftp
+north,orders_2026-01-05.csv.ctl,2026-01-05 08:15:00,sftp
+south,orders_2026-01-04.csv,2026-01-05 06:10:00,sftp
