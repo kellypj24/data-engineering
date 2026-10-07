@@ -35,6 +35,7 @@ Data flows left to right: **Sources -> EL -> Warehouse (raw) -> Transformation -
 | Delivery | [file-export](delivery/file-export/) | Config-driven file exports: generated SQL, watermarks, fail-closed tenant isolation, generated schedules | Ready |
 | Tooling | [sensitive-scan](tooling/sensitive-scan/) | Commit guard for regulated data: secrets, PII, identity literals; pre-commit hook + CI step | Ready |
 | Tooling | [claude-review](tooling/claude-review/) | Opt-in pre-push Claude review (`CLAUDE_REVIEW=1`); fail-open, gated by sensitive-scan | Ready |
+| Tooling | [release-diff](tooling/release-diff/) | Rows added / removed / changed between two dataset captures, with checked arithmetic | Ready |
 | Transformation | [dbt](transformation/dbt/) | SQL transformation, plus a macro library: surrogate keys, in-place backfills, a validation framework, durable facts | Ready |
 
 **Ready** = fully configured with working examples, tests, and documentation.
@@ -160,6 +161,7 @@ Every tool has its own test suite using its native test framework. All tests use
 | file-export | pytest + DuckDB (validates every config in `configs/`) | `just file-export::test` |
 | sensitive-scan | pytest fixture rows per rule (gitleaks mocked) | `just sensitive-scan::test` |
 | claude-review | pytest on temporary git repos (`claude` mocked) | `just claude-review::test` |
+| release-diff | pytest + DuckDB on fixture captures | `just release-diff::test` |
 
 ---
 

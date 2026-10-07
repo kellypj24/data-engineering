@@ -1,0 +1,5 @@
+product_id,name,category,price,status
+1,Widget,tools,9.99,active
+2,Gadget,tools,19.99,active
+3,Gizmo,toys,4.50,active
+4,Doohickey,toys,2.00,discontinued

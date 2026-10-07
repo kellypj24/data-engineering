@@ -1,0 +1,6 @@
+product_id,name,category,price,status
+1,Widget,tools,9.99,active
+2,Gadget,tools,21.99,active
+3,Gizmo,games,4.50,active
+5,Thingamajig,tools,7.25,active
+6,Whatsit,toys,3.10,active

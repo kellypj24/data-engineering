@@ -75,7 +75,7 @@
 - [x] E14. [Add a `tooling/` role](#e14-add-a-tooling-role)
 - [x] E15. [Local Claude pre-push review](#e15-local-claude-pre-push-review)
 - [x] E16. [Configurable sensitive-data commit guard](#e16-configurable-sensitive-data-commit-guard)
-- [ ] E34. [Release-to-release dataset diff](#e34-release-to-release-dataset-diff)
+- [x] E34. [Release-to-release dataset diff](#e34-release-to-release-dataset-diff)
 
 **P5 — Skills, docs, and optional extras**
 

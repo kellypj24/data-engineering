@@ -1,0 +1,9 @@
+# Example profile: a product catalog delivered as one CSV per monthly release.
+# Copy and adapt one profile per dataset you compare.
+name = "products"
+key_columns = ["product_id"]
+compare_columns = ["name", "category", "price", "status"]
+expected_headers = ["product_id", "name", "category", "price", "status"]
+sort_order = ["product_id"]
+# Captures are named so that sorting by name sorts by release.
+capture_glob = "products_*.csv"
