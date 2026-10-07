@@ -20,7 +20,9 @@ the root `CLAUDE.md`. Read it first; this skill does not restate it.
 a **specification, not a skeleton** — there are no files to copy. Read it as a
 checklist of capabilities the new tool has to cover.
 
-Roles: `extract_load/`, `orchestration/`, `transformation/`, `delivery/`.
+Roles: `extract_load/`, `orchestration/`, `transformation/`, `delivery/`, `tooling/`
+(developer-side checks such as git hooks; see its template for the pre-commit
+hook and fail-open/fail-closed requirements).
 
 ## 2. Create the tool directory
 

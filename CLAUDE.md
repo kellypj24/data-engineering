@@ -7,6 +7,7 @@ This is a composable collection of data engineering tools organized by role:
 - `orchestration/` — Orchestrators (Dagster, Airflow, Prefect, Temporal)
 - `transformation/` — Transform tools (dbt)
 - `delivery/` — Outbound delivery tools (file-export)
+- `tooling/` — Developer-side tools a project adopts alongside a stack: git hooks, review, dataset diffs (see `tooling/_template/README.md`)
 - `stacks/` — Pre-assembled combinations (airbyte-dagster-dbt, dlt-dagster-dbt, dlt-temporal-dbt)
 - `infrastructure/` — Shared Docker/Terraform. `terraform/modules/snowflake_rbac/` is the Snowflake role/grant module (read its README for the future-grant precedence rule); `terraform/snowflake/` uses it
 - `docs/` — Architecture patterns, tool comparison matrices, `patterns/` write-ups, and the two roadmaps
