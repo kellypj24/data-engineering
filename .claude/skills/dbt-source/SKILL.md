@@ -19,6 +19,9 @@ point, but a declared source with no staging model in front of it is a table
 every downstream model will reach into directly — which is the thing the staging
 layer exists to prevent. Do both halves.
 
+Profile the table first (the **`data-profiling`** skill): its findings decide
+which source tests are worth writing.
+
 ## Step 1 — declare the table
 
 Sources live in `models/staging/_sources.yml`, grouped under a source `name`
@@ -77,7 +80,7 @@ you the check on the sources that needed it.
 
 One staging model per source table, 1:1, named `stg_<source>_<table>`. Use the
 **`dbt-model`** skill for this — it owns the macro constraints
-(`audit_columns` last, `limit_data_in_dev` needing `WHERE 1 = 1`), the sqlfluff
+(`audit_columns` last, `limit_data_in_dev` as a complete predicate), the sqlfluff
 rules, and the paired-`.yml` requirement. Do not re-derive them here.
 
 The one thing this skill adds: pass the EL tool's load timestamp into
@@ -122,9 +125,9 @@ uv run dbt build --select stg_raw_orders
 uv run dbt source freshness --select source:raw.orders   # only if you set freshness
 ```
 
-In the **toolkit's own** copy there is no `raw` schema, so everything past
-`parse` / `compile` / `lint` fails by design — task #16 in
-`docs/ci-cd-hardening.md`. Downstream that excuse does not apply; run the tests.
+In the **toolkit's own** copy the `raw` tables are fixture seeds
+(`seeds/example_raw/`, duckdb only): run `dbt build --select resource_type:seed`
+first, then the commands above work there too.
 
 `profiles.yml` lives in the project directory, so `DBT_PROFILES_DIR` must point
 at the dbt root. `mod.just` exports it; direct `dbt` calls need it set.
