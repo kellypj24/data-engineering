@@ -11,6 +11,7 @@ This is a composable collection of data engineering tools organized by role:
 - `stacks/` — Pre-assembled combinations (airbyte-dagster-dbt, dlt-dagster-dbt, dlt-temporal-dbt)
 - `infrastructure/` — Shared Docker/Terraform. `terraform/modules/snowflake_rbac/` is the Snowflake role/grant module (read its README for the future-grant precedence rule); `terraform/snowflake/` uses it
 - `docs/` — Architecture patterns, tool comparison matrices, `patterns/` write-ups, `adr/` (architecture decision records: read before reversing a structural choice; supersede, never edit), and the two roadmaps
+- `migrations/` — One file per PR that changes physical state promotion does not carry (seed reloads, rebuilds, backfills, manual DDL), from `migrations/_template.md`; see `docs/patterns/state-migrations.md`
 - `archive/` — Previous experiments (reference only, not maintained)
 
 ## Conventions
