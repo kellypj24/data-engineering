@@ -26,6 +26,36 @@ added to the source later a "change" to every row, which writes a new version of
 the whole table on the next run. Leave out columns that change without meaning
 anything (a `last_seen_at` heartbeat), or every run versions every row.
 
+### One hash column instead of a long `check_cols` list
+
+`row_content_hash` (`macros/utils/row_content_hash.sql`) puts a row's content in
+one column, so `check_cols` has one entry that cannot drift from the table:
+
+```sql
+SELECT
+    id,
+    email,
+    plan,
+    {{ row_content_hash(source('raw', 'customers'), exclude=['_loaded_at', 'last_seen_at']) }} AS content_hash
+FROM {{ source('raw', 'customers') }}
+-- config: strategy='check', check_cols=['content_hash']
+```
+
+- `exclude` drops volatile columns by name (case-insensitive).
+- Arrays are sorted first, so element order is not a change; list
+  order-significant arrays in `keep_array_order`.
+- Columns are hashed in sorted name order, so reordering them is not a change.
+- Given a relation, the hash covers every column. **Adding a column to the
+  source changes every row's hash once**, so the next run opens one new version
+  per row. Pass an explicit column list for wide sources that gain columns
+  often.
+- On Snowflake, ARRAY / VARIANT / OBJECT columns cannot be compared with `=`,
+  which is what a `check` snapshot does; the hash serialises them first
+  (`macros/snowflake/row_content_hash.sql`).
+
+Switching an existing snapshot to a hash column re-versions every row on the
+next run: ship it with a migration file (`docs/patterns/state-migrations.md`).
+
 A `timestamp` column that the source sets on insert but not on update makes the
 snapshot miss every update, silently. Verify it changes on update before trusting
 it.
