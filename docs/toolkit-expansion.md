@@ -119,7 +119,7 @@ Work order across both roadmaps: **P6 fixes**, then the CI quick wins in
 
 **P9 — Pattern docs**
 
-- [ ] E50. [Period close](#e50-period-close)
+- [x] E50. [Period close](#e50-period-close)
 - [ ] E51. [History tables stamped with `current_date`](#e51-history-tables-stamped-with-current_date)
 - [ ] E52. [One unknown-member token per dimension](#e52-one-unknown-member-token-per-dimension)
 - [ ] E53. [Event-driven ingest → dbt subgraph → export](#e53-event-driven-ingest--dbt-subgraph--export)
