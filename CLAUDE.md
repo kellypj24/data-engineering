@@ -62,7 +62,7 @@ GitHub Actions with cross-paradigm impact detection:
 - `dbt-deps-update.yml` (weekly): `dbt deps --upgrade` within the upper bounds in `packages.yml` (every package is bounded; raise a bound in its own PR). Opens one PR with a `DEPS_PR_TOKEN` secret, otherwise a tracker issue
 - `security-audit.yml` (daily, report-only): `pip-audit` of every tool's `uv.lock`; one `security` issue kept open while anything is vulnerable, via the shared living-issue helper `.github/scripts/tracker_issue.py`
 - `delete-merged-branches.yml` (on merge): retargets open PRs stacked on the merged branch to its base, then deletes the branch; any failure before the delete keeps it. **Merge without `--delete-branch`**, or the client-side delete closes the stack first
-- `labeler.yml` (`pull_request_target`, never checks out PR code): additive labels from changed paths (`.github/labeler.yml`) and the title prefix (`feat`/`fix`/`docs`/`ci`); creates missing labels first (`.github/scripts/pr_labels.py`)
+- `labeler.yml` (`pull_request_target`, never checks out PR code): additive labels from changed paths (`.github/labeler.yml`) and the title prefix (`feat`/`fix`/`docs`/`ci`); creates missing labels first, including stale.yml's `EXEMPT` list (`.github/scripts/pr_labels.py`)
 - `stale.yml` (daily): stale at 60 idle days, closed 14 later; drafts and the `EXEMPT` labels are skipped. A manual run is a dry run by default
 - `wiring` (`.github/scripts/check_wiring.py`) fails when a tool is missing from any shared surface, or a workflow's `--label` is missing from stale.yml's `EXEMPT` (a new tracker label goes in both)
 - `CI Success` fans in every job and is the only required check (no-bypass ruleset). **Add every new job to its `needs`** — it fails if the list drifts

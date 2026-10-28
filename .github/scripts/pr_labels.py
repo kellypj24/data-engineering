@@ -3,9 +3,11 @@
     python .github/scripts/pr_labels.py ensure            # before the labeler
     python .github/scripts/pr_labels.py title --pr 123    # after it
 
-`ensure` creates every label in .github/labeler.yml and TITLE_LABELS that
-does not exist yet: the labeler errors on a missing label. A 404 means
-missing; any other error fails the job rather than being swallowed.
+`ensure` creates every label in .github/labeler.yml, TITLE_LABELS, and the
+stale bot's EXEMPT list (.github/workflows/stale.yml) that does not exist yet:
+the labeler errors on a missing label, and the stale bot tells people to add
+`pinned`, which must exist. A 404 means missing; any other error fails the
+job rather than being swallowed.
 
 `title` adds the label for a Conventional-Commit title prefix (`feat:`,
 `fix(scope):`, `docs!:` ...). Additive only: it never removes a label.
@@ -29,14 +31,19 @@ import yaml
 from tracker_issue import Http, github_http
 
 LABELER_CONFIG = Path(__file__).resolve().parents[1] / "labeler.yml"
+STALE_WORKFLOW = Path(__file__).resolve().parents[1] / "workflows/stale.yml"
 TITLE_LABELS = ("feat", "fix", "docs", "ci")
 TITLE_PREFIX = re.compile(r"^(\w+)(\([^)]*\))?!?:\s")
 COLOR = "ededed"
 
 
-def wanted_labels(config: Path = LABELER_CONFIG) -> list[str]:
+def wanted_labels(
+    config: Path = LABELER_CONFIG, stale: Path = STALE_WORKFLOW
+) -> list[str]:
     names = list(yaml.safe_load(config.read_text()))
-    return names + [label for label in TITLE_LABELS if label not in names]
+    names += TITLE_LABELS
+    names += yaml.safe_load(stale.read_text())["env"]["EXEMPT"].split(",")
+    return list(dict.fromkeys(names))
 
 
 def ensure(http: Http, repo: str, names: list[str]) -> list[str]:
