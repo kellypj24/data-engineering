@@ -60,7 +60,7 @@ is why the status lives here rather than on the section headings.)
 **P5 — polish & consistency**
 
 - [ ] 12. [Add a PR template](#12-add-a-pr-template)
-- [ ] 13. [Add a semantic PR title check](#13-add-a-semantic-pr-title-check)
+- [x] 13. [Add a semantic PR title check](#13-add-a-semantic-pr-title-check)
 - [ ] 14. [Broaden Terraform validation beyond Airbyte](#14-broaden-terraform-validation-beyond-airbyte)
 - [ ] 15. [Consider ARM runners for cost/speed](#15-consider-arm-runners-for-costspeed)
 - [x] 16. [Make the shipped dbt tests executable](#16-make-the-shipped-dbt-tests-executable)
@@ -845,6 +845,9 @@ actions by SHA. The PR title is user-controlled: never interpolate it with
 **Acceptance.** A PR titled `update stuff` gets one comment; renaming it to
 `docs: update stuff` removes the comment; renaming it back recreates one
 comment, not a second.
+
+Done: `.github/workflows/pr-title.yml` on `pull_request_target` (no
+checkout), both actions pinned by SHA, the check itself `continue-on-error`.
 
 ### 14. Broaden Terraform validation beyond Airbyte
 

@@ -1,0 +1,54 @@
+name: PR title
+
+# Advisory Conventional-Commit title check (`type(scope): subject`). It never
+# fails: a red check that is not required trains people to ignore red checks.
+# A bad title gets ONE sticky comment, edited in place on later runs and
+# deleted once the title is fixed. To enforce instead, drop continue-on-error
+# and add the job to the required checks. See ci-cd-hardening #13.
+#
+# pull_request_target so Dependabot and fork PRs can be commented on. Nothing
+# is checked out, and the title reaches the actions only as event data, never
+# through a shell.
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+
+concurrency:
+  group: pr-title-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  title:
+    runs-on: ubuntu-latest
+    steps:
+      - id: lint
+        # v6.1.1
+        uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - if: steps.lint.outcome == 'failure'
+        # v3.0.5
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88
+        with:
+          header: pr-title
+          message: |
+            **PR title is not a Conventional Commit** (advisory; nothing is blocked).
+
+            Expected `type(scope): subject`, e.g. `fix(dagster): resolve routing at run time`.
+            Types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert.
+
+            ```
+            ${{ steps.lint.outputs.error_message }}
+            ```
+
+            This comment is removed once the title is fixed.
+      - if: steps.lint.outcome == 'success'
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88
+        with:
+          header: pr-title
+          delete: true
