@@ -21,6 +21,10 @@ Invariants:
   * Bounded payload: CLAUDE_REVIEW_MAX_FILES (default 20),
     CLAUDE_REVIEW_MAX_BYTES (default 100000), CLAUDE_REVIEW_TIMEOUT seconds
     (default 180). Truncation is announced.
+  * Isolated session. The model runs with no tools, no MCP servers, safe
+    mode (no hooks, settings, or CLAUDE.md), and no session persistence
+    (claude_command). CLAUDE_REVIEW_MODEL overrides the model. Every
+    fail-open warning starts with "UNAVAILABLE (NOT A PASS):".
   * Refs come from PRE_COMMIT_FROM_REF / PRE_COMMIT_TO_REF (pre-commit consumes
     the hook's stdin). A new branch (all-zero from-ref) is diffed against its
     merge-base with the remote's default branch; a deleted branch has nothing
@@ -80,8 +84,17 @@ class Payload:
     notes: list[str] = field(default_factory=list)
 
 
+UNAVAILABLE = "UNAVAILABLE (NOT A PASS):"
+
+
 def warn(message: str) -> None:
     print(f"claude-review: {message}", file=sys.stderr)
+
+
+def unavailable(message: str) -> None:
+    """A fail-open warning: the push is allowed but nothing was reviewed, so
+    it must never read like a passing review."""
+    warn(f"{UNAVAILABLE} {message}")
 
 
 def git(*args: str) -> str:
@@ -213,10 +226,32 @@ def build_payload(base: str, head: str, limits: Limits, scanner) -> Payload:
 # ---- the model ------------------------------------------------------------------
 
 
-def ask_claude(payload: Payload, limits: Limits) -> str:
+def claude_command(env=os.environ) -> list[str]:
+    """`claude -p` with nothing but the prompt: no tools, no MCP servers, no
+    hooks, settings, or CLAUDE.md (safe mode), and no transcript on disk.
+    Not --bare: it accepts only API-key auth, which breaks OAuth logins.
+    An older CLI that rejects a flag exits non-zero, which fails open; never
+    retry without the flag."""
+    command = [
+        "claude",
+        "-p",
+        "--tools",
+        "",
+        "--strict-mcp-config",
+        "--mcp-config",
+        '{"mcpServers":{}}',
+        "--safe-mode",
+        "--no-session-persistence",
+    ]
+    if env.get("CLAUDE_REVIEW_MODEL"):
+        command += ["--model", env["CLAUDE_REVIEW_MODEL"]]
+    return command
+
+
+def ask_claude(payload: Payload, limits: Limits, env=os.environ) -> str:
     prompt = PROMPT.format(notes="\n".join(payload.notes), diff=payload.diff)
     completed = subprocess.run(
-        ["claude", "-p"],
+        claude_command(env),
         input=prompt,
         capture_output=True,
         text=True,
@@ -250,18 +285,18 @@ def run(env=os.environ) -> int:
     for note in payload.notes:
         warn(note)
     if not payload.sent:
-        warn("nothing to send for review; push allowed.")
+        unavailable("nothing to send for review; push allowed.")
         return 0
     try:
-        reply = ask_claude(payload, limits)
+        reply = ask_claude(payload, limits, env)
     except FileNotFoundError:
-        warn("`claude` CLI not found; push allowed.")
+        unavailable("`claude` CLI not found; push allowed.")
         return 0
     except subprocess.TimeoutExpired:
-        warn(f"review timed out after {limits.timeout}s; push allowed.")
+        unavailable(f"review timed out after {limits.timeout}s; push allowed.")
         return 0
     except RuntimeError as exc:
-        warn(f"{exc}; push allowed.")
+        unavailable(f"{exc}; push allowed.")
         return 0
     print(reply)
     outcome = verdict(reply)
@@ -271,7 +306,7 @@ def run(env=os.environ) -> int:
         )
         return 1
     if outcome == "ADVISORY":
-        warn("no verdict line in the reply; treated as advisory. Push allowed.")
+        unavailable("no verdict line in the reply; treated as advisory. Push allowed.")
     return 0
 
 
@@ -282,7 +317,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         return run()
     except Exception as exc:  # noqa: BLE001 -- fail open: a review must never block on its own bug
-        warn(f"review failed ({type(exc).__name__}: {exc}); push allowed.")
+        unavailable(f"review failed ({type(exc).__name__}: {exc}); push allowed.")
         return 0
 
 
