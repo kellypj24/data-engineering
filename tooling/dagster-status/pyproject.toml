@@ -1,0 +1,22 @@
+[project]
+name = "dagster-status"
+version = "0.1.0"
+description = "Read-only Dagster status CLI over the GraphQL API: runs, errors, schedules, sensors, and what can trigger a job"
+requires-python = ">=3.11"
+dependencies = []  # stdlib only: runs anywhere without the project venv
+
+[project.scripts]
+dagster-status = "dagster_status.cli:main"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.3",
+    "ruff>=0.16.10",
+]
+
+[build-system]
+requires = ["setuptools>=84.0.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

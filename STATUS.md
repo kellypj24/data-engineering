@@ -8,11 +8,11 @@ _Updated 2026-10-28._
 ## Now
 
 - Round 3 of the roadmap (`docs/toolkit-expansion.md`, `docs/ci-cd-hardening.md`) is in
-  progress. Done: E35–E48; CI hardening #12, #13, #19, #21, #22, #23.
+  progress. Done: E35–E49; P8 complete; CI hardening #12, #13, #19, #21, #22, #23.
 
 ## Next
 
-1. The rest of P8 (E49 read-only Dagster status CLI next), then P9 (`docs/toolkit-expansion.md`).
+1. P9 pattern docs (E50 period close next; `docs/toolkit-expansion.md`).
 2. CI hardening #9 (block `--no-verify` agent hook), then #10, #11, #14, #15, #24
    (`docs/ci-cd-hardening.md`).
 3. Lock refresh: `uv lock --upgrade` per tool to clear the advisories the daily audit

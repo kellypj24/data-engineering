@@ -55,6 +55,7 @@ The Snowflake database and warehouse are **not** env vars: `src/utils/deployment
 
 ## Patterns
 
+- **Query job state, never infer it** from `default_status` or schedule definitions: `default_status` applies only on a definition's first load, and a stopped schedule's job can still be launched by a running sensor. Ask the instance: `tooling/dagster-status` (`triggers <job>`, `schedules`, `sensors`)
 - Assets export via `all_assets` list in `src/assets/__init__.py`
 - Same pattern for sensors (`all_sensors`), schedules (`all_schedules`), jobs (`all_jobs`), checks (`all_checks`)
 - `tests/test_invariants.py` enforces, for every definition: schedules and job-launching sensors default to STOPPED; schedules set `execution_timezone="UTC"`; a sensor without a job target is listed in `observing_sensors`; no duplicate names; jobs tagged `toolkit/manual_only` are never scheduled; a chained job has no schedule and one upstream sensor whose monitored jobs exist; `@dbt_assets` partition the manifest and run `dbt build`; a job selecting a dbt node selects its parent seeds; with `restricted={tag: allowed_jobs}`, only allowed jobs' resolved selections reach an asset carrying `tag`
