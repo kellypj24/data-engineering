@@ -65,7 +65,7 @@ is why the status lives here rather than on the section headings.)
 - [ ] 15. [Consider ARM runners for cost/speed](#15-consider-arm-runners-for-costspeed)
 - [x] 16. [Make the shipped dbt tests executable](#16-make-the-shipped-dbt-tests-executable)
 - [x] 17. [Add stack-usage skills for downstream projects](#17-add-stack-usage-skills-for-downstream-projects)
-- [ ] 21. [Retarget stacked PRs, then delete merged branches](#21-retarget-stacked-prs-then-delete-merged-branches)
+- [x] 21. [Retarget stacked PRs, then delete merged branches](#21-retarget-stacked-prs-then-delete-merged-branches)
 - [ ] 22. [Stale bot that exempts tracker issues](#22-stale-bot-that-exempts-tracker-issues)
 - [ ] 23. [Auto-label PRs by path](#23-auto-label-prs-by-path)
 - [ ] 24. [Run `dbt_project_evaluator` in CI](#24-run-dbt_project_evaluator-in-ci)
@@ -951,6 +951,12 @@ setting, if it is on, so the two never race.
 **Acceptance.** Merging the bottom PR of a two-PR stack deletes its branch and
 leaves the upper PR open, retargeted to `main`. With the retarget API call
 forced to fail, the branch is not deleted and the job is red.
+
+Done: `.github/workflows/delete-merged-branches.yml` runs
+`.github/scripts/delete_merged_branch.py` (stdlib Python, so no shell
+pipelines at all; tested with a fake API in `test_delete_merged_branch.py`).
+Merge **without** `gh pr merge --delete-branch` or the UI's delete button: a
+client-side delete races the workflow and closes the stack.
 
 ### 22. Stale bot that exempts tracker issues
 

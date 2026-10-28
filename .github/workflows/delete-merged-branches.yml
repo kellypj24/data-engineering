@@ -1,0 +1,42 @@
+name: Delete merged branches
+
+# After a merge, retarget every open PR stacked on the merged branch onto the
+# merged PR's base, and only then delete the branch. Deleting first makes
+# GitHub close the stacked PRs for good. Fails closed: any failure before the
+# delete keeps the branch. See ci-cd-hardening #21 and
+# .github/scripts/delete_merged_branch.py.
+#
+# Merge without --delete-branch (gh) or the UI's delete button: this workflow
+# does the delete, after the retarget.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: delete-merged-branch-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  retarget-and-delete:
+    # Merged PRs from this repository only: a fork's branch is not ours to delete.
+    if: >-
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github/scripts
+      - name: Retarget stacked PRs, then delete the branch
+        # Branch names are user-controlled: pass them through env, never ${{ }} in run.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_BRANCH: ${{ github.event.pull_request.head.ref }}
+          BASE_BRANCH: ${{ github.event.pull_request.base.ref }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: python3 .github/scripts/delete_merged_branch.py
