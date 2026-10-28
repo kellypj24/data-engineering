@@ -8,11 +8,11 @@ _Updated 2026-10-28._
 ## Now
 
 - Round 3 of the roadmap (`docs/toolkit-expansion.md`, `docs/ci-cd-hardening.md`) is in
-  progress. Done: E35–E50; P8 complete; CI hardening #12, #13, #19, #21, #22, #23.
+  progress. Done: E35–E51; P8 complete; CI hardening #12, #13, #19, #21, #22, #23.
 
 ## Next
 
-1. P9 pattern docs (E51 history tables stamped with `current_date` next; `docs/toolkit-expansion.md`).
+1. P9 pattern docs (E52 one unknown-member token per dimension next; `docs/toolkit-expansion.md`).
 2. CI hardening #9 (block `--no-verify` agent hook), then #10, #11, #14, #15, #24
    (`docs/ci-cd-hardening.md`).
 3. Lock refresh: `uv lock --upgrade` per tool to clear the advisories the daily audit
