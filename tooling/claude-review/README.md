@@ -39,18 +39,39 @@ advice.
 
 ## Requirements
 
-- Python **3.11+** as `python3` (stdlib only, no venv). macOS's
-  `/usr/bin/python3` is 3.9: the review then sends nothing and allows the push.
 - The `claude` CLI on `PATH`, logged in, recent enough to accept `--safe-mode`
   and `--no-session-persistence`. `CLAUDE_REVIEW_MODEL` picks the model
   (default: the CLI's).
-- `tooling/sensitive-scan/` alongside it (the gate), or `sensitive-scan`
-  installed.
+- sensitive-scan importable by the same Python (the gate). Without it the
+  review sends nothing.
+- Python **3.11+**. Installed as a tool, uv provides it. Vendored, it runs as
+  `python3` (stdlib only, no venv); macOS's `/usr/bin/python3` is 3.9, and the
+  review then sends nothing and allows the push.
 
 ## Adopt
 
-Copy `tooling/claude-review/` and `tooling/sensitive-scan/` into your project,
-then add to `.pre-commit-config.yaml`:
+Two ways in. Both enable the review per repo through pre-commit, and both run it
+only on `CLAUDE_REVIEW=1 git push`.
+
+### Install once per machine (many repos)
+
+Install both tools into one uv environment, pinned to a commit of this toolkit:
+
+```bash
+REF=<commit sha>
+SRC="git+https://github.com/kellypj24/data-engineering@$REF"
+uv tool install --force --python ">=3.11" \
+  "claude-review @ $SRC#subdirectory=tooling/claude-review" \
+  --with "sensitive-scan @ $SRC#subdirectory=tooling/sensitive-scan"
+
+# The gate must import from the tool's environment:
+"$(uv tool dir)/claude-review/bin/python" -c "import sensitive_scan.scan"
+```
+
+Bump `REF` deliberately, after reading the diff of `tooling/claude-review/`
+and `tooling/sensitive-scan/` between the two commits.
+
+In each repo, add to `.pre-commit-config.yaml`:
 
 ```yaml
 default_install_hook_types: [pre-commit, pre-push]
@@ -59,14 +80,31 @@ repos:
     hooks:
       - id: claude-review
         name: claude-review (CLAUDE_REVIEW=1)
-        entry: python3 tooling/claude-review/src/claude_review/review.py
+        entry: claude-review
         language: system
         stages: [pre-push]
         pass_filenames: false
         always_run: true
 ```
 
-and run `pre-commit install --hook-type pre-push`.
+and run `pre-commit install --hook-type pre-push`. A `.sensitive-scan.toml` in
+the repo picks scanner packs; without one, every pack is on.
+
+### Vendor into one project
+
+Copy `tooling/claude-review/` and `tooling/sensitive-scan/` into your project
+(the review finds the scanner as a sibling directory), then use the same
+snippet with:
+
+```yaml
+        entry: python3 tooling/claude-review/src/claude_review/review.py
+```
+
+### Why not a global git hook
+
+`core.hooksPath` replaces every repo's `.git/hooks`, including the ones
+pre-commit installs, and the review reads the push range from pre-commit's
+`PRE_COMMIT_FROM_REF` / `PRE_COMMIT_TO_REF`, not from a raw hook's stdin.
 
 ## Develop
 
