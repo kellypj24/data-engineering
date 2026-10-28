@@ -54,7 +54,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
     │   └── landing.py       # Job launched by the S3 sensor
     ├── resources/
     │   ├── __init__.py
-    │   └── connections.py   # Airbyte, dbt, Snowflake resources
+    │   ├── connections.py   # Airbyte, dbt, Snowflake resources
+    │   ├── routed_snowflake.py  # Snowflake resource routed per connection
+    │   └── routed_dbt.py    # dbt CLI call routed at run time
     ├── checks/
     │   ├── __init__.py
     │   └── freshness.py     # Asset freshness checks
@@ -152,16 +154,24 @@ The following environment variables are expected by the resources defined in
 | `SNOWFLAKE_USER`      | Snowflake |
 | `SNOWFLAKE_PASSWORD`  | Snowflake |
 | `SNOWFLAKE_SCHEMA`    | Snowflake |
-| `SNOWFLAKE_WAREHOUSE` | Snowflake |
-| `DAGSTER_CLOUD_DEPLOYMENT_NAME` or `DEPLOYMENT` | Target database routing |
+| `DAGSTER_CLOUD_DEPLOYMENT_NAME` or `DEPLOYMENT` | Database and warehouse routing |
 
-The Snowflake **database** is not an environment variable. It is chosen from
-the deployment by `src/utils/deployment.py`: `prod` → `ANALYTICS_PROD`, `stage` →
-`ANALYTICS_STAGE`, and any other value, or none, → `ANALYTICS_DEV`. So a
-misconfigured or local process cannot write production. Schedules and jobs carry
-`toolkit/deployment` and `toolkit/target_database` run tags showing the choice.
-The dbt profile still reads `SNOWFLAKE_DATABASE`; set it from the same function
-when deploying dbt through Dagster.
+The Snowflake **database and warehouse** are not environment variables. They
+are chosen from the deployment by `src/utils/deployment.py`: `prod` →
+`ANALYTICS_PROD`, `stage` → `ANALYTICS_STAGE`, and any other value, or none, →
+`ANALYTICS_DEV`; warehouses by a logical size key (`small`, `large`) per
+deployment. So a misconfigured or local process cannot write production.
+
+The choice is made **when the work runs**, not when the code server imports
+the module: a code server can load before the deployment variable is set, and
+anything resolved then sends prod runs to non-prod, silently.
+`RoutedSnowflakeResource` resolves on every connection; dbt assets and jobs
+call dbt through `routed_dbt_cli`, which sets `SNOWFLAKE_DATABASE` /
+`SNOWFLAKE_WAREHOUSE` for the dbt process when `DBT_TARGET=snowflake_prod`
+(other targets, like a personal dev clone, are left alone). The
+`toolkit/deployment` and `toolkit/target_database` run tags are computed at
+import for display only. `identity_probe_job` fails if the session is not
+where routing says.
 
 ## Further Reading
 

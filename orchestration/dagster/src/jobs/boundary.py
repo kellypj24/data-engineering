@@ -6,7 +6,9 @@ config says the stage role, so it must be." Only a refused write, from inside
 the process that does the work, proves the whole chain (secret -> env var ->
 resource -> resolved role).
 
-* ``identity_probe_job`` runs one read-only query and logs who the run is.
+* ``identity_probe_job`` runs one read-only query, logs who the run is, and
+  fails unless the session's database and warehouse are the ones
+  ``src/utils/deployment.py`` resolves for this deployment right now.
 * ``write_boundary_job`` tries to create a uniquely named throwaway table in a
   database this identity must NOT be able to write, and passes only if
   Snowflake refuses. The refusal is logged verbatim as evidence. If the table
@@ -26,6 +28,7 @@ from dagster import Config, Failure, OpExecutionContext, job, op
 from dagster_snowflake import SnowflakeResource
 from snowflake.connector.errors import ProgrammingError
 
+from src.resources.routed_snowflake import RoutedSnowflakeResource
 from src.utils.deployment import (
     DATABASES,
     PROD_DEPLOYMENT,
@@ -73,11 +76,29 @@ def default_forbidden_database(deployment: str | None) -> str:
     return DATABASES[PROD_DEPLOYMENT]
 
 
+def routing_mismatches(identity: dict, routing) -> list[str]:
+    """Where the session differs from the resolved routing. Snowflake reports
+    unquoted identifiers upper-case."""
+    expected = {"database": routing.database, "warehouse": routing.warehouse}
+    return [
+        f"{key}: session {identity[key]!r}, resolved {want!r}"
+        for key, want in expected.items()
+        if (identity[key] or "").upper() != want.upper()
+    ]
+
+
 @op
-def probe_identity(context: OpExecutionContext, snowflake: SnowflakeResource):
+def probe_identity(context: OpExecutionContext, snowflake: RoutedSnowflakeResource):
     with snowflake.get_connection() as connection:
         identity = read_identity(connection)
     context.log.info(f"identity: {json.dumps(identity)}")
+    routing = snowflake.routing()
+    mismatches = routing_mismatches(identity, routing)
+    if mismatches:
+        raise Failure(
+            f"session is not where deployment {routing.deployment or 'unset'!r} "
+            "routes: " + "; ".join(mismatches)
+        )
     return identity
 
 
