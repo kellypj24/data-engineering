@@ -21,6 +21,7 @@ from dagster import EnvVar
 from dagster_airbyte import AirbyteResource
 from dagster_dbt import DbtCliResource
 
+from src.resources.backup import BackupStorage
 from src.resources.routed_snowflake import RoutedSnowflakeResource
 from src.telemetry.store import RunEventStore
 
@@ -52,4 +53,11 @@ RESOURCES: dict = {
     # Run-event telemetry (src/telemetry/). A local duckdb file by default; on
     # a warehouse, subclass RunEventStore and set `warehouse` to record it.
     "telemetry": RunEventStore(path="telemetry.duckdb"),
+    # Warehouse backups (src/assets/backups.py): Parquet from the dbt project's
+    # duckdb file to S3 via the AWS credential chain. On Snowflake use
+    # SnowflakeBackupStorage (src/resources/snowflake_backup.py) instead.
+    "backup": BackupStorage(
+        root="s3://warehouse-backups",
+        duckdb_path=str(Path(DBT_PROJECT_DIR) / "dev.duckdb"),
+    ),
 }

@@ -1,14 +1,18 @@
 """Warehouse backup asset (E48): materialized against a local duckdb table
 and a temp directory; the Snowflake extra by the SQL it sends."""
 
+import socket
 from contextlib import contextmanager
 from unittest.mock import MagicMock
 
+import boto3
 import duckdb
 import pytest
-from dagster import materialize
+from dagster import AssetKey, materialize
+from moto.server import ThreadedMotoServer
 
-from src.resources.backup import PARQUET_FILE, BackupStorage
+from src import defs
+from src.resources.backup import PARQUET_FILE, BackupStorage, s3_setup_sql
 from src.resources.snowflake_backup import SnowflakeBackupStorage
 from src.utils.factories import build_backup_asset
 
@@ -82,3 +86,60 @@ def test_snowflake_unloads_into_the_stage_and_sums_rows():
         "COPY INTO @BACKUPS/prod/raw.orders/snapshot_ts=x/run_id=y/ FROM raw.orders "
         "FILE_FORMAT = (TYPE = PARQUET) HEADER = TRUE"
     )
+
+
+@pytest.fixture
+def s3_endpoint():
+    sock = socket.socket()
+    sock.bind(("127.0.0.1", 0))
+    port = sock.getsockname()[1]
+    sock.close()
+    server = ThreadedMotoServer(ip_address="127.0.0.1", port=port)
+    server.start()
+    boto3.client(
+        "s3",
+        endpoint_url=f"http://127.0.0.1:{port}",
+        region_name="us-east-1",
+        aws_access_key_id="testing",
+        aws_secret_access_key="testing",
+    ).create_bucket(Bucket="backups")
+    yield f"127.0.0.1:{port}"
+    server.stop()
+
+
+def test_s3_root_writes_through_httpfs(warehouse, s3_endpoint):
+    secret = {
+        "KEY_ID": "testing",
+        "SECRET": "testing",
+        "REGION": "us-east-1",
+        "ENDPOINT": s3_endpoint,
+        "URL_STYLE": "path",
+        "USE_SSL": "false",
+    }
+    storage = BackupStorage(
+        root="s3://backups", duckdb_path=str(warehouse), s3_secret=secret
+    )
+    directory = "s3://backups/non_prod/raw.orders/snapshot_ts=x/run_id=y"
+    assert storage.copy_to_parquet("raw.orders", directory) == 3
+
+    with duckdb.connect() as connection:
+        for statement in s3_setup_sql(secret):
+            connection.execute(statement)
+        count = connection.execute(f"SELECT count(*) FROM '{directory}/{PARQUET_FILE}'")
+        assert count.fetchone()[0] == 3
+
+
+def test_credential_chain_is_the_default_secret():
+    assert s3_setup_sql(BackupStorage().s3_secret) == [
+        "INSTALL httpfs",
+        "LOAD httpfs",
+        "INSTALL aws",
+        "LOAD aws",
+        "CREATE OR REPLACE TEMPORARY SECRET backup_s3 (TYPE s3, PROVIDER 'credential_chain')",
+    ]
+
+
+def test_example_backup_runs_after_its_sync():
+    assets = defs.get_repository_def().asset_graph
+    key = AssetKey("raw_orders_backup")
+    assert AssetKey(["airbyte", "raw_orders"]) in assets.get(key).parent_keys
