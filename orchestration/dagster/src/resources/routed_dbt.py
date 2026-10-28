@@ -4,8 +4,7 @@
 dbt profile reads its database and warehouse from env vars. Routing is
 resolved in the op/asset body (``resolve_routing``), applied to the
 environment only for the duration of the ``dbt.cli`` call that starts the
-process, then restored. Targets other than the deployed one are left alone
-(``dbt_routing_env``).
+process, then restored. Every target is routed (``dbt_routing_env``).
 """
 
 import os

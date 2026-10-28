@@ -18,7 +18,7 @@ Reference orchestrator implementation. All other orchestrators (Airflow, Prefect
 - `src/checks/freshness.py` — Asset freshness check (25h threshold)
 - `src/resources/connections.py` — `RESOURCES` dict: airbyte, dbt, snowflake (`RoutedSnowflakeResource`), telemetry
 - `src/resources/routed_snowflake.py` — `RoutedSnowflakeResource`: database and warehouse resolved on every `get_connection()`, configured values ignored; default connector only
-- `src/resources/routed_dbt.py` — `routed_dbt_cli(context, dbt, args)`: every dbt call goes through it; sets `SNOWFLAKE_DATABASE`/`SNOWFLAKE_WAREHOUSE` for the dbt process on the deployed target only
+- `src/resources/routed_dbt.py` — `routed_dbt_cli(context, dbt, args)`: every dbt call goes through it; sets `SNOWFLAKE_DATABASE`/`SNOWFLAKE_WAREHOUSE` for the dbt process on every target: non-prod mirrors prod, no per-target exceptions
 - `src/utils/notifier.py` — One `Notification` model rendered to Slack Block Kit by severity (success = one line; warning/failure expand). Severity→channel routing only in `channel_for`. `make_slack_on_failure_hook` builds on it. Renders are snapshot-tested (`tests/snapshots/`; `UPDATE_SNAPSHOTS=1` to rewrite)
 - `src/utils/factories.py` — `build_source_assets()` factory pattern
 - `src/telemetry/` — Run-event telemetry. `run_events.sql` is the table DDL; `sensors.py` has run-status sensors appending STARTED/SUCCESS/FAILURE rows (completion writers backfill a missing STARTED); `store.py` is the `telemetry` resource (duckdb by default). Every telemetry error is logged, never raised. dbt summarises the table in `mart_orchestrator_run_summary`
