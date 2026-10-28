@@ -46,9 +46,14 @@
         {%- endif -%}
     {%- endfor -%}
     {%- if content_columns | length == 0 -%}
+        {%- if adapter.get_relation(database=extracts.database, schema=extracts.schema, identifier=extracts.identifier) is none -%}
+            {#- Not built yet (e.g. `dbt compile` before seeds/EL). Still read from
+                it, so a run against a missing table fails in the warehouse
+                instead of building something empty. -#}
+            {{- return("SELECT * FROM " ~ extracts ~ " /* reconstruct_scd2: not built yet, columns unknown */") -}}
+        {%- endif -%}
         {{ exceptions.raise_compiler_error(
             "reconstruct_scd2: " ~ extracts ~ " has no columns besides " ~ extract_date
-            ~ ". Does it exist yet? Build or load it first."
         ) }}
     {%- endif -%}
 
