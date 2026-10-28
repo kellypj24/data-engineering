@@ -15,6 +15,7 @@ Reference orchestrator implementation. All other orchestrators (Airflow, Prefect
 - `src/jobs/boundary.py` — Manual-only (`toolkit/manual_only`, never scheduled): `identity_probe_job` logs CURRENT_USER/ROLE/SECONDARY_ROLES/DATABASE/WAREHOUSE; `write_boundary_job` passes only if creating a table in a forbidden database (default: the prod database; required config in the prod deployment) is refused (errno 3001/2003), fails if secondary roles are active, and drops + fails if the table is created
 - `src/jobs/landing.py` — `process_landing_file_job`, one run per landed S3 object
 - `src/schedules/daily.py` — Daily 06:00 UTC `ScheduleDefinition` for `extract_job`, the head of the chain
+- `src/schedules/__init__.py` — `BASE_SCHEDULES`, per-deployment cron overrides (`DEPLOYMENT_CRONS`, applied by `schedules_for_deployment` in `src/utils/deployment.py`), and `NOT_OVERRIDDEN`. Every daily schedule is in one of the two; `tests/test_schedules.py` enforces it
 - `src/checks/freshness.py` — Asset freshness check (25h threshold)
 - `src/resources/connections.py` — `RESOURCES` dict: airbyte, dbt, snowflake (`RoutedSnowflakeResource`), telemetry
 - `src/resources/routed_snowflake.py` — `RoutedSnowflakeResource`: database and warehouse resolved on every `get_connection()`, configured values ignored; default connector only
