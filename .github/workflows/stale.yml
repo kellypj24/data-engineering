@@ -1,0 +1,50 @@
+name: Stale
+
+# Mark issues and PRs stale after 60 idle days; close them 14 days later.
+# Drafts and every label a workflow here manages are exempt, or the bot would
+# close the living tracker issues those workflows update in place.
+# check_wiring.py fails if a workflow's `--label` is missing from EXEMPT below.
+# See ci-cd-hardening #22.
+
+on:
+  schedule:
+    - cron: "41 5 * * *"
+  workflow_dispatch:
+    inputs:
+      debug-only:
+        description: "Dry run: log what would change, change nothing"
+        type: boolean
+        default: true
+
+permissions:
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: stale
+  cancel-in-progress: false
+
+env:
+  # Tracker labels (security-audit, dbt-compile-gate, dbt-deps-update,
+  # dbt-deprecations; claude-review once #10 lands), then human holds.
+  EXEMPT: security,ci-alarm,dependencies,dbt-deprecations,claude-review,pinned,blocked,on-hold
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v11
+        with:
+          days-before-stale: 60
+          days-before-close: 14
+          exempt-draft-pr: true
+          exempt-issue-labels: ${{ env.EXEMPT }}
+          exempt-pr-labels: ${{ env.EXEMPT }}
+          remove-stale-when-updated: true
+          stale-issue-message: >-
+            No activity for 60 days. This closes in 14 days unless it is
+            updated or given one of the exempt labels (e.g. `pinned`).
+          stale-pr-message: >-
+            No activity for 60 days. This closes in 14 days unless it is
+            updated, converted to a draft, or labelled `pinned`.
+          debug-only: ${{ github.event_name == 'workflow_dispatch' && inputs.debug-only }}

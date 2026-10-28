@@ -123,3 +123,23 @@ def test_missing_wiring_is_named(repo, file, old, new, expected):
     edit(repo / file, old, new)
     problems = check(repo)
     assert any(p.startswith(expected) for p in problems), problems
+
+
+def test_a_tracker_label_missing_from_the_stale_exemptions_fails(repo):
+    edit(
+        repo / ".github/workflows/stale.yml",
+        "EXEMPT: security,ci-alarm,",
+        "EXEMPT: security,",
+    )
+    assert check(repo) == [
+        "label `ci-alarm` (dbt-compile-gate.yml): not exempt in stale.yml EXEMPT"
+    ]
+
+
+def test_a_new_workflow_label_must_be_exempted(repo):
+    (repo / ".github/workflows/new-alarm.yml").write_text(
+        "jobs: {x: {steps: [{run: 'tracker_issue.py --label new-alarm'}]}}\n"
+    )
+    assert check(repo) == [
+        "label `new-alarm` (new-alarm.yml): not exempt in stale.yml EXEMPT"
+    ]
