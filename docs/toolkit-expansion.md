@@ -88,6 +88,46 @@
 - [x] E21. [Architecture decision records](#e21-architecture-decision-records)
 - [x] E22. [Semantic-view generator from dbt metadata (Snowflake extra)](#e22-semantic-view-generator-from-dbt-metadata-snowflake-extra)
 
+### Round 3 (drafted 2026-10-28)
+
+Work order across both roadmaps: **P6 fixes**, then the CI quick wins in
+`ci-cd-hardening.md` (#21, #22, #23, #13, #12, in that order), then P7–P9.
+
+**P6 — Fixes to shipped code**
+
+- [ ] E35. [claude-review: scan the base side of every diff](#e35-claude-review-scan-the-base-side-of-every-diff)
+- [ ] E36. [claude-review: run the model in an isolated, non-persistent session](#e36-claude-review-run-the-model-in-an-isolated-non-persistent-session)
+- [ ] E37. [Dagster: resolve target routing at run time, not import time](#e37-dagster-resolve-target-routing-at-run-time-not-import-time)
+
+**P7 — dbt building blocks, round 2**
+
+- [ ] E40. [Row content hash for snapshot `check_cols`](#e40-row-content-hash-for-snapshot-check_cols)
+- [ ] E39. [Generic SCD2 invariants test](#e39-generic-scd2-invariants-test)
+- [ ] E38. [SCD2 reconstruction from dated full extracts](#e38-scd2-reconstruction-from-dated-full-extracts)
+- [ ] E41. [Grain guard: count before dedup](#e41-grain-guard-count-before-dedup)
+- [ ] E42. [Date spine with a fact-coverage test](#e42-date-spine-with-a-fact-coverage-test)
+- [ ] E43. [Static check for undefined `var()` references](#e43-static-check-for-undefined-var-references)
+- [ ] E44. [Pre-run write-role guard (Snowflake extra)](#e44-pre-run-write-role-guard-snowflake-extra)
+
+**P8 — Dagster patterns, round 2**
+
+- [ ] E45. [Restricted-tag reach invariant](#e45-restricted-tag-reach-invariant)
+- [ ] E46. [Per-deployment schedule times](#e46-per-deployment-schedule-times)
+- [ ] E47. [SQS sensor with redelivery-safe acknowledgement](#e47-sqs-sensor-with-redelivery-safe-acknowledgement)
+- [ ] E48. [Warehouse backup as an asset](#e48-warehouse-backup-as-an-asset)
+- [ ] E49. [Read-only Dagster status CLI](#e49-read-only-dagster-status-cli)
+
+**P9 — Pattern docs**
+
+- [ ] E50. [Period close](#e50-period-close)
+- [ ] E51. [History tables stamped with `current_date`](#e51-history-tables-stamped-with-current_date)
+- [ ] E52. [One unknown-member token per dimension](#e52-one-unknown-member-token-per-dimension)
+- [ ] E53. [Event-driven ingest → dbt subgraph → export](#e53-event-driven-ingest--dbt-subgraph--export)
+- [ ] E54. [Image promotion runbook](#e54-image-promotion-runbook)
+- [ ] E55. [Sensitive-scan runbook: freeze, verify, audit](#e55-sensitive-scan-runbook-freeze-verify-audit)
+
+Not yet tasks: [Deferred to a later round](#deferred-to-a-later-round).
+
 ---
 
 ## Baseline — what exists today
@@ -961,6 +1001,462 @@ synonyms) in the header.
 
 ---
 
+## P6 — Fixes to shipped code
+
+> Defects in tools this repo already ships. Each one leaks data or writes to
+> the wrong place, so they come before any new feature or CI polish.
+
+### E35. claude-review: scan the base side of every diff
+
+> **Fixes E15.**
+
+**Why.** `build_payload` scans `git show <head>:<path>` and then sends
+`git diff <base> <head> -- <path>`. A diff carries both sides: the removed
+lines come from the base version, which is never scanned. A push that deletes a
+secret, or rewrites the line it sat on, sends that secret to the model. The
+existing invariant (`sent ⊆ scanned`) holds by path but not by content.
+
+**How.**
+- For every file whose status is M, R, or D, also scan `git show <base>:<old
+  path>`. Parse the old path from `--name-status` (`R100\told\tnew`); today
+  `changed_files` keeps only the new path.
+- A file is sendable only if **both** sides are clean. Either side tripping the
+  scanner withholds the file, and the note says which side.
+- Deleted files are still not sent, but they are scanned, so the withheld list
+  reports a deleted secret instead of staying silent.
+- Scan before any byte is assembled into the payload, not between files.
+- Restate the invariant in `CLAUDE.md`: every line in the payload came from a
+  scanned blob.
+
+**Acceptance.** Real-repo tests in `tests/test_review.py`: a push that removes
+a secret line withholds the file; a rename whose old content trips the scanner
+withholds it; a delete of a tripping file appears in the withheld note; a clean
+modify still sends. `FakeClaude` records its input, and no test payload ever
+contains the fixture secret.
+
+---
+
+### E36. claude-review: run the model in an isolated, non-persistent session
+
+> **Fixes E15.**
+
+**Why.** `ask_claude` runs a bare `claude -p`. That session inherits whatever
+the developer's environment configures: tools (it can read and run things),
+MCP servers, hooks, and the project `CLAUDE.md`. It also writes a session
+transcript, which is a second copy of the diff on disk. A reviewer needs none
+of that; it needs the prompt and nothing else.
+
+**How.**
+- Build the argv in one function: no tools, a strict empty MCP config, safe
+  mode (no hooks, no project or user settings, no `CLAUDE.md`), and no session
+  persistence. Use the flags the installed CLI documents; a test pins the argv.
+- `CLAUDE_REVIEW_MODEL` overrides the model. Unset means the CLI default.
+- Every fail-open warning starts with `UNAVAILABLE (NOT A PASS):`, so a review
+  that did not run can never be read as one that passed. A real `VERDICT: OK`
+  keeps its own wording.
+- If the CLI rejects an isolation flag (older version), fail open with that
+  prefix. Never retry without the flag.
+
+**Acceptance.** A test asserts the exact argv, including the model override. A
+test per fail-open class asserts the `UNAVAILABLE (NOT A PASS)` prefix. An
+unknown-flag error from the CLI fails open and does not re-run `claude`.
+
+---
+
+### E37. Dagster: resolve target routing at run time, not import time
+
+> **Fixes E8.** Uses E13's identity probe.
+
+**Why.** `resources/connections.py` calls
+`target_database(current_deployment())` when the module is imported. If the
+deployment variable is not in the code server's environment at load time, the
+resource is built with the non-prod database, and every prod run then writes
+there. The fail-safe default makes this silent: nothing errors, prod just
+stops getting data. This happened in production.
+
+**How.**
+- Resolve routing inside the op/asset body, immediately before the warehouse
+  connection or the `dbt` CLI call, from the run's environment. The dbt call
+  passes the resolved database explicitly (env var or `--vars`), never relying
+  on the profile's default.
+- Import-time `deployment_tags` stay, labelled display-only in the docstring.
+  Nothing may route on them.
+- Add the warehouse as a **logical size key** (`small`, `large`) mapped per
+  deployment in `utils/deployment.py`, with the same fail-safe: an unknown
+  deployment gets the non-prod mapping.
+- E13's identity probe asserts that the database and warehouse the session
+  reports equal what `utils/deployment.py` resolves for the running
+  deployment, and fails otherwise.
+
+**Acceptance.** A test imports `connections` with the deployment unset, then
+sets it to `prod` and executes the asset: the resolved database is prod. The
+size-key mapping has the same unset/empty/unknown → non-prod tests as E8. The
+probe fails when the resolved and reported databases differ.
+
+---
+
+## P7 — dbt building blocks, round 2
+
+### E40. Row content hash for snapshot `check_cols`
+
+> **Depends on E1** (reuses its encoding). Used by E38.
+
+**What.** `row_content_hash(relation_or_columns, exclude=[])` in
+`macros/utils/`, returning one hash over a row's content, for use as a single
+snapshot `check_cols` column.
+
+**Why.** A long `check_cols` list drifts from the table as columns are added.
+`check_cols='all'` treats volatile columns (`last_updated`, load timestamps)
+as changes and opens a version on every run. Array columns report a change
+whenever element order changes.
+
+**How.**
+- Reuse `mint_surrogate_key`'s length-framed payload (factor the encoding out
+  into a shared macro; do not copy it), so NULL and `''` stay distinct and
+  delimiters cannot collide.
+- `exclude` removes volatile columns by name. Columns are taken in a fixed,
+  sorted order so a column reorder is not a change.
+- Arrays are sorted before encoding.
+- **Snowflake extra**, in `macros/snowflake/`: ARRAY/VARIANT columns are not
+  comparable with `=`, so serialise them to a canonical string before
+  hashing. The duckdb implementation is the default dispatch.
+
+**Acceptance.** A singular test on literal rows fails if: changing an excluded
+column changes the hash; reordering an array changes it; NULL and `''` hash the
+same; reordering columns changes it. Runs on duckdb.
+
+---
+
+### E39. Generic SCD2 invariants test
+
+**What.** `tests/generic/scd2_invariants.sql`
+(`scd2_invariants(key, valid_from, valid_to)`) asserting, per key:
+- no zero-length spans (`valid_from < valid_to` when closed);
+- at most one open version (`valid_to is null`);
+- no overlapping spans.
+
+**Why.** Snapshot and reconstructed history tables break in exactly these
+three ways, and a point-in-time query over a broken table returns zero rows or
+two rows for one key without erroring. `unique` on the surrogate key catches
+none of them.
+
+**Acceptance.** Applied to `customers_snapshot`. Fixture seeds with one
+violation each fail the test; a clean fixture passes. Runs on duckdb.
+
+---
+
+### E38. SCD2 reconstruction from dated full extracts
+
+> **Depends on E40 and E39.** Distinct from the declined CDC-landing-table
+> reconstruction (see *Deliberately left out*): this reads archived full
+> extracts and depends on no connector.
+
+**What.** `reconstruct_scd2(extracts, key, extract_date, hash_col)` — a macro
+that rebuilds type-2 history from a stack of archived full extracts (one row
+per key per extract date) using gaps-and-islands.
+
+**Why.** E32 says history begins at the first snapshot run. Often it does not
+have to: archived full extracts from before that run already contain the
+history. Naive reconstruction compares consecutive hashes only, so a key that
+disappears and later returns with the same content looks continuous, and a key
+missing from the latest extract stays open forever.
+
+**How.**
+- **Presence-aware.** Build the full calendar of extract dates. A key absent
+  from an extract closes its version at that extract's date. A key that
+  reappears opens a new version, even if its hash is unchanged.
+- Islands are runs of consecutive extract dates with the same hash *and*
+  continuous presence.
+- Output columns match dbt snapshot meta columns (`dbt_valid_from`,
+  `dbt_valid_to`, `dbt_scd_id`) so downstream point-in-time queries do not
+  change at the seam.
+- Extend `docs/patterns/snapshots.md`: start a go-forward snapshot from the
+  rebuilt history at a fixed cutover date. The last reconstructed extract and
+  the first snapshot run must use the same E40 hash; a test compares hashes of
+  open versions at the cutover and fails on any mismatch. Amend "history
+  begins at the first run" to point here.
+
+**Acceptance.** A fixture of dated extracts covering change, disappearance,
+reappearance-unchanged, and still-present keys produces the expected versions.
+E39 passes on the output. The seam test fails when the cutover hash differs.
+Runs on duckdb.
+
+---
+
+### E41. Grain guard: count before dedup
+
+**What.** `grain_guard(grain, order_by)` in `macros/utils/`: dedups to the
+declared grain with `row_number()` and keeps `count(*) over (partition by
+<grain>)` as a `_grain_rows` column. A generic test,
+`grain_guard_is_one`, at `severity: warn`, checks `_grain_rows <= 1`.
+
+**Why.** Deduping to a grain makes `unique` pass by construction. A real key
+collision upstream (two source rows claiming one `order_id`) becomes an
+arbitrary pick, and every test stays green.
+
+**How.**
+- `order_by` is the tie-break. Its header says volatile columns
+  (`_loaded_at`, `last_updated`) must not be in it, or the chosen row changes
+  run to run and snapshots open spurious versions.
+- Snapshots read the guarded model with `select * exclude (_grain_rows)`, so
+  the count never becomes part of tracked history.
+- Wire it into one example staging model.
+
+**Acceptance.** A fixture with a duplicated key emits a warning and still
+builds one row; a clean fixture is silent. The example snapshot's columns do
+not include `_grain_rows`.
+
+---
+
+### E42. Date spine with a fact-coverage test
+
+**What.** A `dim_date` built on `dbt_utils.date_spine` with start and end from
+vars, plus a generic test `within_date_spine(date_column)` that fails when a
+fact date falls outside the spine.
+
+**Why.** Dates outside the spine do not error; they fail to join and the fact
+rows silently drop out of anything joined through `dim_date`. Spines are
+usually set once, too narrow, and never revisited.
+
+**How.** Document in the model header that `date_spine`'s `end_date` is
+**exclusive**, the usual off-by-one. Apply the test to the example facts.
+
+**Acceptance.** A fixture fact dated past the spine end fails the test; moving
+the end var forward one day passes it. Runs on duckdb.
+
+---
+
+### E43. Static check for undefined `var()` references
+
+**What.** `.github/scripts/check_dbt_vars.py` (stdlib) plus a CI step and a
+`just dbt::check-vars` recipe: flag every `var('x')` with no default whose name
+is not defined under `vars:` in `dbt_project.yml`.
+
+**Why.** `dbt parse` does not render model bodies, so a removed or renamed var
+surfaces only at compile. Downstream projects often compile only against a
+real warehouse, so the break reaches main.
+
+**How.**
+- Allow the defaulted form `var('x', <default>)`.
+- Lex Jinja string literals properly: quotes inside strings, both quote
+  styles, `var` inside comments. No regex over raw text.
+- Scan `models/`, `macros/`, `snapshots/`, `tests/`, and property YAML.
+- Keep the post-merge compile gate (`ci-cd-hardening.md` #18): two green PRs
+  can still break main together.
+
+**Acceptance.** Tests: an undefined bare var fails with file and line; a
+defaulted var passes; `var` inside a string or Jinja comment is ignored; a var
+defined only under a package scope is handled. The example project passes.
+
+---
+
+### E44. Pre-run write-role guard (Snowflake extra)
+
+> **Depends on E9.** Prevents the drift E12 repairs.
+
+**What.** `macros/snowflake/assert_write_role.sql`, wired as an
+`on-run-start` hook that is a no-op on non-Snowflake adapters. For
+`run`/`build`/`seed`/`snapshot` against a shared environment database, it
+fails unless `current_role()` is that database's service role. An allow-list
+var names extra permitted roles.
+
+**Why.** A developer running dbt against stage under a personal role creates
+objects that role owns. The service role then cannot replace them, which is the
+ownership drift E12 audits and repairs after the fact.
+
+**How.** Map database → service role from the same names E9 uses. Skip
+`compile`, `parse`, `docs`, `ls`, and personal (E31) databases.
+
+**Caveat to document.** dbt runs `create schema if not exists` before
+`on-run-start` fires, so a wrong role can still create an empty schema. The
+guard stops table and view writes, not that.
+
+**Acceptance.** On duckdb the hook runs and does nothing. Compiled on
+Snowflake, a wrong role against a shared database aborts before the first
+model; the service role and allow-listed roles pass; a personal database is
+skipped.
+
+---
+
+## P8 — Dagster patterns, round 2
+
+### E45. Restricted-tag reach invariant
+
+> **Extends E5.**
+
+**What.** `check_definitions(..., restricted={tag: allowed_jobs})` in
+`utils/invariants.py`: fail if any job not in `allowed_jobs` has a resolved
+asset selection that reaches an asset carrying `tag`.
+
+**Why.** Broad selectors (`*`, a group, `upstream()`) pull in new assets as
+they are added. When one of those reads data the job's role cannot access, the
+job fails at run time in prod. Assets with restricted access need an explicit
+list of jobs allowed to touch them.
+
+**Acceptance.** A test definition where a broad-selection job reaches a tagged
+asset fails the invariant, naming the job and asset. Adding the job to the
+allow-list passes it.
+
+---
+
+### E46. Per-deployment schedule times
+
+> **Extends E8's docs.**
+
+**What.** A pure `schedules_for_deployment(name, base, overrides)` returning
+`base` unchanged except in deployment `name`, where `overrides` replaces cron
+strings by schedule name. A coverage test fails when a daily schedule is in
+neither the override map nor an explicit `NOT_OVERRIDDEN` list.
+
+**Why.** Stage and prod usually run the same schedules, but stage should run
+off-peak or after prod's source loads. Copying the schedule list per
+deployment drifts; overriding by name in one place does not. The coverage test
+stops a new schedule from silently keeping prod's time in stage.
+
+**Acceptance.** Unit tests: unknown deployment returns base; named deployment
+gets the override; an override for a nonexistent schedule raises; a new daily
+schedule missing from both lists fails the coverage test.
+
+---
+
+### E47. SQS sensor with redelivery-safe acknowledgement
+
+**What.** `sensors/sqs_sensor.py` beside `s3_sensor.py`: polls a queue and
+yields one `RunRequest` per message.
+
+**How.**
+- `run_key` is the message id, so a redelivered message produces no second run.
+- Delete a message **one tick after** its run request was queued: the cursor
+  stores message ids pending deletion, and the next tick deletes them. A crash
+  between yielding the run and saving the cursor loses nothing (the message
+  redelivers) and duplicates nothing (`run_key` dedups).
+- Fail fast at load on an empty queue URL. `default_status=STOPPED`.
+
+**Acceptance.** Tests with `moto`: a message produces one run; a simulated
+crash before cursor save redelivers without a duplicate run; the message is
+deleted on the following tick; an empty queue URL raises.
+
+---
+
+### E48. Warehouse backup as an asset
+
+**What.** `build_backup_asset(table)` in `utils/factories.py`: an asset
+downstream of a sync that copies `table` to Parquet in object storage.
+
+**How.**
+- Path: `<prefix>/<table>/snapshot_ts=<ts>/run_id=<run_id>/`. The prod/non-prod
+  prefix comes from `utils/deployment.py`, with the same fail-safe: an
+  unknown deployment writes under non-prod.
+- Provenance (source relation, row count, snapshot timestamp, triggering run
+  id, path) goes in asset materialization metadata.
+- duckdb `COPY ... TO ... (FORMAT parquet)` by default.
+- **Snowflake extra:** `COPY INTO @stage` in `macros/snowflake/` or a Snowflake
+  resource method.
+
+> **New mechanism:** production ran Snowflake `COPY INTO` only. The duckdb
+> default is new.
+
+**Acceptance.** A test materializes the asset against a local duckdb table and
+a temp directory: the Parquet file exists at the expected path, row count in
+metadata matches, and an unset deployment writes under the non-prod prefix.
+
+---
+
+### E49. Read-only Dagster status CLI
+
+> **Depends on E14.**
+
+**What.** `tooling/dagster-status/`: a stdlib CLI over the Dagster GraphQL API
+(`/graphql` on OSS, and Dagster+ with a token). Commands: `status`, `recent`,
+`errors`, `schedules`, `sensors`, `triggers <job>` (which schedules and
+sensors can launch it, with their live state). Table or `--csv` output.
+Queries only; no mutation is ever issued.
+
+**Why.** "Is this job going to run tonight?" gets answered by reading code,
+and code is wrong. `default_status` applies only on a definition's first load;
+after that the live state is what counts, and a stopped schedule's job can
+still be launched by a running sensor.
+
+**How.** Add to `orchestration/dagster/CLAUDE.md`: query job state, never
+infer it from `default_status` or schedule definitions.
+
+> **New mechanism:** production used it against Dagster+ only. OSS `/graphql`
+> support is new.
+
+**Acceptance.** Tests mock GraphQL responses for each command and both output
+formats. A test asserts no query string contains `mutation`. `triggers` lists a
+running sensor for a job whose schedule is stopped.
+
+---
+
+## P9 — Pattern docs
+
+> Docs under `docs/patterns/` unless noted. No new code unless the task says so.
+
+### E50. Period close
+
+`docs/patterns/period-close.md`:
+- Read history **as of period end plus a grace window**, not as of the run
+  date, so a retry next month reproduces the original numbers.
+- Closed periods are locked unless explicitly listed in a reprocess var.
+- The delete scope equals the reload scope; a mismatch deletes rows the run
+  does not reload.
+- A guard query runs before writing and is the same SQL as a singular test.
+- As-of window and ordering logic live in one shared macro, so two filters
+  cannot drift.
+- Optional code: `assert_no_rows(sql, message)`, usable as a `pre_hook`.
+
+**Acceptance.** If `assert_no_rows` ships, a test shows it aborting a model
+build when the guard returns rows, on duckdb.
+
+### E51. History tables stamped with `current_date`
+
+Add to `docs/patterns/durable-facts.md`: a table stamping each row with
+`current_date` must filter incrementally with `>=`, not `>`. With `>`, the
+first run of each day writes that day and every later run skips it, so the day
+freezes at its first state. Document a day-over-day shift test (a date whose
+values equal the previous day's across all keys is suspect) and a repair op,
+dry-run by default, that restates one bad date from a neighbouring day.
+
+### E52. One unknown-member token per dimension
+
+Add to E1's docs (`mint_surrogate_key` header and the dbt README): keep each
+dimension's `null_as` token as its own named var (`unknown_customer`,
+`unknown_product`). With one shared token, every dimension's unknown member
+hashes to the same key, so a fact's unknown customer joins to the unknown
+product.
+
+### E53. Event-driven ingest → dbt subgraph → export
+
+A section in `docs/architecture-patterns.md`:
+- Ingest is its own job, separate from the dbt job. A table-materialized
+  staging model run in the same job as ingest can read the table before the
+  load finishes.
+- Exports are side effects, so they run as jobs, not assets.
+- Chain ingest → dbt subgraph → export with run-status sensors (E7) into the
+  file-export engine (E23).
+
+### E54. Image promotion runbook
+
+`docs/patterns/image-promotion.md`: stage soak period, quiet windows, promote
+by immutable tag (digest, never `latest`), rollback to the previous tag, image
+retention long enough to roll back. This covers deployable images; branch
+promotion paths stay declined (see *Deliberately left out*).
+
+### E55. Sensitive-scan runbook: freeze, verify, audit
+
+Add to `tooling/sensitive-scan/RUNBOOK.md`:
+- **Not yet pushed:** amend or rebase locally; no history rewrite on the remote.
+- **Freeze:** stop merges and pushes before rewriting.
+- **Verify before force-pushing:** the rewritten history no longer contains the
+  value (`git log -p --all | <scanner>`).
+- **Scrub-completeness audit:** every branch, tag, and open PR ref checked
+  after the force-push.
+- **Branch protection:** lift it for the force-push only, restore it, and
+  record both steps.
+
+---
+
 ## Deliberately left out
 
 Reviewed and not proposed, so they are not re-derived later:
@@ -977,3 +1473,22 @@ Reviewed and not proposed, so they are not re-derived later:
   it without a macro.
 - **History reconstruction from CDC landing tables.** Valuable but tied to one
   connector's landing semantics; revisit as a dlt/Airbyte pattern doc if needed.
+  E38 is the connector-free alternative: it reads archived full extracts.
+
+---
+
+## Deferred to a later round
+
+Backlog notes, not tasks. They get E-numbers when promoted.
+
+- **LLM enrichment inside a dbt DAG.** A Python asset between models; results
+  keyed on id + input hash + per-stage prompt version in an append-only table;
+  an anti-join so only new rows are billed; an attempt cap so unparseable
+  responses stop re-billing; a per-run budget; a "latest row per stage" dbt
+  model; a reconciliation test as the gate. Deferred: the production version
+  is not proven yet.
+- **Engineering-analytics example stack** over issue-tracker and code-host
+  data: an identity bridge between the two systems' users, issue flow time, PR
+  time-to-first-review, throughput.
+- **Pre-decommission consumer audit.** List a table's readers from warehouse
+  access history before retiring it.
