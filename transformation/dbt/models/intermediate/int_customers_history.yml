@@ -1,0 +1,37 @@
+version: 2
+
+models:
+  - name: int_customers_history
+    description: >
+      Type-2 history of customers rebuilt from archived full extracts
+      (reconstruct_scd2). One row per customer version; a customer missing
+      from an extract has its version closed at that extract's date, and a
+      returning customer opens a new version. Query a point in time with
+      dbt_valid_from <= t AND (t < dbt_valid_to OR dbt_valid_to IS NULL).
+    config:
+      tags: [customer]
+    data_tests:
+      - scd2_invariants:
+          key: id
+    columns:
+      - name: id
+        description: Customer id
+        data_tests:
+          - not_null
+      - name: email
+        description: Email as of this version
+      - name: content_hash
+        description: row_content_hash of the version's content columns
+      - name: dbt_scd_id
+        description: Version key, minted from id and dbt_valid_from
+        data_tests:
+          - unique
+          - not_null
+      - name: dbt_updated_at
+        description: Equal to dbt_valid_from
+      - name: dbt_valid_from
+        description: Extract date this version first appeared (midnight)
+        data_tests:
+          - not_null
+      - name: dbt_valid_to
+        description: Extract date it changed or went missing; null if current

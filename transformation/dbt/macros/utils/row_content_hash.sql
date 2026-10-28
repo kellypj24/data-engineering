@@ -86,6 +86,14 @@
     {%- endif -%}
 
     {%- if entries | length == 0 -%}
+        {%- if columns is not string and columns.identifier is defined and adapter.get_relation(
+            database=columns.database, schema=columns.schema, identifier=columns.identifier
+        ) is none -%}
+            {#- Relation not built yet (e.g. `dbt compile` before seeds/EL). The
+                enclosing query's FROM fails on a real run, so this placeholder
+                never reaches data. -#}
+            {{- return("''") -}}
+        {%- endif -%}
         {{ exceptions.raise_compiler_error("row_content_hash: every column was excluded") }}
     {%- endif -%}
 
