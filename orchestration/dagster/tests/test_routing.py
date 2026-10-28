@@ -147,9 +147,16 @@ def test_dbt_on_the_deployed_target_writes_where_the_run_resolves(env):
     assert "SNOWFLAKE_WAREHOUSE" not in os.environ
 
 
-def test_dbt_on_other_targets_is_left_alone(env):
-    env.setenv("DEPLOYMENT", "prod")
+@pytest.mark.parametrize("target", ["snowflake", "duckdb", None])
+def test_every_target_is_routed(env, target):
+    """Non-prod mirrors prod: the personal `snowflake` dev target run through
+    Dagster also writes where the deployment routes, not to a personal clone."""
+    if target:
+        env.setenv("DBT_TARGET", target)
     dbt = FakeDbt()
     with log_context() as context:
         routed_dbt_cli(context, dbt, ["build"])
-    assert dbt.seen == {"SNOWFLAKE_DATABASE": None, "SNOWFLAKE_WAREHOUSE": None}
+    assert dbt.seen == {
+        "SNOWFLAKE_DATABASE": "ANALYTICS_DEV",
+        "SNOWFLAKE_WAREHOUSE": "TRANSFORMING",
+    }

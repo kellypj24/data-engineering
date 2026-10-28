@@ -167,8 +167,9 @@ the module: a code server can load before the deployment variable is set, and
 anything resolved then sends prod runs to non-prod, silently.
 `RoutedSnowflakeResource` resolves on every connection; dbt assets and jobs
 call dbt through `routed_dbt_cli`, which sets `SNOWFLAKE_DATABASE` /
-`SNOWFLAKE_WAREHOUSE` for the dbt process when `DBT_TARGET=snowflake_prod`
-(other targets, like a personal dev clone, are left alone). The
+`SNOWFLAKE_WAREHOUSE` for the dbt process on every target. Every deployment
+mirrors prod's setup and differs only in where routing points; personal dev
+clones (`just dbt::dev-database`) are for the dbt CLI run directly. The
 `toolkit/deployment` and `toolkit/target_database` run tags are computed at
 import for display only. `identity_probe_job` fails if the session is not
 where routing says.

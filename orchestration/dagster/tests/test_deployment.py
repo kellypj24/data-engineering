@@ -82,11 +82,9 @@ def test_resolve_routing_reads_the_environment_it_is_given():
     assert resolve_routing({}).database == NON_PROD_DATABASE
 
 
-def test_dbt_routing_env_only_for_the_deployed_target():
+def test_dbt_routing_env_sets_database_and_warehouse():
     routing = Routing("prod", "ANALYTICS_PROD", "TRANSFORMING")
-    assert dbt_routing_env(routing, {"DBT_TARGET": "snowflake_prod"}) == {
+    assert dbt_routing_env(routing) == {
         "SNOWFLAKE_DATABASE": "ANALYTICS_PROD",
         "SNOWFLAKE_WAREHOUSE": "TRANSFORMING",
     }
-    assert dbt_routing_env(routing, {"DBT_TARGET": "snowflake"}) == {}
-    assert dbt_routing_env(routing, {}) == {}

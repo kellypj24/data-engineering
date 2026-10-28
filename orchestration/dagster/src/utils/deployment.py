@@ -85,20 +85,14 @@ def resolve_routing(
     )
 
 
-# The dbt target deployed runs use. Its profile reads the database and
-# warehouse from these env vars with no defaults; dbt_routing_env fills them
-# from the resolved routing. Other targets (duckdb, a personal `snowflake` dev
-# clone) are left alone.
-DEPLOYED_DBT_TARGET = "snowflake_prod"
-
-
-def dbt_routing_env(
-    routing: Routing, env: Mapping[str, str] = os.environ
-) -> dict[str, str]:
+def dbt_routing_env(routing: Routing) -> dict[str, str]:
     """Env overrides for a dbt subprocess so it writes where ``routing`` says.
-    Empty unless dbt runs the deployed target."""
-    if env.get("DBT_TARGET") != DEPLOYED_DBT_TARGET:
-        return {}
+
+    Applied on every target. Every deployment mirrors prod's setup and differs
+    only in where routing points, so there is no per-target exception to get
+    wrong. Personal dev clones (E31) are for the dbt CLI run directly; dbt run
+    through Dagster writes where the deployment routes. duckdb ignores these.
+    """
     return {
         "SNOWFLAKE_DATABASE": routing.database,
         "SNOWFLAKE_WAREHOUSE": routing.warehouse,
