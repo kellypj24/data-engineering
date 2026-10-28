@@ -59,7 +59,7 @@ is why the status lives here rather than on the section headings.)
 
 **P5 — polish & consistency**
 
-- [ ] 12. [Add a PR template](#12-add-a-pr-template)
+- [x] 12. [Add a PR template](#12-add-a-pr-template)
 - [x] 13. [Add a semantic PR title check](#13-add-a-semantic-pr-title-check)
 - [ ] 14. [Broaden Terraform validation beyond Airbyte](#14-broaden-terraform-validation-beyond-airbyte)
 - [ ] 15. [Consider ARM runners for cost/speed](#15-consider-arm-runners-for-costspeed)
@@ -828,6 +828,9 @@ where that gap is cheapest to catch.
 
 **Acceptance.** A new PR opens with the template. The migration item links to
 `docs/patterns/state-migrations.md` and `migrations/_template.md`.
+
+Done: `.github/pull_request_template.md`. No ticket field: titles and bodies
+never require an issue-tracker key.
 
 ### 13. Add a semantic PR title check
 
