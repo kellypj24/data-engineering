@@ -18,6 +18,11 @@ clean-targets:
   - "target"
   - "dbt_packages"
 
+# Snowflake extra: a wrong role against a shared environment database aborts
+# before the first model. A no-op on other adapters.
+on-run-start:
+  - "{{ assert_write_role() }}"
+
 vars:
   # Environment is deliberately independent of the target. A target says *which
   # warehouse* (duckdb, snowflake, postgres, bigquery); this says *which
@@ -52,6 +57,12 @@ vars:
     prod: ANALYTICS_PROD
     stage: ANALYTICS_STAGE
     dev: ANALYTICS_DEV
+
+  # assert_write_role (macros/snowflake/write_role_guard.sql): roles besides
+  # <DATABASE>_OWNER that may run/build/seed/snapshot against a shared
+  # environment database. Keys are databases from environment_databases, or "*"
+  # for all of them.
+  write_role_allowlist: {}
 
   # Objects dbt does not manage that a cloned environment must get back
   # (macros/utils/preserve_objects.sql; Snowflake example in
