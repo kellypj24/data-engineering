@@ -16,11 +16,13 @@ Reference orchestrator implementation. All other orchestrators (Airflow, Prefect
 - `src/jobs/landing.py` — `process_landing_file_job`, one run per landed S3 object
 - `src/schedules/daily.py` — Daily 06:00 UTC `ScheduleDefinition` for `extract_job`, the head of the chain
 - `src/checks/freshness.py` — Asset freshness check (25h threshold)
-- `src/resources/connections.py` — `RESOURCES` dict: airbyte, dbt, snowflake, telemetry
+- `src/resources/connections.py` — `RESOURCES` dict: airbyte, dbt, snowflake (`RoutedSnowflakeResource`), telemetry
+- `src/resources/routed_snowflake.py` — `RoutedSnowflakeResource`: database and warehouse resolved on every `get_connection()`, configured values ignored; default connector only
+- `src/resources/routed_dbt.py` — `routed_dbt_cli(context, dbt, args)`: every dbt call goes through it; sets `SNOWFLAKE_DATABASE`/`SNOWFLAKE_WAREHOUSE` for the dbt process on the deployed target only
 - `src/utils/notifier.py` — One `Notification` model rendered to Slack Block Kit by severity (success = one line; warning/failure expand). Severity→channel routing only in `channel_for`. `make_slack_on_failure_hook` builds on it. Renders are snapshot-tested (`tests/snapshots/`; `UPDATE_SNAPSHOTS=1` to rewrite)
 - `src/utils/factories.py` — `build_source_assets()` factory pattern
 - `src/telemetry/` — Run-event telemetry. `run_events.sql` is the table DDL; `sensors.py` has run-status sensors appending STARTED/SUCCESS/FAILURE rows (completion writers backfill a missing STARTED); `store.py` is the `telemetry` resource (duckdb by default). Every telemetry error is logged, never raised. dbt summarises the table in `mart_orchestrator_run_summary`
-- `src/utils/deployment.py` — Deployment → target database (`prod`/`stage`/else non-prod, exact match) and the `toolkit/deployment` / `toolkit/target_database` run tags
+- `src/utils/deployment.py` — Deployment → target database and warehouse size key (`prod`/`stage`/else non-prod, exact match), `resolve_routing()`, and the display-only `toolkit/deployment` / `toolkit/target_database` run tags
 - `src/utils/invariants.py` — `check_definitions(defs)`: invariants over every schedule, sensor, job, and `@dbt_assets`. Run by `tests/test_invariants.py`; importable by downstream projects
 - `dagster.yaml` — Instance config. Storage is intentionally unconfigured so it
   defaults to SQLite under `$DAGSTER_HOME`. Never use `base_dir: ~/...` — `~` is
@@ -43,9 +45,11 @@ just dagster::test     # runs `dbt parse` in transformation/dbt, then pytest
 
 ## Environment Variables
 
-AIRBYTE_USERNAME, AIRBYTE_PASSWORD, SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_SCHEMA, SNOWFLAKE_WAREHOUSE, and `DAGSTER_CLOUD_DEPLOYMENT_NAME` or `DEPLOYMENT`.
+AIRBYTE_USERNAME, AIRBYTE_PASSWORD, SNOWFLAKE_ACCOUNT, SNOWFLAKE_USER, SNOWFLAKE_PASSWORD, SNOWFLAKE_SCHEMA, and `DAGSTER_CLOUD_DEPLOYMENT_NAME` or `DEPLOYMENT`.
 
-The Snowflake database is **not** an env var: `src/utils/deployment.py` maps the deployment to it, and anything unrecognised maps to non-prod. Never route it back to `EnvVar`
+The Snowflake database and warehouse are **not** env vars: `src/utils/deployment.py` maps the deployment to them, and anything unrecognised maps to non-prod. Never route them back to `EnvVar`.
+
+**Resolve routing in the op/asset body, never at import.** A code server can import without the deployment variable that the run worker has; anything resolved at import then sends prod runs to non-prod with no error (this happened in production). Use `RoutedSnowflakeResource` and `routed_dbt_cli`; never call `dbt.cli` directly or build a resource from `target_database(...)` at module level. Run tags from `deployment_tags` are display-only
 
 ## Patterns
 

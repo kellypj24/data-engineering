@@ -18,6 +18,7 @@ from dagster import (
 )
 from dagster_dbt import DbtCliResource
 
+from src.resources.routed_dbt import routed_dbt_cli
 from src.utils.deployment import current_deployment, deployment_tags
 
 REFRESHED_ENVIRONMENT = "stage"
@@ -34,7 +35,7 @@ def refresh_args(env: str) -> list[str]:
 
 @op
 def refresh_stage_environment(context: OpExecutionContext, dbt: DbtCliResource):
-    dbt.cli(refresh_args(REFRESHED_ENVIRONMENT)).wait()
+    routed_dbt_cli(context, dbt, refresh_args(REFRESHED_ENVIRONMENT)).wait()
     context.log.info(f"refreshed {REFRESHED_ENVIRONMENT} from prod")
 
 

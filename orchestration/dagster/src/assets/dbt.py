@@ -18,6 +18,7 @@ from pathlib import Path
 from dagster import AssetExecutionContext
 from dagster_dbt import DagsterDbtTranslator, DbtCliResource, dbt_assets
 
+from src.resources.routed_dbt import routed_dbt_cli
 from src.telemetry.sensors import tag_dbt_command
 
 # ---- Configuration ---------------------------------------------------------
@@ -49,7 +50,7 @@ if DBT_MANIFEST_PATH.exists() and not os.environ.get("DAGSTER_DBT_SKIP_MANIFEST"
         """Materialise all dbt models as Dagster assets."""
         args = ["build"]
         tag_dbt_command(context, args)
-        yield from dbt.cli(args, context=context).stream()
+        yield from routed_dbt_cli(context, dbt, args, context=context).stream()
 
 else:
     dbt_project_assets = None

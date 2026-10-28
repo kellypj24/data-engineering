@@ -5,7 +5,6 @@ from contextlib import contextmanager
 
 import dagster as dg
 import pytest
-from dagster_snowflake import SnowflakeResource
 from snowflake.connector.errors import ProgrammingError
 
 from src import defs
@@ -13,8 +12,11 @@ from src.jobs.boundary import (
     active_secondary_roles,
     default_forbidden_database,
     identity_probe_job,
+    routing_mismatches,
     write_boundary_job,
 )
+from src.resources.routed_snowflake import RoutedSnowflakeResource
+from src.utils.deployment import Routing
 from src.utils.invariants import MANUAL_ONLY_TAG
 
 STATEMENTS: list[str] = []
@@ -32,15 +34,21 @@ class FakeCursor:
             "SVC_STAGE",
             "ANALYTICS_STAGE_WRITE",
             SCRIPT.get("secondary", '{"roles":"","value":""}'),
-            "ANALYTICS_STAGE",
+            SCRIPT.get("database", "ANALYTICS_STAGE"),
             "TRANSFORMING",
         )
 
 
-class FakeSnowflake(SnowflakeResource):
+class FakeSnowflake(RoutedSnowflakeResource):
     @contextmanager
     def get_connection(self, raw_conn: bool = True):
         yield type("Connection", (), {"cursor": lambda self: FakeCursor()})()
+
+
+@pytest.fixture(autouse=True)
+def stage_deployment(monkeypatch):
+    monkeypatch.delenv("DAGSTER_CLOUD_DEPLOYMENT_NAME", raising=False)
+    monkeypatch.setenv("DEPLOYMENT", "stage")
 
 
 def run(job, **script):
@@ -128,3 +136,17 @@ def test_both_jobs_are_manual_only_and_unscheduled():
     for job in (identity_probe_job, write_boundary_job):
         assert job.tags[MANUAL_ONLY_TAG] == "true"
         assert job.name not in scheduled
+
+
+def test_identity_probe_fails_when_session_is_not_where_routing_says():
+    result = run(identity_probe_job, database="ANALYTICS_DEV")
+    assert not result.success
+    message = failure_message(result)
+    assert "deployment 'stage'" in message
+    assert "database: session 'ANALYTICS_DEV', resolved 'ANALYTICS_STAGE'" in message
+
+
+def test_routing_comparison_ignores_case():
+    routing = Routing("stage", "ANALYTICS_STAGE", "TRANSFORMING")
+    identity = {"database": "analytics_stage", "warehouse": "transforming"}
+    assert routing_mismatches(identity, routing) == []

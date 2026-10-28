@@ -20,10 +20,9 @@ from pathlib import Path
 from dagster import EnvVar
 from dagster_airbyte import AirbyteResource
 from dagster_dbt import DbtCliResource
-from dagster_snowflake import SnowflakeResource
 
+from src.resources.routed_snowflake import RoutedSnowflakeResource
 from src.telemetry.store import RunEventStore
-from src.utils.deployment import current_deployment, target_database
 
 # ---- Relative paths ---------------------------------------------------------
 DBT_PROJECT_DIR = str(Path(__file__).resolve().parents[4] / "transformation" / "dbt")
@@ -41,15 +40,14 @@ RESOURCES: dict = {
     "dbt": DbtCliResource(
         project_dir=DBT_PROJECT_DIR,
     ),
-    "snowflake": SnowflakeResource(
+    # Database and warehouse are resolved from the deployment on every
+    # connection, never here: this module is imported by a code server that
+    # may not have the deployment variable yet (src/utils/deployment.py).
+    "snowflake": RoutedSnowflakeResource(
         account=EnvVar("SNOWFLAKE_ACCOUNT"),
         user=EnvVar("SNOWFLAKE_USER"),
         password=EnvVar("SNOWFLAKE_PASSWORD"),
-        # Chosen from the deployment, never from an env var: an unknown or
-        # missing deployment resolves to the non-prod database.
-        database=target_database(current_deployment()),
         schema=EnvVar("SNOWFLAKE_SCHEMA"),
-        warehouse=EnvVar("SNOWFLAKE_WAREHOUSE"),
     ),
     # Run-event telemetry (src/telemetry/). A local duckdb file by default; on
     # a warehouse, subclass RunEventStore and set `warehouse` to record it.

@@ -28,6 +28,7 @@ from pathlib import Path
 from dagster import Config, OpExecutionContext, job, op
 from dagster_dbt import DbtCliResource
 
+from src.resources.routed_dbt import routed_dbt_cli
 from src.utils.deployment import PROD_DEPLOYMENT, current_deployment, deployment_tags
 
 LIVE_DESTINATION = "s3://example-dbt-docs/live"
@@ -131,7 +132,7 @@ def publish_dbt_docs(
         config.destination,
         allow_live_from_non_prod=config.allow_live_from_non_prod,
     )
-    invocation = dbt.cli(["docs", "generate"]).wait()
+    invocation = routed_dbt_cli(context, dbt, ["docs", "generate"]).wait()
     target_dir = invocation.target_path
     sha = git_sha()
     metadata = build_metadata(target_dir, sha, deployment, dt.datetime.now(dt.UTC))
