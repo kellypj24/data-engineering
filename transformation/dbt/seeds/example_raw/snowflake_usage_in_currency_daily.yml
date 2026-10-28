@@ -18,5 +18,5 @@ seeds:
     columns:
       - name: usage_type
         description: Usage type
-        tests:
+        data_tests:
           - not_null

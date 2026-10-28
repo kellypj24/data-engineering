@@ -57,7 +57,7 @@ models:
   - name: fct_monthly_cost
     description: >
       ... Grain: one row per cost_month, team, workload, warehouse_name, currency.
-    tests:
+    data_tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
             - cost_month

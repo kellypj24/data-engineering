@@ -11,14 +11,14 @@ models:
     columns:
       - name: order_date
         description: Day the orders were created (grain)
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: order_count
         description: Orders created that day
       - name: revenue
         description: Sum of order amounts that day
-        tests:
+        data_tests:
           - ties_to_control_total:
               period_column: order_date
               control: source('raw', 'order_daily_totals')

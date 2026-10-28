@@ -10,7 +10,7 @@ models:
       rows. Every foreign key is not_null as well as related, because a NULL
       foreign key passes a relationships test silently.
       Grain: one row per cost_month, team, workload, warehouse_name, currency.
-    tests:
+    data_tests:
       - dbt_utils.unique_combination_of_columns:
           combination_of_columns:
             - cost_month
@@ -21,28 +21,28 @@ models:
     columns:
       - name: cost_month
         description: '{{ doc("cost_month") }}'
-        tests:
+        data_tests:
           - not_null
           - relationships:
               to: ref('dim_cost_month')
               field: cost_month
       - name: team
         description: '{{ doc("cost_team") }}'
-        tests:
+        data_tests:
           - not_null
           - relationships:
               to: ref('dim_cost_team')
               field: team
       - name: workload
         description: '{{ doc("cost_workload") }}'
-        tests:
+        data_tests:
           - not_null
           - relationships:
               to: ref('dim_cost_workload')
               field: workload
       - name: warehouse_name
         description: '{{ doc("cost_warehouse_name") }}'
-        tests:
+        data_tests:
           - not_null
           - relationships:
               to: ref('dim_cost_warehouse')
@@ -53,7 +53,7 @@ models:
         description: Credits behind the cost, where the usage is in credits
       - name: cost
         description: Cost in the invoice currency
-        tests:
+        data_tests:
           - not_null
           - ties_to_control_total:
               period_column: cost_month
@@ -69,7 +69,7 @@ models:
     columns:
       - name: cost_month
         description: Month
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: total_cost

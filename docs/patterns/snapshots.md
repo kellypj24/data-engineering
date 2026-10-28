@@ -116,7 +116,7 @@ history: daily snapshots cannot tell you the state at noon.
   ```yaml
   snapshots:
     - name: customers_snapshot
-      tests:
+      data_tests:
         - scd2_invariants:
             key: id   # valid_from / valid_to default to dbt_valid_from / dbt_valid_to
   ```

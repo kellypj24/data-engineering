@@ -21,7 +21,7 @@
     Usage (column level):
         columns:
           - name: revenue
-            tests:
+            data_tests:
               - ties_to_control_total:
                   period_column: order_date
                   control: source('raw', 'order_daily_totals')

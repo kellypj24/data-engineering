@@ -17,7 +17,7 @@ SEEDS_YML = "version: 2\nseeds:\n" + "".join(
     f"""  - name: {name}
     config:
       column_types: {{id: integer, valid_from: timestamp, valid_to: timestamp}}
-    tests:
+    data_tests:
       - scd2_invariants:
           key: id
           valid_from: valid_from

@@ -117,7 +117,7 @@ models:
     columns:
       - name: order_id
         description: Primary key
-        tests:
+        data_tests:
           - unique
           - not_null
 ```

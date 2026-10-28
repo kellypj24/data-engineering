@@ -17,5 +17,5 @@ seeds:
     columns:
       - name: database_name
         description: Database name
-        tests:
+        data_tests:
           - not_null

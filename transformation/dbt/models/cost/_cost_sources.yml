@@ -21,7 +21,7 @@ sources:
         description: Compute credits attributed to each query; excludes idle time
         columns:
           - name: query_id
-            tests:
+            data_tests:
               - not_null
       - name: query_history
         identifier: >-
@@ -30,7 +30,7 @@ sources:
         description: Query metadata; supplies the database a query ran in
         columns:
           - name: query_id
-            tests:
+            data_tests:
               - not_null
       - name: warehouse_metering_history
         identifier: >-
@@ -63,5 +63,5 @@ sources:
         description: Daily usage and its cost in the invoice currency, per usage type
         columns:
           - name: usage_date
-            tests:
+            data_tests:
               - not_null

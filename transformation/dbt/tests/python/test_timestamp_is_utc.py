@@ -24,7 +24,7 @@ models:
     columns:
       - name: ts
         description: probe column
-        tests:
+        data_tests:
           - timestamp_is_utc
 """
     )

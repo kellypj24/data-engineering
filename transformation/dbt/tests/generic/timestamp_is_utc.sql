@@ -19,7 +19,7 @@
     Usage:
         columns:
           - name: created_at
-            tests:
+            data_tests:
               - timestamp_is_utc
 -#}
 {%- set kind = 'unknown' -%}

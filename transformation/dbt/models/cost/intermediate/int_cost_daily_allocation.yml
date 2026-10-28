@@ -10,13 +10,13 @@ models:
         description: Day
       - name: team
         description: Owning team, SHARED, or NEEDS_OWNER_REVIEW
-        tests:
+        data_tests:
           - not_null
       - name: workload
         description: Workload bucket
-        tests:
+        data_tests:
           - not_null
       - name: cost
         description: Share of the day's invoiced amount
-        tests:
+        data_tests:
           - not_null

@@ -9,10 +9,10 @@ models:
     columns:
       - name: validation_key
         description: Deterministic key over validation, source table, record, and run time
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: validated_at
         description: Start time of the dbt run that recorded the failure
-        tests:
+        data_tests:
           - not_null

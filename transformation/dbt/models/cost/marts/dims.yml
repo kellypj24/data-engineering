@@ -6,7 +6,7 @@ models:
     columns:
       - name: cost_month
         description: '{{ doc("cost_month") }}'
-        tests:
+        data_tests:
           - unique
           - not_null
   - name: dim_cost_team
@@ -14,7 +14,7 @@ models:
     columns:
       - name: team
         description: '{{ doc("cost_team") }}'
-        tests:
+        data_tests:
           - unique
           - not_null
   - name: dim_cost_workload
@@ -22,7 +22,7 @@ models:
     columns:
       - name: workload
         description: '{{ doc("cost_workload") }}'
-        tests:
+        data_tests:
           - unique
           - not_null
   - name: dim_cost_warehouse
@@ -30,7 +30,7 @@ models:
     columns:
       - name: warehouse_name
         description: '{{ doc("cost_warehouse_name") }}'
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: first_seen_at

@@ -6,7 +6,7 @@ models:
     columns:
       - name: query_id
         description: Query id
-        tests:
+        data_tests:
           - unique
           - not_null
   - name: stg_snowflake__warehouse_metering
@@ -14,21 +14,21 @@ models:
     columns:
       - name: warehouse_name
         description: Warehouse
-        tests:
+        data_tests:
           - not_null
   - name: stg_snowflake__database_storage
     description: Daily bytes per database, including failsafe
     columns:
       - name: database_name
         description: Database
-        tests:
+        data_tests:
           - not_null
   - name: stg_snowflake__usage_in_currency_daily
     description: Daily invoiced amount per usage type, with its month; the cost control total
     columns:
       - name: usage_in_currency
         description: Cost in the invoice currency
-        tests:
+        data_tests:
           - not_null
       - name: usage_month
         description: Month of usage_date

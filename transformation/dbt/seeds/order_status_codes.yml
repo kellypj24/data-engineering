@@ -9,7 +9,7 @@ seeds:
     columns:
       - name: status_code
         description: Lowercase status code as it appears in stg_example.status
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: status_label

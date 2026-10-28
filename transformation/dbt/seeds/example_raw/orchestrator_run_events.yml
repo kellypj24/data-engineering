@@ -27,10 +27,10 @@ seeds:
     columns:
       - name: run_id
         description: Dagster run id
-        tests:
+        data_tests:
           - not_null
       - name: status
         description: STARTED, SUCCESS, or FAILURE
-        tests:
+        data_tests:
           - accepted_values:
               values: ["STARTED", "SUCCESS", "FAILURE"]

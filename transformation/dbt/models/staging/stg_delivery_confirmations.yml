@@ -8,11 +8,11 @@ models:
     columns:
       - name: recipient
         description: Recipient name, as in the file-export config
-        tests:
+        data_tests:
           - not_null
       - name: file_name
         description: Base name of the file that arrived
-        tests:
+        data_tests:
           - not_null
       - name: confirmed_at
         description: When the transport confirmed the file, UTC

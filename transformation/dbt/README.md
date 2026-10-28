@@ -151,7 +151,7 @@ models:
   - name: stg_my_source__users
     columns:
       - name: user_id
-        tests:
+        data_tests:
           - unique
           - not_null
 ```
