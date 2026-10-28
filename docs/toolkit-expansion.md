@@ -112,7 +112,7 @@ Work order across both roadmaps: **P6 fixes**, then the CI quick wins in
 **P8 — Dagster patterns, round 2**
 
 - [x] E45. [Restricted-tag reach invariant](#e45-restricted-tag-reach-invariant)
-- [ ] E46. [Per-deployment schedule times](#e46-per-deployment-schedule-times)
+- [x] E46. [Per-deployment schedule times](#e46-per-deployment-schedule-times)
 - [ ] E47. [SQS sensor with redelivery-safe acknowledgement](#e47-sqs-sensor-with-redelivery-safe-acknowledgement)
 - [ ] E48. [Warehouse backup as an asset](#e48-warehouse-backup-as-an-asset)
 - [ ] E49. [Read-only Dagster status CLI](#e49-read-only-dagster-status-cli)

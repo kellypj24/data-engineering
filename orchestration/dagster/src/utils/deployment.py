@@ -27,13 +27,24 @@ Customisation
   warehouses in ``WAREHOUSES`` / ``NON_PROD_WAREHOUSES``.
 * Add a deployment by adding a key to ``DATABASES`` and ``WAREHOUSES``;
   anything else stays non-prod.
+
+Schedule times
+--------------
+``schedules_for_deployment`` gives one deployment different cron strings for
+the same schedules (stage off-peak, or after prod's source loads), by schedule
+name, without a second schedule list to drift. Unlike routing it runs at
+import, because Dagster reads cron strings when the code location loads;
+Dagster+ sets ``DAGSTER_CLOUD_DEPLOYMENT_NAME`` on the code server. Its
+fail-safe is the base (prod) times, which costs only timing, never data.
 """
 
 from __future__ import annotations
 
 import os
-from collections.abc import Mapping
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+
+from dagster import ScheduleDefinition
 
 PROD_DEPLOYMENT = "prod"
 DATABASES = {
@@ -106,3 +117,51 @@ def deployment_tags(deployment: str | None) -> dict[str, str]:
         DEPLOYMENT_TAG: deployment or "unset",
         TARGET_DATABASE_TAG: target_database(deployment),
     }
+
+
+def schedules_for_deployment(
+    deployment: str | None,
+    base: Sequence[ScheduleDefinition],
+    overrides: Mapping[str, Mapping[str, str]],
+) -> list[ScheduleDefinition]:
+    """``base`` unchanged, except in ``deployment``, where
+    ``overrides[deployment]`` (schedule name -> cron) replaces cron strings.
+
+    An override naming a schedule that is not in ``base`` raises, in every
+    deployment, so a rename cannot silently drop stage's time.
+    """
+    names = {s.name for s in base}
+    for name_, crons in overrides.items():
+        unknown = sorted(set(crons) - names)
+        if unknown:
+            raise ValueError(
+                f"deployment {name_}: overrides unknown schedules {unknown}"
+            )
+    crons = overrides.get(deployment or "", {})
+    return [_with_cron(s, crons[s.name]) if s.name in crons else s for s in base]
+
+
+def _with_cron(schedule: ScheduleDefinition, cron: str) -> ScheduleDefinition:
+    """A copy of ``schedule`` with another cron string. Dagster has no public
+    way to do this; mirrors ``ScheduleDefinition.with_attributes``, and
+    tests/test_schedules.py fails if the copy loses a field."""
+    return ScheduleDefinition.dagster_internal_init(
+        name=schedule.name,
+        cron_schedule=cron,
+        job_name=None if schedule._target.has_job_def else schedule.job_name,
+        execution_timezone=schedule.execution_timezone,
+        execution_fn=schedule._execution_fn,
+        description=schedule.description,
+        job=schedule.job if schedule._target.has_job_def else None,
+        default_status=schedule.default_status,
+        environment_vars=schedule._environment_vars,
+        required_resource_keys=schedule._raw_required_resource_keys,
+        run_config=None,
+        run_config_fn=None,
+        tags=schedule.tags,
+        tags_fn=None,
+        metadata=schedule.metadata,
+        should_execute=None,
+        target=None,
+        owners=schedule._owners,
+    )

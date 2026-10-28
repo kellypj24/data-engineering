@@ -90,7 +90,9 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 1. Create a new file in `src/schedules/`.
 2. Use `ScheduleDefinition` or the `@schedule` decorator, with
    `execution_timezone="UTC"` and the default STOPPED status; turn it on in the UI.
-3. Import and append to `all_schedules` in `src/schedules/__init__.py`.
+3. Import and append to `BASE_SCHEDULES` in `src/schedules/__init__.py`.
+4. If it runs daily, give it a stage time in `DEPLOYMENT_CRONS` or list it in
+   `NOT_OVERRIDDEN`; `tests/test_schedules.py` fails until you decide.
 
 `tests/test_invariants.py` checks every schedule, sensor, job, and dbt asset
 definition against these rules (see `src/utils/invariants.py`). A downstream
@@ -182,6 +184,12 @@ clones (`just dbt::dev-database`) are for the dbt CLI run directly. The
 `toolkit/deployment` and `toolkit/target_database` run tags are computed at
 import for display only. `identity_probe_job` fails if the session is not
 where routing says.
+
+Schedule **times** can differ per deployment too: `schedules_for_deployment`
+replaces cron strings by schedule name for one deployment (stage's
+`daily_asset_schedule` runs at 09:00, after prod's 06:00 extract). This one is
+resolved at import, since Dagster reads cron strings when the code location
+loads; an unknown deployment keeps the base (prod) times.
 
 ## Further Reading
 
