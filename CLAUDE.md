@@ -61,6 +61,7 @@ GitHub Actions with cross-paradigm impact detection:
 - `dbt-deprecations.yml` (weekly): `dbt parse --show-all-deprecations` grouped by type and file (`.github/scripts/dbt_deprecations.py`) into one `dbt-deprecations` issue
 - `dbt-deps-update.yml` (weekly): `dbt deps --upgrade` within the upper bounds in `packages.yml` (every package is bounded; raise a bound in its own PR). Opens one PR with a `DEPS_PR_TOKEN` secret, otherwise a tracker issue
 - `security-audit.yml` (daily, report-only): `pip-audit` of every tool's `uv.lock`; one `security` issue kept open while anything is vulnerable, via the shared living-issue helper `.github/scripts/tracker_issue.py`
+- `delete-merged-branches.yml` (on merge): retargets open PRs stacked on the merged branch to its base, then deletes the branch; any failure before the delete keeps it. **Merge without `--delete-branch`**, or the client-side delete closes the stack first
 - `wiring` (`.github/scripts/check_wiring.py`) fails when a tool is missing from any shared surface
 - `CI Success` fans in every job and is the only required check (no-bypass ruleset). **Add every new job to its `needs`** — it fails if the list drifts
 
