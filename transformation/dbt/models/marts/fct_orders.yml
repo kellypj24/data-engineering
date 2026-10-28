@@ -22,3 +22,5 @@ models:
         description: Order amount
       - name: created_at
         description: Order creation timestamp; the incremental window column for exports
+        data_tests:
+          - within_date_spine

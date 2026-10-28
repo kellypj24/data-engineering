@@ -1,0 +1,19 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: >
+      One row per day, date_spine_start inclusive to date_spine_end EXCLUSIVE.
+      Built from a spine, never from a fact. Every fact date column carries
+      within_date_spine, so a fact outside the spine fails instead of silently
+      dropping out of joins.
+    columns:
+      - name: date_day
+        description: The day (grain)
+        data_tests:
+          - unique
+          - not_null
+      - name: month_start
+        description: First day of the day's month
+      - name: calendar_year
+        description: Calendar year of the day
