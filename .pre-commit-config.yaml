@@ -77,6 +77,12 @@ repos:
         language: system
         files: ^tooling/release\-diff/
         pass_filenames: false
+      - id: lint-dagster-status
+        name: lint dagster-status
+        entry: bash -c 'just dagster-status::lint && just dagster-status::fmt-check'
+        language: system
+        files: ^tooling/dagster\-status/
+        pass_filenames: false
       - id: terraform-fmt
         name: terraform fmt
         entry: terraform fmt -check -recursive

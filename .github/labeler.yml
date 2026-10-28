@@ -36,6 +36,9 @@ claude-review:
 release-diff:
   - changed-files:
       - any-glob-to-any-file: tooling/release-diff/**
+dagster-status:
+  - changed-files:
+      - any-glob-to-any-file: tooling/dagster-status/**
 
 stacks:
   - changed-files:

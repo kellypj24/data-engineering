@@ -30,6 +30,7 @@ jobs:
       sensitive_scan: ${{ steps.filter.outputs.sensitive_scan }}
       claude_review: ${{ steps.filter.outputs.claude_review }}
       release_diff: ${{ steps.filter.outputs.release_diff }}
+      dagster_status: ${{ steps.filter.outputs.dagster_status }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -56,6 +57,8 @@ jobs:
               - 'tooling/sensitive-scan/**'
             release_diff:
               - 'tooling/release-diff/**'
+            dagster_status:
+              - 'tooling/dagster-status/**'
             claude_review:
               # The gate it imports is part of its behaviour.
               - 'tooling/claude-review/**'
@@ -275,6 +278,19 @@ jobs:
       - run: uv sync --dev
       - run: uv run pytest tests/ -v --tb=short
 
+  test-dagster-status:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.dagster_status == 'true'
+    defaults:
+      run:
+        working-directory: tooling/dagster-status
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v7
+      - run: uv sync --dev
+      - run: uv run pytest tests/ -v --tb=short
+
   exposures-drift:
     runs-on: ubuntu-latest
     needs: detect-changes
@@ -346,6 +362,9 @@ jobs:
             srcs: src/ tests/
           - tool: release-diff
             path: tooling/release-diff
+            srcs: src/ tests/
+          - tool: dagster-status
+            path: tooling/dagster-status
             srcs: src/ tests/
     steps:
       - uses: actions/checkout@v7
@@ -451,6 +470,7 @@ jobs:
             orchestration/prefect \
             orchestration/temporal \
             tooling/claude-review \
+            tooling/dagster-status \
             tooling/release-diff \
             tooling/sensitive-scan \
             transformation/dbt
@@ -516,7 +536,7 @@ jobs:
           terraform_version: ">=1.6.0"
       - name: Run hooks on every file
         env:
-          SKIP: lint-dagster,lint-airflow,lint-prefect,lint-temporal,lint-dbt,lint-dlt,lint-file-export,lint-sensitive-scan,lint-claude-review,lint-release-diff
+          SKIP: lint-dagster,lint-airflow,lint-prefect,lint-temporal,lint-dbt,lint-dlt,lint-file-export,lint-sensitive-scan,lint-claude-review,lint-release-diff,lint-dagster-status
         run: uvx pre-commit run --all-files --show-diff-on-failure
       - name: No hook rewrote a file
         if: '!cancelled()'
@@ -544,6 +564,7 @@ jobs:
       - test-sensitive-scan
       - test-claude-review
       - test-release-diff
+      - test-dagster-status
       - exposures-drift
       - test-file-export
       - lint

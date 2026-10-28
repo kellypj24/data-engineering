@@ -115,7 +115,7 @@ Work order across both roadmaps: **P6 fixes**, then the CI quick wins in
 - [x] E46. [Per-deployment schedule times](#e46-per-deployment-schedule-times)
 - [x] E47. [SQS sensor with redelivery-safe acknowledgement](#e47-sqs-sensor-with-redelivery-safe-acknowledgement)
 - [x] E48. [Warehouse backup as an asset](#e48-warehouse-backup-as-an-asset)
-- [ ] E49. [Read-only Dagster status CLI](#e49-read-only-dagster-status-cli)
+- [x] E49. [Read-only Dagster status CLI](#e49-read-only-dagster-status-cli)
 
 **P9 — Pattern docs**
 
