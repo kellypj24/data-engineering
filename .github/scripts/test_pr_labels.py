@@ -3,7 +3,7 @@
 import urllib.error
 
 import pytest
-from pr_labels import LABELER_CONFIG, TITLE_LABELS, ensure, title_label, wanted_labels
+from pr_labels import TITLE_LABELS, ensure, title_label, wanted_labels
 
 REPO = "org/repo"
 
@@ -42,10 +42,11 @@ def test_errors_other_than_404_fail():
         ensure(gh, REPO, ["dagster"])
 
 
-def test_wanted_labels_cover_the_config_and_title_prefixes():
-    names = wanted_labels(LABELER_CONFIG)
+def test_wanted_labels_cover_the_config_title_prefixes_and_stale_exemptions():
+    names = wanted_labels()
     assert "dagster" in names and "stacks" in names
     assert set(TITLE_LABELS) <= set(names)
+    assert {"pinned", "blocked", "on-hold", "ci-alarm"} <= set(names)
     assert len(names) == len(set(names))
 
 
