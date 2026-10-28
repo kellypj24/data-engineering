@@ -817,19 +817,34 @@ reports clean.
 
 ### 12. Add a PR template
 
-Add `.github/pull_request_template.md` with sections for summary, tool(s)
-touched, how tested, and a checklist (tests pass, docs updated, README table
-updated if a tool/stack was added). Keep it lean — this isn't a regulated
-platform.
+Add `.github/pull_request_template.md`: summary, tool(s) touched, how tested,
+and a short checklist (tests pass locally, docs and README table updated if a
+tool or stack was added). Keep it lean; this isn't a regulated platform.
+
+The one non-obvious item: **"State migration needed?"** — a checkbox that,
+when ticked, requires a file in `migrations/` from `migrations/_template.md`
+(E20). Promotion moves code, not table state, and this is the point in review
+where that gap is cheapest to catch.
+
+**Acceptance.** A new PR opens with the template. The migration item links to
+`docs/patterns/state-migrations.md` and `migrations/_template.md`.
 
 ### 13. Add a semantic PR title check
 
 Advisory-to-enforced Conventional-Commit title check so history stays clean
 (and future release automation is possible). Use
 `amannn/action-semantic-pull-request`. Start advisory; flip to enforced once the
-habit sticks. While advisory, report through a single sticky comment that is
-edited in place and deleted once the title is fixed, rather than a failing
-check — a red check that isn't required trains people to ignore red checks.
+habit sticks. While advisory, report through a single sticky comment
+(`marocchino/sticky-pull-request-comment` or equivalent, with a fixed header)
+that is edited in place and **deleted** once the title is fixed, rather than a
+failing check: a red check that isn't required trains people to ignore red
+checks. Trigger on `opened`, `edited`, `synchronize`, `reopened`. Pin both
+actions by SHA. The PR title is user-controlled: never interpolate it with
+`${{ }}` inside `run:`.
+
+**Acceptance.** A PR titled `update stuff` gets one comment; renaming it to
+`docs: update stuff` removes the comment; renaming it back recreates one
+comment, not a second.
 
 ### 14. Broaden Terraform validation beyond Airbyte
 
@@ -916,27 +931,62 @@ the merged branch, retarget it to the merged PR's base, and **only then** delete
 the branch. GitHub closes any open PR whose base branch disappears; it
 auto-retargets dependents only when the branch is deleted through its own
 post-merge button, not via a raw `DELETE /git/refs` from a workflow. A PR closed
-that way cannot be reopened or retargeted — it has to be recreated. Pass branch
-names through `env:`, never `${{ }}` inside `run:` (branch names are
-user-controlled, so that's a shell-injection vector). Skip fork PRs and
-protected branches. Needs `contents: write` and `pull-requests: write`.
+that way cannot be reopened or retargeted; it has to be recreated.
+
+Rules:
+- **Fail closed.** If listing dependents or retargeting any of them fails, do
+  not delete the branch, and fail the job. A stale branch is cheap; a closed
+  stack is not.
+- Pass branch names through `env:`, never `${{ }}` inside `run:` (branch names
+  are user-controlled, so that's a shell-injection vector).
+- No process substitution (`while read …; done < <(gh …)`): `set -e` does not
+  see a failure inside `<( )`, so a failed lookup reads as "no dependents" and
+  the branch is deleted. Capture output into a variable first, then iterate.
+- Skip fork PRs, protected branches, and the default branch.
+- `permissions: contents: write, pull-requests: write`.
+
+Do this before turning off the repo's "Automatically delete head branches"
+setting, if it is on, so the two never race.
 
 **Acceptance.** Merging the bottom PR of a two-PR stack deletes its branch and
-leaves the upper PR open, retargeted to `main`.
+leaves the upper PR open, retargeted to `main`. With the retarget API call
+forced to fail, the branch is not deleted and the job is red.
 
 ### 22. Stale bot that exempts tracker issues
 
-`actions/stale`: mark issues/PRs stale after 60 days idle, close 14 days later.
-Exempt every label a workflow manages (`security`, `dbt-deprecations`,
-`claude-review`, the #18 alarm) plus `pinned`/`blocked`/`on-hold` — otherwise the
-bot closes the living issues that #6/#18/#20 depend on.
+> Land after the living-issue workflows it must exempt (#6, #18, #19, #20).
+
+`actions/stale`: mark issues and PRs stale after 60 days idle, close 14 days
+later. Exempt drafts (`exempt-draft-pr: true`) and every label a workflow in
+this repo creates or manages. Today that is `security` (#6), `ci-alarm` (#18),
+`dependencies` (#19), and `dbt-deprecations` (#20), plus `claude-review` once
+#10 lands, and `pinned`/`blocked`/`on-hold`. Otherwise the bot closes the
+living issues those workflows update in place.
+
+Keep the exempt list in sync mechanically: a check (extend
+`.github/scripts/check_wiring.py`) that greps `--label <x>` in
+`.github/workflows/` and fails if any is missing from the stale config.
+
+**Acceptance.** The wiring check fails when a workflow adds a tracker label
+the stale config does not exempt. A dry run (`debug-only: true`) marks no
+issue carrying an exempt label.
 
 ### 23. Auto-label PRs by path
 
 `actions/labeler` with `.github/labeler.yml` mapping each role and tool
 directory (`orchestration/dagster/**` → `dagster`, `stacks/**` → `stacks`, …) to a
-label, plus a title-prefix step (`feat`/`fix`/`docs`/`ci`). Additive only:
-`sync-labels: false`, so it never removes a label a human added.
+label, plus a step that labels from the title prefix (`feat`/`fix`/`docs`/`ci`).
+Additive only: `sync-labels: false`, so it never removes a label a human added.
+
+The labeler errors on a label that does not exist yet, so a step before it
+creates any missing label from the config (`gh label create … || true` is not
+enough: check existence first and fail on any other error). Run on
+`pull_request_target` only if it never checks out PR code; otherwise
+`pull_request`.
+
+**Acceptance.** A PR touching `orchestration/dagster/` titled `fix: …` gets
+`dagster` and `fix`. Adding a new directory mapping with a brand-new label
+works on its first run. A manually added label survives a later push.
 
 ### 24. Run `dbt_project_evaluator` in CI
 
@@ -1080,3 +1130,6 @@ Not CI/CD, but noted so it isn't lost:
    then **#19 / #20** (dbt package upgrades and deprecations) on the same helper.
 9. **#11 (scheduled AI reviews)** and **#12–#15, #21–#24 (polish)** — as
    capacity allows. Land #22 after the living-issue workflows it must exempt.
+10. **Round 3 (2026-10-28):** after `toolkit-expansion.md` E35–E37 (fixes to
+    shipped code), do #21, #22, #23, #13, #12 in that order, then return to
+    `toolkit-expansion.md` P7.
