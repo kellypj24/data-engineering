@@ -24,6 +24,10 @@ dev-database username="":
 run:
     uv run dbt run
 
+# Every bare var('x') is defined in dbt_project.yml (dbt parse does not check model bodies)
+check-vars:
+    uv run python scripts/check_vars.py
+
 # Lint SQL with sqlfluff
 lint:
     uv run sqlfluff lint models/ macros/

@@ -106,7 +106,7 @@ Work order across both roadmaps: **P6 fixes**, then the CI quick wins in
 - [x] E38. [SCD2 reconstruction from dated full extracts](#e38-scd2-reconstruction-from-dated-full-extracts)
 - [x] E41. [Grain guard: count before dedup](#e41-grain-guard-count-before-dedup)
 - [x] E42. [Date spine with a fact-coverage test](#e42-date-spine-with-a-fact-coverage-test)
-- [ ] E43. [Static check for undefined `var()` references](#e43-static-check-for-undefined-var-references)
+- [x] E43. [Static check for undefined `var()` references](#e43-static-check-for-undefined-var-references)
 - [ ] E44. [Pre-run write-role guard (Snowflake extra)](#e44-pre-run-write-role-guard-snowflake-extra)
 
 **P8 — Dagster patterns, round 2**
@@ -1248,6 +1248,12 @@ real warehouse, so the break reaches main.
 defaulted var passes; `var` inside a string or Jinja comment is ignored; a var
 defined only under a package scope is handled. The example project passes.
 
+
+Done: lives in the dbt tool as `transformation/dbt/scripts/check_vars.py` (not
+`.github/scripts/`): it ships with the stack, so downstream projects that copy
+`transformation/dbt/` get it. `just dbt::check-vars`; CI runs it through
+`tests/python/test_check_vars.py` in the existing `test-dbt` job. Uses Jinja's
+own lexer from the dbt venv instead of a stdlib lexer.
 ---
 
 ### E44. Pre-run write-role guard (Snowflake extra)

@@ -26,6 +26,7 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `macros/snowflake/semantic_view.sql` — **Snowflake extra.** `generate_semantic_view(domain, dry_run)`: Snowflake `SEMANTIC VIEW` DDL for the models tagged `marts` + `<domain>`. Generated: tables, PKs (from uniqueness tests), facts/dimensions (documented columns; keys are dimensions), comments. Hand-curated in the `semantic_views` var: metrics, relationships, synonyms. Mark a column `meta: {sensitive: true}` to keep it out
 - `macros/utils/preserve_objects.sql` — `preserve_objects(mode, database, dry_run)`: verify / provision / restore the objects in the `preservation_manifest` var (stages, UDFs, ... dbt does not manage). Each entry brings its own `exists_sql`, so the engine is adapter-neutral; `{database}` is substituted. `refresh_environment` restores after cloning. Snowflake example: `macros/snowflake/README.md`
 - `macros/utils/check_tag_contract.sql` — `dbt run-operation check_tag_contract`: every model has exactly one layer tag and only `tag_taxonomy` tags (docs/patterns/tagging.md). Run in CI via `tests/python/test_tag_contract.py`
+- `scripts/check_vars.py` — `just dbt::check-vars`: every bare `var('x')` (no default) in models/macros/snapshots/tests/seeds/analyses, YAML included, must be defined in `dbt_project.yml` (top level or scoped to this project). Lexed with Jinja's lexer, so strings and comments are exact. Run in CI by `tests/python/test_check_vars.py`. `dbt parse` does not catch this (it does not render model bodies); the post-merge compile gate is the backstop
 - `tests/python/` — pytest suite that runs dbt in-process (`dbtRunner`) on a throwaway copy of the project and duckdb file (`conftest.py`): run-operations, seeds, the durable fact, and a whole-project `dbt build`
 - `tests/macros/` — Singular tests over literal rows that pin macro behaviour; no sources, so they run on duckdb in CI
 - `macros/staging/audit_columns.sql` — _loaded_at (EL timestamp or fallback), _dbt_updated_at columns
@@ -58,6 +59,7 @@ uv run dbt deps        # install packages.yml dependencies (first time)
 just dbt::run          # dbt run
 just dbt::test         # pytest, then `dbt build` of the seeds, then of everything else (DBT_ENV=prod)
 just dbt::lint         # sqlfluff + yamllint --strict (same as CI)
+just dbt::check-vars   # every bare var() is defined in dbt_project.yml
 just dbt::fix          # sqlfluff fix
 just dbt::docs         # dbt docs generate + serve
 just dbt::dev-database # Snowflake: clone prod into ANALYTICS_PROD_<USER>
@@ -72,6 +74,7 @@ e.g. `uv sync --extra postgres`.
 
 - `require-dbt-version: ">=1.8.0"` for unit test support
 - **Adapter sugar with an ANSI fallback.** Where duckdb/Snowflake have better syntax (QUALIFY, `* EXCLUDE`), dispatch to it and keep a `default__` ANSI form for Postgres/BigQuery; test the two forms against each other on duckdb
+- **A new var goes in `dbt_project.yml`**, with a comment saying what it does, or is read with a default (`var('x', ...)`). A var only ever passed via `--vars` is declared too (as `null` if nothing fits). `just dbt::check-vars` enforces it
 - Property files use `data_tests:` (dbt 1.8+), never the older `tests:`. Generic-test arguments stay top-level, not under `arguments:`: that form needs a newer floor than `>=1.8` (tracked by `dbt-deprecations.yml`)
 - Macros organized: `overrides/` (built-in overrides), `utils/` (helpers), `staging/` (staging-specific), `validation/` (validation framework), `snowflake/` (Snowflake-only features; they refuse to execute on other adapters)
 - A macro argument named `target` shadows dbt's `target`; inside such a macro use `adapter.type()`
