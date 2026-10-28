@@ -8,11 +8,11 @@ _Updated 2026-10-28._
 ## Now
 
 - Round 3 of the roadmap (`docs/toolkit-expansion.md`, `docs/ci-cd-hardening.md`) is in
-  progress. Done: E35–E41; CI hardening #12, #13, #19, #21, #22, #23.
+  progress. Done: E35–E42; CI hardening #12, #13, #19, #21, #22, #23.
 
 ## Next
 
-1. The rest of P7 (E42 date spine next), then P8 and P9 (`docs/toolkit-expansion.md`).
+1. The rest of P7 (E43 static `var()` check next), then P8 and P9 (`docs/toolkit-expansion.md`).
 2. CI hardening #9 (block `--no-verify` agent hook), then #10, #11, #14, #15, #24
    (`docs/ci-cd-hardening.md`).
 3. Lock refresh: `uv lock --upgrade` per tool to clear the advisories the daily audit

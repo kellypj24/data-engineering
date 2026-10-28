@@ -46,6 +46,7 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `snapshots/customers_snapshot.sql` — example snapshot (`check` strategy, explicit `check_cols`, `hard_deletes='invalidate'`); the rules are in `docs/patterns/snapshots.md`. Never full-refresh or drop a snapshot table
 - `tests/generic/timestamp_is_utc.sql` — Fails non-UTC offsets on ISO-8601 strings (any adapter) and Snowflake `TIMESTAMP_TZ`; logs a no-op for types with no per-value offset. Dispatch helpers in `macros/utils/timestamp_is_utc_kind.sql` (dbt does not register plain macros under `tests/generic/`)
 - `tests/generic/scd2_invariants.sql` — Type-2 history per key: no zero-length span, at most one open version, no overlap (gaps allowed). Defaults to dbt snapshot columns; on `customers_snapshot`
+- `models/marts/dim_date.sql` — one row per day from `date_spine_start` to `date_spine_end` **exclusive** (`dbt_utils.date_spine`'s end is exclusive); `tests/generic/within_date_spine.sql` fails on any fact date outside it, since such rows silently drop out of joins. By default it checks the same two vars' bounds (no dependency on `dim_date`, so `--select +fct_x` works on a fresh database); `spine: ref(...)` checks by join instead. On `fct_orders.created_at` and `fct_daily_order_revenue.order_date`; put it on every new fact date column
 - `tests/generic/ties_to_control_total.sql` — Ties a column's per-period sum to an independent control; fails when zero periods are compared
 
 ## Commands

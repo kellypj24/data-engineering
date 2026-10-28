@@ -75,6 +75,12 @@ vars:
   #     synonyms: {fct_orders: [orders]}
   semantic_views: {}
 
+  # dim_date (models/marts/dim_date.sql). The end is EXCLUSIVE: the spine's
+  # last day is the day before date_spine_end. Widen it before facts outgrow it;
+  # within_date_spine fails on any fact date outside.
+  date_spine_start: "2020-01-01"
+  date_spine_end: "2031-01-01"
+
   # grain_guard (macros/utils/grain_guard.sql) refuses these as a tie-break, on
   # top of the audit columns _loaded_at and _dbt_updated_at: columns whose value
   # changes without the row changing (heartbeats, last_seen_at).
