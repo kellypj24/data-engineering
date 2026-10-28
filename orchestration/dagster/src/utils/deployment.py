@@ -25,8 +25,8 @@ Customisation
 -------------
 * Rename the databases in ``DATABASES`` / ``NON_PROD_DATABASE``, and the
   warehouses in ``WAREHOUSES`` / ``NON_PROD_WAREHOUSES``.
-* Add a deployment by adding a key to ``DATABASES`` and ``WAREHOUSES``;
-  anything else stays non-prod.
+* Add a deployment by adding a key to ``DATABASES``, ``WAREHOUSES``, and
+  ``BACKUP_PREFIXES``; anything else stays non-prod.
 
 Schedule times
 --------------
@@ -53,6 +53,11 @@ DATABASES = {
 }
 NON_PROD_DATABASE = "ANALYTICS_DEV"
 
+# Object-storage prefix for warehouse backups (build_backup_asset), with the
+# same fail-safe as the database: anything unrecognised writes under non-prod.
+BACKUP_PREFIXES = {PROD_DEPLOYMENT: "prod", "stage": "stage"}
+NON_PROD_BACKUP_PREFIX = "non_prod"
+
 SIZES = ("small", "large")
 WAREHOUSES = {
     PROD_DEPLOYMENT: {"small": "TRANSFORMING", "large": "TRANSFORMING_LARGE"},
@@ -70,6 +75,10 @@ def current_deployment(env: Mapping[str, str] = os.environ) -> str | None:
 
 def target_database(deployment: str | None) -> str:
     return DATABASES.get(deployment or "", NON_PROD_DATABASE)
+
+
+def backup_prefix(deployment: str | None) -> str:
+    return BACKUP_PREFIXES.get(deployment or "", NON_PROD_BACKUP_PREFIX)
 
 
 def target_warehouse(deployment: str | None, size: str = "small") -> str:

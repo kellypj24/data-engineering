@@ -8,15 +8,18 @@ _Updated 2026-10-28._
 ## Now
 
 - Round 3 of the roadmap (`docs/toolkit-expansion.md`, `docs/ci-cd-hardening.md`) is in
-  progress. Done: E35–E47; CI hardening #12, #13, #19, #21, #22, #23.
+  progress. Done: E35–E48; CI hardening #12, #13, #19, #21, #22, #23.
 
 ## Next
 
-1. The rest of P8 (E48 warehouse backup as an asset next), then P9 (`docs/toolkit-expansion.md`).
+1. The rest of P8 (E49 read-only Dagster status CLI next), then P9 (`docs/toolkit-expansion.md`).
 2. CI hardening #9 (block `--no-verify` agent hook), then #10, #11, #14, #15, #24
    (`docs/ci-cd-hardening.md`).
 3. Lock refresh: `uv lock --upgrade` per tool to clear the advisories the daily audit
    reports (`python3 .github/scripts/security_audit.py --out x.md`).
+4. Airflow/Prefect parity, lower priority than Dagster: port the round-3 Dagster
+   patterns that apply (per-deployment schedule times, SQS sensor, warehouse backup)
+   so they don't fall far behind. Dagster stays the reference.
 
 ## Open decisions
 
