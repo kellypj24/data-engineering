@@ -39,6 +39,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
     ├── assets/
     │   ├── __init__.py      # Re-exports all asset groups
     │   ├── airbyte.py       # Airbyte connection assets
+    │   ├── backups.py       # Parquet backup of a synced table (build_backup_asset)
     │   └── dbt.py           # dbt model assets
     ├── sensors/
     │   ├── __init__.py
