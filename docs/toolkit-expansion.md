@@ -102,7 +102,7 @@ Work order across both roadmaps: **P6 fixes**, then the CI quick wins in
 **P7 — dbt building blocks, round 2**
 
 - [x] E40. [Row content hash for snapshot `check_cols`](#e40-row-content-hash-for-snapshot-check_cols)
-- [ ] E39. [Generic SCD2 invariants test](#e39-generic-scd2-invariants-test)
+- [x] E39. [Generic SCD2 invariants test](#e39-generic-scd2-invariants-test)
 - [ ] E38. [SCD2 reconstruction from dated full extracts](#e38-scd2-reconstruction-from-dated-full-extracts)
 - [ ] E41. [Grain guard: count before dedup](#e41-grain-guard-count-before-dedup)
 - [ ] E42. [Date spine with a fact-coverage test](#e42-date-spine-with-a-fact-coverage-test)

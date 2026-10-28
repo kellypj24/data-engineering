@@ -107,3 +107,16 @@ history: daily snapshots cannot tell you the state at noon.
   changes what counts as a change from the next run on.
 - `unique_key` must be unique in the source. Duplicates produce overlapping
   versions that break the point-in-time query. Test it on the source.
+- Test the history itself with `scd2_invariants`
+  (`tests/generic/scd2_invariants.sql`): no zero-length spans, at most one open
+  version per key, no overlapping spans. Gaps are allowed. `unique` on the
+  surrogate key catches none of these, and the point-in-time query fails
+  silently on all three:
+
+  ```yaml
+  snapshots:
+    - name: customers_snapshot
+      tests:
+        - scd2_invariants:
+            key: id   # valid_from / valid_to default to dbt_valid_from / dbt_valid_to
+  ```
