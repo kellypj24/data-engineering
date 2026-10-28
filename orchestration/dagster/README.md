@@ -42,7 +42,8 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
     │   └── dbt.py           # dbt model assets
     ├── sensors/
     │   ├── __init__.py
-    │   └── s3_sensor.py     # S3 file-arrival sensor
+    │   ├── s3_sensor.py     # S3 file-arrival sensor
+    │   └── sqs_sensor.py    # SQS sensor; deletes a message the tick after its run
     ├── schedules/
     │   ├── __init__.py
     │   ├── daily.py         # Daily 06:00 UTC: starts the extract chain

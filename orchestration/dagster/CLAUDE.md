@@ -9,6 +9,7 @@ Reference orchestrator implementation. All other orchestrators (Airflow, Prefect
 - `src/assets/airbyte.py` — Airbyte connection assets via `build_airbyte_assets()`
 - `src/assets/dbt.py` — dbt project wrapped as Dagster assets via `@dbt_assets`
 - `src/sensors/s3_sensor.py` — S3 file arrival polling sensor (boto3, cursor-based); launches `process_landing_file_job`
+- `src/sensors/sqs_sensor.py` — `build_sqs_sensor(name, queue_url, job, run_config_fn)`: one RunRequest per message, `run_key` = message id; receipt handles go in the cursor and are deleted **the next tick**, so a crash before the cursor saves redelivers without a duplicate run. Empty `queue_url` raises at load. `sqs_landing_sensor` reads S3 event notifications into `process_landing_file_job`; an unparseable message stays on the queue (DLQ via redrive). Visibility timeout must exceed two intervals. Tested with `moto`
 - `src/jobs/chain.py`, `src/sensors/chain.py` — Worked chain: `daily_asset_schedule` → `extract_job` (Airbyte); `transform_after_extract` run-status sensor → `transform_job` (dbt). Only the head has a cron
 - `src/jobs/dbt_docs.py` + `src/schedules/dbt_docs.py` — `publish_dbt_docs_job`: `dbt docs generate`, stamps `_build.json` (git SHA, build time, dbt version, deployment), uploads to `versions/<sha>/` and `latest/`. prod → live, anything else → test; live from non-prod raises `LivePublishRefused` unless `allow_live_from_non_prod`
 - `src/jobs/environment_refresh.py` — `refresh_stage_environment_job` + weekly STOPPED schedule: runs dbt `refresh_environment` for stage (Snowflake zero-copy clone of prod)
@@ -37,7 +38,7 @@ just dagster::test     # runs `dbt parse` in transformation/dbt, then pytest
 ```
 
 - Tests in `tests/` use `unittest.mock` — no live services
-- `conftest.py` provides mock fixtures for airbyte, dbt, s3
+- `conftest.py` provides mock fixtures for airbyte, dbt, s3; `tests/test_sqs_sensor.py` uses a `moto` queue instead
 - Dagster runs dbt with **this** venv's dbt, so it carries `dbt-duckdb` (the profile's default target) as well as `dbt-snowflake`; `test_dbt_runs_from_the_dagster_environment` fails without it
 - `tests/test_dbt_assets.py` loads the real dbt project as assets. With
   `DAGSTER_REQUIRE_DBT_MANIFEST=1` (set by `just dagster::test` and CI) a missing
