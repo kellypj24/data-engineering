@@ -215,3 +215,39 @@ class _Prefixed(DagsterDbtTranslator):
 
     def get_asset_key(self, dbt_resource_props):
         return super().get_asset_key(dbt_resource_props).with_prefix("copy")
+
+
+@dg.asset(tags={"pii": ""})
+def customers():
+    return 1
+
+
+broad_job = dg.define_asset_job("broad_job", selection=dg.AssetSelection.all())
+pii_job = dg.define_asset_job("pii_job", selection=[customers])
+
+
+def test_broad_job_reaching_restricted_asset_is_flagged():
+    problems = check_definitions(
+        dg.Definitions(assets=[orders, customers], jobs=[broad_job, pii_job]),
+        restricted={"pii": ["pii_job"]},
+    )
+    assert problems == [
+        "job broad_job: reaches customers, tagged pii, but is not in its allowed jobs"
+    ]
+
+
+def test_allow_listed_job_passes():
+    problems = check_definitions(
+        dg.Definitions(assets=[orders, customers], jobs=[broad_job, pii_job]),
+        restricted={"pii": ["pii_job", "broad_job"]},
+    )
+    assert problems == []
+
+
+def test_restricted_tag_typos_are_flagged():
+    problems = check_definitions(
+        dg.Definitions(assets=[orders], jobs=[orders_job]),
+        restricted={"pi": ["pii_job"]},
+    )
+    assert_flags(problems, "restricted tag pi", "on no asset")
+    assert_flags(problems, "restricted tag pi", "allowed job pii_job does not exist")

@@ -55,7 +55,7 @@ The Snowflake database and warehouse are **not** env vars: `src/utils/deployment
 
 - Assets export via `all_assets` list in `src/assets/__init__.py`
 - Same pattern for sensors (`all_sensors`), schedules (`all_schedules`), jobs (`all_jobs`), checks (`all_checks`)
-- `tests/test_invariants.py` enforces, for every definition: schedules and job-launching sensors default to STOPPED; schedules set `execution_timezone="UTC"`; a sensor without a job target is listed in `observing_sensors`; no duplicate names; jobs tagged `toolkit/manual_only` are never scheduled; a chained job has no schedule and one upstream sensor whose monitored jobs exist; `@dbt_assets` partition the manifest and run `dbt build`; a job selecting a dbt node selects its parent seeds
+- `tests/test_invariants.py` enforces, for every definition: schedules and job-launching sensors default to STOPPED; schedules set `execution_timezone="UTC"`; a sensor without a job target is listed in `observing_sensors`; no duplicate names; jobs tagged `toolkit/manual_only` are never scheduled; a chained job has no schedule and one upstream sensor whose monitored jobs exist; `@dbt_assets` partition the manifest and run `dbt build`; a job selecting a dbt node selects its parent seeds; with `restricted={tag: allowed_jobs}`, only allowed jobs' resolved selections reach an asset carrying `tag`
 - Resources are a flat dict passed to `Definitions(resources=RESOURCES)`
 - dbt manifest loaded at import time; `@dbt_assets` rejects two dbt resources
   with one asset key (e.g. a seed in schema `raw` and source `raw.<table>`)

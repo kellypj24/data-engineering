@@ -32,12 +32,18 @@ Checks
   checked by invoking it against a recording stand-in for ``DbtCliResource``.
 * A job that selects a dbt node also selects that node's parent seeds, checked
   by resolving the job's asset selection, not by reading its selector string.
+* Restricted assets: ``restricted={tag: allowed_jobs}``. Only the listed jobs
+  may select an asset carrying ``tag`` (an asset tag key; dbt tags arrive as
+  keys). Checked on the resolved selection, so a broad selector (``*``, a
+  group, ``upstream()``) that later pulls in a restricted asset fails here, not
+  at run time under a role that cannot read it. A restricted tag on no asset,
+  or an allowed job that does not exist, is flagged as a likely typo.
 """
 
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from unittest.mock import MagicMock
 
 from dagster import (
@@ -59,6 +65,7 @@ def check_definitions(
     *,
     observing_sensors: Iterable[str] = (),
     timezone: str = "UTC",
+    restricted: Mapping[str, Iterable[str]] | None = None,
 ) -> list[str]:
     problems = _duplicate_names(defs)
     if problems:
@@ -105,6 +112,35 @@ def check_definitions(
 
     problems += _chain_problems(repo, jobs)
     problems += _dbt_problems(defs, jobs.values())
+    problems += _restricted_problems(defs, jobs, restricted or {})
+    return problems
+
+
+def _restricted_problems(defs, jobs, restricted) -> list[str]:
+    tagged: dict[str, set] = {tag: set() for tag in restricted}
+    for a in defs.assets or []:
+        for spec in getattr(a, "specs", None) or []:
+            for tag in restricted.keys() & (spec.tags or {}).keys():
+                tagged[tag].add(spec.key)
+
+    problems = []
+    for tag, allowed in sorted(restricted.items()):
+        allowed = set(allowed)
+        if not tagged[tag]:
+            problems.append(f"restricted tag {tag}: on no asset")
+        for name in sorted(allowed - set(jobs)):
+            problems.append(f"restricted tag {tag}: allowed job {name} does not exist")
+        for name, job in sorted(jobs.items()):
+            # Dagster's implicit __ASSET_JOB selects everything; it is not a
+            # job anyone launches by name.
+            if name in allowed or name.startswith("__"):
+                continue
+            reached = tagged[tag] & job.asset_layer.selected_asset_keys
+            for key in sorted(reached, key=lambda k: k.to_user_string()):
+                problems.append(
+                    f"job {name}: reaches {key.to_user_string()}, tagged {tag}, "
+                    "but is not in its allowed jobs"
+                )
     return problems
 
 

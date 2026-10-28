@@ -101,6 +101,15 @@ from src.utils.invariants import check_definitions
 assert check_definitions(defs, observing_sensors={"my_watch_sensor"}) == []
 ```
 
+Assets a job's role may not be able to read carry a tag, and
+`restricted={tag: allowed_jobs}` names the only jobs that may select them. The
+check runs on each job's resolved selection, so a `*` or group selector that
+later pulls in a tagged asset fails the test instead of failing in prod:
+
+```python
+check_definitions(defs, restricted={"pii": ["pii_export_job"]})
+```
+
 ### Resources
 
 1. Add a new resource instance to the `RESOURCES` dict in
