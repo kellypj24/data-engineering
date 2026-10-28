@@ -17,6 +17,10 @@ Terraform tools must appear in the ci.yml paths-filter, in a ci.yml
 their directory, in a `terraform` dependabot entry, and in the README table. They are not in the root `just` aggregates,
 which would make the terraform CLI a prerequisite for `just test`.
 
+Separately, every label a workflow manages (`--label <name>` in
+.github/workflows/) must be in the stale bot's EXEMPT list (stale.yml), or the
+bot closes the living tracker issues those workflows keep open.
+
 Run from anywhere: `python .github/scripts/check_wiring.py [--root DIR]`.
 Exits 1 and prints one line per missing wiring, naming the tool and surface.
 """
@@ -52,6 +56,24 @@ def job_dir(job: dict) -> str | None:
 
 def step_text(job: dict) -> str:
     return "\n".join(str(s.get("run", "")) for s in job.get("steps", []))
+
+
+def stale_problems(root: Path) -> list[str]:
+    workflows = root / ".github/workflows"
+    stale = workflows / "stale.yml"
+    if not stale.exists():
+        return []
+    exempt = set(yaml.safe_load(stale.read_text())["env"]["EXEMPT"].split(","))
+    problems = []
+    for workflow in sorted(workflows.glob("*.yml")):
+        if workflow == stale:
+            continue
+        for label in re.findall(r"--label\s+[\"']?([\w./-]+)", workflow.read_text()):
+            if label not in exempt:
+                problems.append(
+                    f"label `{label}` ({workflow.name}): not exempt in stale.yml EXEMPT"
+                )
+    return problems
 
 
 def check(root: Path) -> list[str]:
@@ -146,7 +168,7 @@ def check(root: Path) -> list[str]:
         else:
             problems.append(f"{tool}: {directory} has neither pyproject.toml nor *.tf")
 
-    return problems
+    return problems + stale_problems(root)
 
 
 def main() -> int:

@@ -66,7 +66,7 @@ is why the status lives here rather than on the section headings.)
 - [x] 16. [Make the shipped dbt tests executable](#16-make-the-shipped-dbt-tests-executable)
 - [x] 17. [Add stack-usage skills for downstream projects](#17-add-stack-usage-skills-for-downstream-projects)
 - [x] 21. [Retarget stacked PRs, then delete merged branches](#21-retarget-stacked-prs-then-delete-merged-branches)
-- [ ] 22. [Stale bot that exempts tracker issues](#22-stale-bot-that-exempts-tracker-issues)
+- [x] 22. [Stale bot that exempts tracker issues](#22-stale-bot-that-exempts-tracker-issues)
 - [ ] 23. [Auto-label PRs by path](#23-auto-label-prs-by-path)
 - [ ] 24. [Run `dbt_project_evaluator` in CI](#24-run-dbt_project_evaluator-in-ci)
 
@@ -976,6 +976,10 @@ Keep the exempt list in sync mechanically: a check (extend
 **Acceptance.** The wiring check fails when a workflow adds a tracker label
 the stale config does not exempt. A dry run (`debug-only: true`) marks no
 issue carrying an exempt label.
+
+Done: `.github/workflows/stale.yml` (daily; a manual run is a dry run by
+default) keeps the exemptions in one `EXEMPT` env list, and `check_wiring.py`
+fails on any `--label` in `.github/workflows/` missing from it.
 
 ### 23. Auto-label PRs by path
 
