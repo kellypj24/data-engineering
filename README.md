@@ -200,6 +200,7 @@ Working with Claude Code? The `add-tool` skill in `.claude/skills/` does all of 
 - [Architecture Patterns](docs/architecture-patterns.md) — ELT, orchestration models, idempotency, and how the pieces fit together
 - [Tool Comparison](docs/tool-comparison.md) — Decision matrices for choosing between tools in each role
 - [Durable facts](docs/patterns/durable-facts.md) — Incremental tables whose history outlives their source
+- [Period close](docs/patterns/period-close.md) — Reported periods that reproduce on retry and cannot be rewritten by accident
 - [Validation framework](transformation/dbt/macros/validation/README.md) — Tiered-severity rules, notification routing, failure log
 - Roadmaps: [CI/CD hardening](docs/ci-cd-hardening.md) (how this repo is checked) and [toolkit expansion](docs/toolkit-expansion.md) (features to add)
 
