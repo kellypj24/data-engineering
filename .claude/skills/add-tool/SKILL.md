@@ -63,6 +63,8 @@ All five, or the tool is invisible to some part of the system.
    **Root `.pre-commit-config.yaml`** — a `lint-<tool-name>` hook calling
    `just <tool-name>::lint && just <tool-name>::fmt-check`, `files: ^<role>/<tool-name>/`;
    add its id to the `SKIP` list of ci.yml's `hooks` job.
+   **`.github/labeler.yml`** — a `<tool-name>` label matching `<role>/<tool-name>/**`
+   (the label itself is created on the first PR).
 5. **Root `CLAUDE.md`** — only if the tool introduces a new convention. Usually
    it does not.
 

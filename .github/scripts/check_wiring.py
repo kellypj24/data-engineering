@@ -10,11 +10,12 @@ uv tools must appear in:
     directory, a lint-matrix row or `lint-<tool>` job, and the lockfiles job;
   - dependabot.yml: a `uv` entry for its directory;
   - the root .pre-commit-config.yaml: a `lint-<tool>` hook;
+  - .github/labeler.yml: a `<tool>` label matching `<directory>/**`;
   - the README tool table.
 
 Terraform tools must appear in the ci.yml paths-filter, in a ci.yml
 `test-<tool>` job that runs `terraform fmt -check` and `terraform test` under
-their directory, in a `terraform` dependabot entry, and in the README table. They are not in the root `just` aggregates,
+their directory, in a `terraform` dependabot entry, in .github/labeler.yml, and in the README table. They are not in the root `just` aggregates,
 which would make the terraform CLI a prerequisite for `just test`.
 
 Separately, every label a workflow manages (`--label <name>` in
@@ -81,6 +82,10 @@ def check(root: Path) -> list[str]:
     ci_jobs = yaml.safe_load((root / ".github/workflows/ci.yml").read_text())["jobs"]
     dependabot = yaml.safe_load((root / ".github/dependabot.yml").read_text())
     readme = (root / "README.md").read_text()
+    labeler_path = root / ".github/labeler.yml"
+    labeler = (
+        yaml.safe_load(labeler_path.read_text()) if labeler_path.exists() else None
+    )
     hooks_path = root / ".pre-commit-config.yaml"
     hook_ids = (
         {
@@ -124,6 +129,8 @@ def check(root: Path) -> list[str]:
 
         if f"]({directory}/)" not in readme:
             missing("the README tool table")
+        if labeler is not None and f"{directory}/**" not in str(labeler.get(tool)):
+            missing(f".github/labeler.yml (label `{tool}`: {directory}/**)")
 
         if (path / "pyproject.toml").exists():
             defined = recipes((path / "mod.just").read_text())

@@ -1,0 +1,57 @@
+# Path -> label for actions/labeler (.github/workflows/labeler.yml). One label
+# per tool (its `mod` name in the root justfile; check_wiring.py fails if a
+# tool is missing) plus the shared areas. Labels that do not exist yet are
+# created before the labeler runs (.github/scripts/pr_labels.py ensure).
+
+dagster:
+  - changed-files:
+      - any-glob-to-any-file: orchestration/dagster/**
+airflow:
+  - changed-files:
+      - any-glob-to-any-file: orchestration/airflow/**
+prefect:
+  - changed-files:
+      - any-glob-to-any-file: orchestration/prefect/**
+temporal:
+  - changed-files:
+      - any-glob-to-any-file: orchestration/temporal/**
+dbt:
+  - changed-files:
+      - any-glob-to-any-file: transformation/dbt/**
+airbyte:
+  - changed-files:
+      - any-glob-to-any-file: extract_load/airbyte/**
+dlt:
+  - changed-files:
+      - any-glob-to-any-file: extract_load/dlt/**
+file-export:
+  - changed-files:
+      - any-glob-to-any-file: delivery/file-export/**
+sensitive-scan:
+  - changed-files:
+      - any-glob-to-any-file: tooling/sensitive-scan/**
+claude-review:
+  - changed-files:
+      - any-glob-to-any-file: tooling/claude-review/**
+release-diff:
+  - changed-files:
+      - any-glob-to-any-file: tooling/release-diff/**
+
+stacks:
+  - changed-files:
+      - any-glob-to-any-file: stacks/**
+infrastructure:
+  - changed-files:
+      - any-glob-to-any-file: infrastructure/**
+skills:
+  - changed-files:
+      - any-glob-to-any-file: .claude/**
+migrations:
+  - changed-files:
+      - any-glob-to-any-file: migrations/**
+docs:
+  - changed-files:
+      - any-glob-to-any-file: docs/**
+ci:
+  - changed-files:
+      - any-glob-to-any-file: .github/**
