@@ -124,6 +124,10 @@ Then run the step 1 grain query once more against the built model.
 - **`unique` on a surrogate key as the only grain test.** The key is unique by
   construction, because it hashes whatever it was given. It proves nothing about
   the grain unless its inputs *are* the grain.
+- **`unique` after a dedup to the grain.** `ROW_NUMBER() ... = 1` makes `unique`
+  pass by construction and turns an upstream key collision into an arbitrary
+  pick. If the project has `grain_guard`, use it: it keeps the pre-dedup count
+  as `_grain_rows`, and `grain_guard_is_one` warns on any collision.
 - **`relationships` without `not_null`.** NULLs pass it.
 - **`accepted_values` written from today's data.** The next new value fails the
   build, and the test gets removed instead of updated.
