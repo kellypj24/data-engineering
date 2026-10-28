@@ -12,10 +12,12 @@ Invariants:
   * Fail open. A missing `claude` CLI, an auth error, a timeout, an
     unparseable reply, or any bug in this script prints a warning and allows
     the push. `main` never raises.
-  * Gate what leaves the machine. Every changed file is run through
-    sensitive-scan (tooling/sensitive-scan) BEFORE anything is sent; files that
-    trip it are withheld, and the review says so. Only scanned, clean files are
-    transmitted. If the scanner cannot be loaded, nothing is sent.
+  * Gate what leaves the machine. Both sides of every changed file (base and
+    head: a diff's removed lines come from base) are run through
+    sensitive-scan (tooling/sensitive-scan) before any content is assembled;
+    a file where either side trips it is withheld, and the review says which
+    side. Every line sent came from a scanned, clean blob. If the scanner
+    cannot be loaded, nothing is sent.
   * Bounded payload: CLAUDE_REVIEW_MAX_FILES (default 20),
     CLAUDE_REVIEW_MAX_BYTES (default 100000), CLAUDE_REVIEW_TIMEOUT seconds
     (default 180). Truncation is announced.
@@ -131,14 +133,36 @@ def load_scanner():
     return scan_text, load_config(Path(".sensitive-scan.toml"))
 
 
-def changed_files(base: str, head: str) -> list[tuple[str, str]]:
-    """[(status, path)], status A/M/D/R..., path is the new path for renames."""
+def changed_files(base: str, head: str) -> list[tuple[str, str, str]]:
+    """[(status, old_path, new_path)], status A/M/D/R/C/T. old_path is the
+    path at base and new_path the path at head; they differ only for renames
+    and copies."""
     files = []
     for line in git("diff", "--name-status", "-M", base, head).splitlines():
         parts = line.split("\t")
         if parts and parts[0]:
-            files.append((parts[0][0], parts[-1]))
+            files.append((parts[0][0], parts[1], parts[-1]))
     return files
+
+
+def tripped_sides(
+    status: str, old: str, new: str, base: str, head: str, scanner
+) -> list[str]:
+    """The sides ("base", "head") of one changed file that trip the scanner.
+    A diff carries removed lines from base as well as added lines from head,
+    so both sides are scanned; an added file has no base and a deleted file
+    no head."""
+    scan_text, config = scanner
+    sides = []
+    if status != "A":
+        sides.append(("base", base, old))
+    if status != "D":
+        sides.append(("head", head, new))
+    return [
+        label
+        for label, ref, path in sides
+        if scan_text(path, git("show", f"{ref}:{path}"), config)
+    ]
 
 
 def build_payload(base: str, head: str, limits: Limits, scanner) -> Payload:
@@ -152,18 +176,24 @@ def build_payload(base: str, head: str, limits: Limits, scanner) -> Payload:
     if scanner is None:
         payload.notes.append("sensitive-scan unavailable: nothing was sent.")
         return payload
-    scan_text, config = scanner
+
+    # Scan every file, both sides, before any content is assembled.
+    clean = []
+    withheld_notes = []
+    for status, old, new in files:
+        path = old if status == "D" else new
+        tripped = tripped_sides(status, old, new, base, head, scanner)
+        payload.scanned.append(path)
+        if tripped:
+            payload.withheld.append(path)
+            withheld_notes.append(f"{path} ({' and '.join(tripped)})")
+        elif status == "D":
+            payload.notes.append(f"{path}: deleted (no content sent).")
+        else:
+            clean.append(path)
 
     used = 0
-    for status, path in files:
-        if status == "D":
-            payload.notes.append(f"{path}: deleted (no content sent).")
-            continue
-        content = git("show", f"{head}:{path}")
-        payload.scanned.append(path)
-        if scan_text(path, content, config):
-            payload.withheld.append(path)
-            continue
+    for path in clean:
         file_diff = git("diff", "-M", base, head, "--", path)
         if used + len(file_diff.encode()) > limits.max_bytes:
             payload.notes.append(
@@ -173,9 +203,9 @@ def build_payload(base: str, head: str, limits: Limits, scanner) -> Payload:
         used += len(file_diff.encode())
         payload.diff += file_diff
         payload.sent.append(path)
-    if payload.withheld:
+    if withheld_notes:
         payload.notes.append(
-            "Withheld by sensitive-scan, not sent: " + ", ".join(payload.withheld)
+            "Withheld by sensitive-scan, not sent: " + ", ".join(withheld_notes)
         )
     return payload
 

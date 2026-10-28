@@ -189,3 +189,66 @@ def test_verdict_parsing():
     assert review.verdict("x\nVERDICT: CRITICAL\n") == "CRITICAL"
     assert review.verdict("VERDICT: OK") == "OK"
     assert review.verdict("the verdict: critical-ish") == "ADVISORY"
+
+
+SSN = "123-" + "45-6789"  # split so this file does not trip the repo's own scan
+FILLER = "".join(f"row,{n}\n" for n in range(20))  # keeps renames detectable
+
+
+def payload_and_prompts(base, head):
+    fake = FakeClaude()
+    with patch("subprocess.run", side_effect=fake):
+        payload = review.build_payload(
+            base, head, review.Limits(), review.load_scanner()
+        )
+    run(push_env(base, head), fake)
+    return payload, fake.prompts
+
+
+def test_removing_a_secret_withholds_the_file(repo):
+    base = commit(repo, {"people.csv": f"name,ssn\nx,{SSN}\n"})
+    head = commit(repo, {"people.csv": "name,ssn\n", "app.py": "print('ok')\n"})
+    payload, prompts = payload_and_prompts(base, head)
+    assert payload.withheld == ["people.csv"]
+    assert payload.sent == ["app.py"]
+    assert SSN not in prompts[0]
+    assert "people.csv (base)" in prompts[0]
+
+
+def test_rename_whose_old_content_trips_is_withheld(repo):
+    base = commit(repo, {"old.csv": FILLER + f"x,{SSN}\n"})
+    git(repo, "mv", "old.csv", "new.csv")
+    head = commit(repo, {"new.csv": FILLER, "app.py": "print('ok')\n"})
+    assert ("R", "old.csv", "new.csv") in review.changed_files(base, head)
+    payload, prompts = payload_and_prompts(base, head)
+    assert payload.withheld == ["new.csv"]
+    assert SSN not in prompts[0]
+    assert "new.csv (base)" in prompts[0]
+
+
+def test_deleting_a_tripping_file_is_reported_as_withheld(repo):
+    base = commit(repo, {"people.csv": f"name,ssn\nx,{SSN}\n"})
+    git(repo, "rm", "-q", "people.csv")
+    head = commit(repo, {"app.py": "print('ok')\n"})
+    payload, prompts = payload_and_prompts(base, head)
+    assert payload.withheld == ["people.csv"]
+    assert "people.csv: deleted (no content sent)." not in payload.notes
+    assert SSN not in prompts[0]
+    assert "Withheld by sensitive-scan, not sent: people.csv (base)" in prompts[0]
+
+
+def test_scans_everything_before_assembling_anything(repo):
+    base = git(repo, "rev-parse", "HEAD")
+    head = commit(repo, {"a.py": "A = 1\n", "z.csv": f"x,{SSN}\n"})
+    calls = []
+    real = review.git
+
+    def spy(*args):
+        calls.append(args[0])
+        return real(*args)
+
+    with patch.object(review, "git", side_effect=spy):
+        review.build_payload(base, head, review.Limits(), review.load_scanner())
+    assert "diff" in calls[1:]
+    first_diff = calls.index("diff", 1)  # calls[0] is --name-status
+    assert "show" not in calls[first_diff:]

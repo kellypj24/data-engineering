@@ -95,7 +95,7 @@ Work order across both roadmaps: **P6 fixes**, then the CI quick wins in
 
 **P6 — Fixes to shipped code**
 
-- [ ] E35. [claude-review: scan the base side of every diff](#e35-claude-review-scan-the-base-side-of-every-diff)
+- [x] E35. [claude-review: scan the base side of every diff](#e35-claude-review-scan-the-base-side-of-every-diff)
 - [ ] E36. [claude-review: run the model in an isolated, non-persistent session](#e36-claude-review-run-the-model-in-an-isolated-non-persistent-session)
 - [ ] E37. [Dagster: resolve target routing at run time, not import time](#e37-dagster-resolve-target-routing-at-run-time-not-import-time)
 

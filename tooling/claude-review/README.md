@@ -18,10 +18,12 @@ advice.
 - **Fail open.** A missing `claude` CLI, an auth error, a timeout, a reply it
   cannot parse, or a bug in the script prints a warning and lets the push
   through.
-- **Only scanned, clean files leave the machine.** Each changed file is checked
-  with [sensitive-scan](../sensitive-scan/) first. Files that trip it are
-  withheld, and the review is told which. If the scanner cannot load, nothing
-  is sent.
+- **Only scanned, clean content leaves the machine.** Both sides of each
+  changed file, base and head, are checked with
+  [sensitive-scan](../sensitive-scan/) before anything is sent, because a diff
+  carries the removed lines too: deleting a secret would otherwise send it.
+  Files where either side trips it are withheld, and the review is told which
+  side. If the scanner cannot load, nothing is sent.
 - **Bounded.** `CLAUDE_REVIEW_MAX_FILES` (20), `CLAUDE_REVIEW_MAX_BYTES`
   (100000), `CLAUDE_REVIEW_TIMEOUT` seconds (180). Anything cut is announced.
 - **Correct ranges.** Reads the push range from `PRE_COMMIT_FROM_REF` /
