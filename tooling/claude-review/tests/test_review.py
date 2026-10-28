@@ -44,18 +44,27 @@ def commit(repo, files: dict[str, str], message="change"):
 class FakeClaude:
     """Intercepts `claude -p`; every other command (git) runs for real."""
 
-    def __init__(self, reply="looks fine\nVERDICT: OK", error=None, returncode=0):
+    def __init__(
+        self,
+        reply="looks fine\nVERDICT: OK",
+        error=None,
+        returncode=0,
+        stderr="auth failed",
+    ):
         self.reply, self.error, self.returncode = reply, error, returncode
+        self.stderr = stderr
         self.prompts: list[str] = []
+        self.commands: list[list[str]] = []
 
     def __call__(self, cmd, *args, **kwargs):
         if cmd[0] != "claude":
             return REAL_RUN(cmd, *args, **kwargs)
+        self.commands.append(cmd)
         self.prompts.append(kwargs["input"])
         if self.error:
             raise self.error
         return subprocess.CompletedProcess(
-            cmd, self.returncode, self.reply, "auth failed"
+            cmd, self.returncode, self.reply, self.stderr
         )
 
 
@@ -98,16 +107,72 @@ def test_ok_verdict_allows_and_critical_blocks(repo):
     ],
     ids=["missing-cli", "timeout", "auth-error", "unparseable"],
 )
-def test_fails_open(repo, fake):
+def test_fails_open(repo, fake, capsys):
     base = git(repo, "rev-parse", "HEAD")
     head = commit(repo, {"app.py": "print('hi')\n"})
     assert run(push_env(base, head), fake) == 0
+    assert "claude-review: UNAVAILABLE (NOT A PASS):" in capsys.readouterr().err
 
 
-def test_a_bug_in_the_script_fails_open(repo, monkeypatch):
+def test_a_bug_in_the_script_fails_open(repo, monkeypatch, capsys):
     monkeypatch.setenv("CLAUDE_REVIEW", "1")
     with patch.object(review, "run", side_effect=KeyError("boom")):
         assert review.main([]) == 0
+    assert "UNAVAILABLE (NOT A PASS): review failed" in capsys.readouterr().err
+
+
+def test_nothing_to_send_is_not_a_pass(repo, capsys):
+    base = git(repo, "rev-parse", "HEAD")
+    head = commit(repo, {"app.py": "print('x')\n"})
+    with patch.object(review, "load_scanner", return_value=None):
+        assert run(push_env(base, head), FakeClaude()) == 0
+    assert "UNAVAILABLE (NOT A PASS): nothing to send" in capsys.readouterr().err
+
+
+def test_ok_verdict_has_no_unavailable_prefix(repo, capsys):
+    base = git(repo, "rev-parse", "HEAD")
+    head = commit(repo, {"app.py": "print('hi')\n"})
+    assert run(push_env(base, head), FakeClaude()) == 0
+    assert "UNAVAILABLE" not in capsys.readouterr().err
+
+
+ISOLATED = [
+    "claude",
+    "-p",
+    "--tools",
+    "",
+    "--strict-mcp-config",
+    "--mcp-config",
+    '{"mcpServers":{}}',
+    "--safe-mode",
+    "--no-session-persistence",
+]
+
+
+def test_session_is_isolated(repo):
+    base = git(repo, "rev-parse", "HEAD")
+    head = commit(repo, {"app.py": "print('hi')\n"})
+    fake = FakeClaude()
+    assert run(push_env(base, head), fake) == 0
+    assert fake.commands == [ISOLATED]
+
+
+def test_model_override(repo):
+    base = git(repo, "rev-parse", "HEAD")
+    head = commit(repo, {"app.py": "print('hi')\n"})
+    fake = FakeClaude()
+    assert run(push_env(base, head, CLAUDE_REVIEW_MODEL="sonnet"), fake) == 0
+    assert fake.commands == [ISOLATED + ["--model", "sonnet"]]
+
+
+def test_unknown_flag_fails_open_without_retry(repo, capsys):
+    base = git(repo, "rev-parse", "HEAD")
+    head = commit(repo, {"app.py": "print('hi')\n"})
+    fake = FakeClaude(returncode=1, stderr="error: unknown option '--safe-mode'")
+    assert run(push_env(base, head), fake) == 0
+    assert len(fake.commands) == 1
+    err = capsys.readouterr().err
+    assert "UNAVAILABLE (NOT A PASS): claude exited 1: error: unknown option" in err
 
 
 def test_withheld_file_is_never_transmitted(repo):

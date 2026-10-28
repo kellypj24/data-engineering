@@ -15,9 +15,15 @@ advice.
 
 ## What it guarantees
 
-- **Fail open.** A missing `claude` CLI, an auth error, a timeout, a reply it
-  cannot parse, or a bug in the script prints a warning and lets the push
-  through.
+- **Fail open, and say so.** A missing `claude` CLI, an auth error, a timeout,
+  a reply it cannot parse, or a bug in the script lets the push through with a
+  warning starting `UNAVAILABLE (NOT A PASS):`, so a skipped review never reads
+  as a passing one.
+- **Isolated session.** The model gets the prompt and nothing else: no tools,
+  no MCP servers (`--strict-mcp-config` with an empty config), safe mode (no
+  hooks, settings, or `CLAUDE.md`), and no transcript written to disk. An older
+  CLI that rejects one of these flags fails open; it is never retried without
+  the flag.
 - **Only scanned, clean content leaves the machine.** Both sides of each
   changed file, base and head, are checked with
   [sensitive-scan](../sensitive-scan/) before anything is sent, because a diff
@@ -35,7 +41,9 @@ advice.
 
 - Python **3.11+** as `python3` (stdlib only, no venv). macOS's
   `/usr/bin/python3` is 3.9: the review then sends nothing and allows the push.
-- The `claude` CLI on `PATH`, logged in. It runs `claude -p`.
+- The `claude` CLI on `PATH`, logged in, recent enough to accept `--safe-mode`
+  and `--no-session-persistence`. `CLAUDE_REVIEW_MODEL` picks the model
+  (default: the CLI's).
 - `tooling/sensitive-scan/` alongside it (the gate), or `sensitive-scan`
   installed.
 
