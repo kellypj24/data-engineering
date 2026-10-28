@@ -8,7 +8,7 @@ models:
     columns:
       - name: order_id
         description: Primary key
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: customer_id
@@ -19,7 +19,7 @@ models:
         description: Order amount
       - name: created_at
         description: Order creation timestamp
-        tests:
+        data_tests:
           - timestamp_is_utc
       - name: _loaded_at
         description: Timestamp when this row was first loaded into the warehouse by the EL tool

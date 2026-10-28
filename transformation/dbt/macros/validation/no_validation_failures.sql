@@ -4,7 +4,7 @@
     `min_severity` or above. Attach it with the dbt severity that matches the
     tier -- `error` to stop the pipeline, `warn` to report and continue:
 
-        tests:
+        data_tests:
           - no_validation_failures:
               min_severity: CRITICAL
               config:

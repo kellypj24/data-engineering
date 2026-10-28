@@ -18,5 +18,5 @@ seeds:
     columns:
       - name: file_name
         description: Base name of the file that arrived
-        tests:
+        data_tests:
           - not_null

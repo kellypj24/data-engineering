@@ -6,7 +6,7 @@ snapshots:
       Type-2 history of raw.customers (check strategy on email; hard deletes
       invalidate the current row). Query a point in time with
       dbt_valid_from <= t AND (t < dbt_valid_to OR dbt_valid_to IS NULL).
-    tests:
+    data_tests:
       - scd2_invariants:
           key: id
     columns:
@@ -16,7 +16,7 @@ snapshots:
         description: Email as of this version
       - name: dbt_valid_from
         description: When this version became current
-        tests:
+        data_tests:
           - not_null
       - name: dbt_valid_to
         description: When it stopped being current; null for the current version

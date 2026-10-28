@@ -16,11 +16,11 @@ models:
         description: Export config name; null for unexpected
       - name: recipient
         description: Recipient
-        tests:
+        data_tests:
           - not_null
       - name: file_name
         description: Base name of the file
-        tests:
+        data_tests:
           - not_null
       - name: run_id
         description: Export run that wrote the file; null for unexpected
@@ -36,7 +36,7 @@ models:
         description: Confirmations matched to this file (re-sends count)
       - name: delivery_state
         description: delivered, late, missing, or unexpected
-        tests:
+        data_tests:
           - not_null
           - accepted_values:
               values: ["delivered", "late", "missing", "unexpected"]

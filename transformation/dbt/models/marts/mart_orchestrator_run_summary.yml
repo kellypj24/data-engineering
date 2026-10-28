@@ -15,14 +15,14 @@ models:
     columns:
       - name: run_id
         description: Orchestrator run id
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: job_name
         description: Job the run executed
       - name: run_status
         description: SUCCESS, FAILURE, or IN_PROGRESS
-        tests:
+        data_tests:
           - not_null
           - accepted_values:
               values: ["SUCCESS", "FAILURE", "IN_PROGRESS"]
@@ -36,7 +36,7 @@ models:
         description: Warehouse the run used
       - name: started_at
         description: First STARTED event, UTC
-        tests:
+        data_tests:
           - not_null
       - name: completed_at
         description: Completion event, UTC; null while in progress

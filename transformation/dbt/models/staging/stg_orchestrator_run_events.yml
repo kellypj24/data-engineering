@@ -10,15 +10,15 @@ models:
     columns:
       - name: run_id
         description: Orchestrator run id
-        tests:
+        data_tests:
           - not_null
       - name: job_name
         description: Job the run executed
-        tests:
+        data_tests:
           - not_null
       - name: status
         description: STARTED, SUCCESS, or FAILURE
-        tests:
+        data_tests:
           - accepted_values:
               values: ["STARTED", "SUCCESS", "FAILURE"]
       - name: trigger_source
@@ -37,5 +37,5 @@ models:
         description: Failure message; FAILURE rows only
       - name: event_at
         description: When the event happened, UTC
-        tests:
+        data_tests:
           - not_null

@@ -77,7 +77,7 @@ that matches the tier:
 ```yaml
 models:
   - name: val_orders
-    tests:
+    data_tests:
       - no_validation_failures:
           min_severity: CRITICAL
           config:

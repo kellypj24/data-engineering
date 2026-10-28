@@ -17,5 +17,5 @@ seeds:
     columns:
       - name: warehouse_name
         description: Warehouse name
-        tests:
+        data_tests:
           - not_null

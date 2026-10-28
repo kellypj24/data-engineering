@@ -18,5 +18,5 @@ seeds:
     columns:
       - name: query_id
         description: Query id
-        tests:
+        data_tests:
           - not_null

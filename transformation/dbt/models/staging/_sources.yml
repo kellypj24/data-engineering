@@ -23,7 +23,7 @@ sources:
         columns:
           - name: id
             description: Primary key
-            tests:
+            data_tests:
               - unique
               - not_null
           - name: customer_id
@@ -35,7 +35,7 @@ sources:
         columns:
           - name: id
             description: Primary key
-            tests:
+            data_tests:
               - unique
               - not_null
           - name: email
@@ -58,11 +58,11 @@ sources:
         columns:
           - name: run_id
             description: Orchestrator run id
-            tests:
+            data_tests:
               - not_null
           - name: status
             description: STARTED, SUCCESS, or FAILURE
-            tests:
+            data_tests:
               - accepted_values:
                   values: ["STARTED", "SUCCESS", "FAILURE"]
           - name: event_at
@@ -76,15 +76,15 @@ sources:
         columns:
           - name: recipient
             description: Recipient name, as in the file-export config
-            tests:
+            data_tests:
               - not_null
           - name: file_name
             description: Base name of the file that arrived
-            tests:
+            data_tests:
               - not_null
           - name: confirmed_at
             description: When the transport confirmed the file, UTC
-            tests:
+            data_tests:
               - not_null
           - name: transport
             description: Which transport confirmed it, e.g. sftp or s3
@@ -106,11 +106,11 @@ sources:
         columns:
           - name: run_id
             description: Export run id
-            tests:
+            data_tests:
               - unique
               - not_null
           - name: status
             description: success or failure
-            tests:
+            data_tests:
               - accepted_values:
                   values: ["success", "failure"]

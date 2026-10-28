@@ -66,6 +66,7 @@ e.g. `uv sync --extra postgres`.
 ## Patterns
 
 - `require-dbt-version: ">=1.8.0"` for unit test support
+- Property files use `data_tests:` (dbt 1.8+), never the older `tests:`. Generic-test arguments stay top-level, not under `arguments:`: that form needs a newer floor than `>=1.8` (tracked by `dbt-deprecations.yml`)
 - Macros organized: `overrides/` (built-in overrides), `utils/` (helpers), `staging/` (staging-specific), `validation/` (validation framework), `snowflake/` (Snowflake-only features; they refuse to execute on other adapters)
 - A macro argument named `target` shadows dbt's `target`; inside such a macro use `adapter.type()`
 - **Tags: three axes** (layer by directory, workload and entity by hand), values only from the `tag_taxonomy` var. A new `models/` subdirectory needs a layer tag in `dbt_project.yml`; never nest one layer folder inside another (tags accumulate). Select production jobs by tag, not path

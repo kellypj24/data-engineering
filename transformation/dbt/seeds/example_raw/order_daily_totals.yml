@@ -15,6 +15,6 @@ seeds:
     columns:
       - name: order_date
         description: Day the total covers
-        tests:
+        data_tests:
           - unique
           - not_null

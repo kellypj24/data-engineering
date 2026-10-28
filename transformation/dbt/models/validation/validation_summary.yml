@@ -6,7 +6,7 @@ models:
     columns:
       - name: validation_name
         description: Rule-set name passed to validate_data_source
-        tests:
+        data_tests:
           - not_null
       - name: failure_count
         description: Failing rows recorded that day at this severity

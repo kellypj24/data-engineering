@@ -13,7 +13,7 @@
     reappearance leaves one. Returns one row per violation.
 
     Usage (model level):
-        tests:
+        data_tests:
           - scd2_invariants:
               key: id
               # valid_from / valid_to default to dbt's snapshot columns
