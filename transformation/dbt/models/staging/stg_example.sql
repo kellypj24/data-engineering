@@ -17,6 +17,14 @@ renamed AS (
         {{ audit_columns() }}
     FROM source
 
+),
+
+-- One row per order_id. A duplicated id upstream is kept as one row and
+-- reported by grain_guard_is_one (warn) on _grain_rows, not hidden.
+deduped AS (
+
+    {{ grain_guard('renamed', grain=['order_id'], order_by=['created_at DESC', 'customer_id', 'status', 'amount']) }}
+
 )
 
-SELECT * FROM renamed
+SELECT * FROM deduped

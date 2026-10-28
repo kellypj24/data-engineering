@@ -25,6 +25,12 @@ models:
         description: Timestamp when this row was first loaded into the warehouse by the EL tool
       - name: _dbt_updated_at
         description: Timestamp when this row was last processed by dbt
+      - name: _grain_rows
+        description: >
+          Rows sharing this order_id before grain_guard kept one. Above 1 means
+          a key collision upstream; grain_guard_is_one warns on it.
+        data_tests:
+          - grain_guard_is_one
 
 unit_tests:
   - name: test_stg_example_cleans_strings
@@ -48,3 +54,22 @@ unit_tests:
         - {order_id: 1, status: "active", amount: 100}
         - {order_id: 2, status: null, amount: 200}
         - {order_id: 3, status: "pending", amount: 0}
+
+  - name: test_stg_example_keeps_one_row_per_order_and_counts_duplicates
+    description: >
+      grain_guard keeps the latest created_at per order_id and records how many
+      rows shared it, so the collision is reported instead of hidden.
+    model: stg_example
+    overrides:
+      vars:
+        dbt_env: prod
+    given:
+      - input: source('raw', 'orders')
+        rows:
+          - {id: 1, status: "old", amount: 100, created_at: "2024-01-01"}
+          - {id: 1, status: "new", amount: 110, created_at: "2024-01-02"}
+          - {id: 2, status: "only", amount: 200, created_at: "2024-01-02"}
+    expect:
+      rows:
+        - {order_id: 1, status: "new", amount: 110, _grain_rows: 2}
+        - {order_id: 2, status: "only", amount: 200, _grain_rows: 1}
