@@ -42,7 +42,8 @@ def build_fixtures(project) -> dict[str, list[str]]:
     )
     found = {name: [] for name in FIXTURES}
     with duckdb.connect(str(project.db_path)) as con:
-        for test in result.result.results:
+        # The on-run-start hook reports a result too; keep the data tests.
+        for test in (r for r in result.result.results if r.node.resource_type == "test"):
             seed = next(name for name in FIXTURES if name in test.node.name)
             if test.failures:
                 relation = test.node.relation_name

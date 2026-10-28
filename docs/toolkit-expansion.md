@@ -107,7 +107,7 @@ Work order across both roadmaps: **P6 fixes**, then the CI quick wins in
 - [x] E41. [Grain guard: count before dedup](#e41-grain-guard-count-before-dedup)
 - [x] E42. [Date spine with a fact-coverage test](#e42-date-spine-with-a-fact-coverage-test)
 - [x] E43. [Static check for undefined `var()` references](#e43-static-check-for-undefined-var-references)
-- [ ] E44. [Pre-run write-role guard (Snowflake extra)](#e44-pre-run-write-role-guard-snowflake-extra)
+- [x] E44. [Pre-run write-role guard (Snowflake extra)](#e44-pre-run-write-role-guard-snowflake-extra)
 
 **P8 — Dagster patterns, round 2**
 

@@ -11,6 +11,7 @@ adapters; dry runs work everywhere.
 | `audit_object_ownership` | Read-only: schemas/tables/views not owned by `<DATABASE>_OWNER`, and an owner role that cannot create schemas |
 | `generate_semantic_view` | `CREATE SEMANTIC VIEW` for one mart domain (a workload tag): tables with primary keys from uniqueness tests, documented columns as facts/dimensions with descriptions as comments, `meta.sensitive` columns excluded. Metrics, relationships, and synonyms are hand-curated in the `semantic_views` var. Prints by default |
 | `row_content_hash` (dispatch) | Serialises ARRAY (sorted) and VARIANT/OBJECT with `TO_JSON` so `macros/utils/row_content_hash.sql` can hash them; they cannot be compared with `=`. Rendered in tests, never executed |
+| `assert_write_role` | `on-run-start` hook: `run`/`build`/`seed`/`snapshot` against a shared environment database (`environment_databases`) fails unless `CURRENT_ROLE()` is `<DATABASE>_OWNER` or in the `write_role_allowlist` var. Personal databases, other commands, and other adapters are skipped. Prevents the drift `audit_object_ownership` reports |
 | `normalize_object_ownership` | Transfers that ownership (`COPY CURRENT GRANTS`) and grants `CREATE SCHEMA`. Dry run by default |
 
 ## Ownership after a clone
@@ -21,6 +22,11 @@ replace` an existing model, or create the `__dbt_tmp` tables incrementals and
 snapshots need. `refresh_environment` normalizes ownership after each clone.
 The audit and the repair share one rule (`ownership_drift`), so a repair always
 leaves a clean audit.
+
+`assert_write_role` stops that drift at the source: a personal role cannot
+build into a shared database. dbt runs `create schema if not exists` before
+`on-run-start` fires, so a wrong role can still create an empty schema; the
+guard stops table and view writes, not that.
 
 ## Preservation manifest
 
