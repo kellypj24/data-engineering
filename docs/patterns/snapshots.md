@@ -14,6 +14,11 @@ longer has it. Start snapshotting a table before anyone needs its history.
 "We'll add a snapshot when the question comes up" means the answer starts
 from that day.
 
+**The exception: archived full extracts.** If dated full copies of the source
+were kept (a daily export, a landing bucket that was never purged), the past
+*can* be rebuilt from them, then continued by a snapshot. See
+[Backfilling history from full extracts](#backfilling-history-from-full-extracts).
+
 ## Strategy
 
 | Use | When | Config |
@@ -120,3 +125,73 @@ history: daily snapshots cannot tell you the state at noon.
         - scd2_invariants:
             key: id   # valid_from / valid_to default to dbt_valid_from / dbt_valid_to
   ```
+
+## Backfilling history from full extracts
+
+`reconstruct_scd2` (`transformation/dbt/macros/utils/reconstruct_scd2.sql`)
+rebuilds type-2 history from a stack of archived full extracts, one row per key
+per extract date. Example: `seeds/example_raw/customer_extracts.csv` →
+`models/intermediate/int_customers_history.sql`, tested in
+`tests/python/test_scd2_reconstruction.py`.
+
+```sql
+{{ config(materialized='table') }}
+{{ reconstruct_scd2(source('raw', 'customer_extracts'), key='id', extract_date='extract_date') }}
+```
+
+It is **presence-aware**, which is the part naive versions get wrong:
+
+| In the extracts | In the history |
+|---|---|
+| content changes | the version closes at that extract; a new one opens |
+| key missing from an extract | the version closes at that extract's date |
+| key back, content unchanged | a **new** version opens: the absence is kept |
+| key in the latest extract | the version stays open |
+| no extract file that day | nothing: the calendar is the extract dates present |
+| an extract with zero rows | invisible unless you pass `calendar` (one row per extract date) |
+
+Change detection is `row_content_hash` over every column except the extract
+date, kept as `content_hash`. Test the extracts with
+`unique_combination_of_columns` on key + extract date, and the result with
+`scd2_invariants`.
+
+### Cutover to a go-forward snapshot
+
+Pick a fixed cutover: the last extract the history uses, and the day the
+snapshot starts. Then, once:
+
+1. Write the snapshot so it selects the history's columns, with
+   `content_hash` as its check column computed the same way:
+
+   ```sql
+   {% snapshot customers_snapshot %}
+   {{ config(target_schema='snapshots', unique_key='id', strategy='check',
+             check_cols=['content_hash'], hard_deletes='invalidate') }}
+   SELECT id, email, {{ row_content_hash(source('raw', 'customers')) }} AS content_hash
+   FROM {{ source('raw', 'customers') }}
+   {% endsnapshot %}
+   ```
+
+   `hard_deletes='invalidate'` matches the reconstruction: a missing key closes
+   its version, and a returning one opens a new version.
+2. Build the history model.
+3. Seed the snapshot table from it, **before the snapshot's first run**:
+
+   ```bash
+   dbt run-operation seed_snapshot_from_history --args '{snapshot: customers_snapshot,
+     history: int_customers_history, current: raw.customers, key: id}'   # dry run
+   dbt run-operation seed_snapshot_from_history --args '{..., dry_run: false}'
+   ```
+
+   It checks the seam first: every open version's `content_hash` must equal
+   the hash of the same key in `current`, and the key sets must match. Any
+   difference would version on the first run (a real change since the last
+   extract, or a hash over different columns: check `exclude`). It is listed
+   and refused unless `allow_mismatch: true`. It never replaces an existing
+   snapshot table.
+4. Run `dbt snapshot`. dbt continues the seeded history natively; nothing
+   re-versions at the seam.
+
+Ship the cutover with a migration file (`docs/patterns/state-migrations.md`):
+it is a one-time physical change that promoting code does not carry, and it
+runs once per environment.

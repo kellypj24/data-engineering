@@ -1,0 +1,10 @@
+extract_date,id,email
+2026-01-01,1,ada@old.example.com
+2026-01-01,2,grace@example.com
+2026-01-01,3,alan@example.com
+2026-01-02,1,ada@old.example.com
+2026-01-02,2,grace@example.com
+2026-01-02,3,alan@example.com
+2026-01-03,1,ada@example.com
+2026-01-04,1,ada@example.com
+2026-01-04,2,grace@example.com

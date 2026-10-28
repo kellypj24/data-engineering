@@ -30,6 +30,10 @@ sources:
             description: Customer who placed the order
           - name: created_at
             description: Order creation timestamp
+      - name: customer_extracts
+        description: >
+          Archived full extracts of customers, one row per customer per
+          extract date. Rebuilt into type-2 history by int_customers_history.
       - name: customers
         description: Raw customer records from the source system
         columns:
