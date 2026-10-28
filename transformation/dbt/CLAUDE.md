@@ -71,6 +71,7 @@ e.g. `uv sync --extra postgres`.
 - Property files use `data_tests:` (dbt 1.8+), never the older `tests:`. Generic-test arguments stay top-level, not under `arguments:`: that form needs a newer floor than `>=1.8` (tracked by `dbt-deprecations.yml`)
 - Macros organized: `overrides/` (built-in overrides), `utils/` (helpers), `staging/` (staging-specific), `validation/` (validation framework), `snowflake/` (Snowflake-only features; they refuse to execute on other adapters)
 - A macro argument named `target` shadows dbt's `target`; inside such a macro use `adapter.type()`
+- **CI compiles before anything is built.** A macro that reads a relation's columns (`adapter.get_columns_in_relation`) must degrade when the relation does not exist yet: render SQL that still reads from it, so compile passes and a real run against a missing table fails in the warehouse. Never return SQL that would build an empty table (see `reconstruct_scd2`, `row_content_hash`)
 - **Tags: three axes** (layer by directory, workload and entity by hand), values only from the `tag_taxonomy` var. A new `models/` subdirectory needs a layer tag in `dbt_project.yml`; never nest one layer folder inside another (tags accumulate). Select production jobs by tag, not path
 - **Environment is `DBT_ENV`, not the target.** A target picks a *warehouse*
   (`duckdb`, `snowflake`, …); the `dbt_env` var in `dbt_project.yml` picks an
