@@ -10,6 +10,7 @@ adapters; dry runs work everywhere.
 | `refresh_dev_database` | `clone_database` from prod into `<PROD>_<USERNAME>` (E31) |
 | `audit_object_ownership` | Read-only: schemas/tables/views not owned by `<DATABASE>_OWNER`, and an owner role that cannot create schemas |
 | `generate_semantic_view` | `CREATE SEMANTIC VIEW` for one mart domain (a workload tag): tables with primary keys from uniqueness tests, documented columns as facts/dimensions with descriptions as comments, `meta.sensitive` columns excluded. Metrics, relationships, and synonyms are hand-curated in the `semantic_views` var. Prints by default |
+| `row_content_hash` (dispatch) | Serialises ARRAY (sorted) and VARIANT/OBJECT with `TO_JSON` so `macros/utils/row_content_hash.sql` can hash them; they cannot be compared with `=`. Rendered in tests, never executed |
 | `normalize_object_ownership` | Transfers that ownership (`COPY CURRENT GRANTS`) and grants `CREATE SCHEMA`. Dry run by default |
 
 ## Ownership after a clone

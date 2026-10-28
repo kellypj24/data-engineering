@@ -68,12 +68,21 @@
         {%- else -%}
             {%- set value = "CAST(" ~ field ~ " AS " ~ dbt.type_string() ~ ")" -%}
         {%- endif -%}
-        {%- do parts.append(
-            "CASE WHEN " ~ value ~ " IS NULL THEN '~' ELSE CAST(LENGTH(" ~ value ~ ") AS "
-            ~ dbt.type_string() ~ ") || ':' || " ~ value ~ " END"
-        ) -%}
+        {%- do parts.append(_length_framed(value)) -%}
     {%- endfor -%}
     {{- parts | join(' || ') -}}
+{%- endmacro %}
+
+
+{% macro _length_framed(value) -%}
+    {#-
+        One field of the shared encoding (also used by row_content_hash):
+        NULL -> '~', otherwise '<length>:<value>'. `value` must already be a
+        string expression. No encoded value starts with '~', so NULL is
+        distinct from every string, and length-framing makes concatenation
+        unambiguous.
+    -#}
+    CASE WHEN {{ value }} IS NULL THEN '~' ELSE CAST(LENGTH({{ value }}) AS {{ dbt.type_string() }}) || ':' || {{ value }} END
 {%- endmacro %}
 
 
