@@ -1,0 +1,47 @@
+name: Label PRs
+
+# Additive labels from changed paths (.github/labeler.yml) and the title
+# prefix (feat/fix/docs/ci). Never removes a label a human added.
+# See ci-cd-hardening #23.
+#
+# pull_request_target, so Dependabot and fork PRs get a token that can label.
+# That is safe only because no PR code is ever checked out or run: the
+# checkout below is the base branch (the default ref for this event), and the
+# title is read from env.
+
+on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+concurrency:
+  group: label-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  label:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          sparse-checkout: .github
+      - uses: astral-sh/setup-uv@v7
+      - name: Create labels that do not exist yet
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: uv run --no-project --with pyyaml python .github/scripts/pr_labels.py ensure
+      - uses: actions/labeler@v7
+        with:
+          sync-labels: false
+      - name: Label from the title prefix
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: >-
+          uv run --no-project --with pyyaml
+          python .github/scripts/pr_labels.py title --pr "$PR_NUMBER"

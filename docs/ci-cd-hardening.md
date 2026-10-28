@@ -67,7 +67,7 @@ is why the status lives here rather than on the section headings.)
 - [x] 17. [Add stack-usage skills for downstream projects](#17-add-stack-usage-skills-for-downstream-projects)
 - [x] 21. [Retarget stacked PRs, then delete merged branches](#21-retarget-stacked-prs-then-delete-merged-branches)
 - [x] 22. [Stale bot that exempts tracker issues](#22-stale-bot-that-exempts-tracker-issues)
-- [ ] 23. [Auto-label PRs by path](#23-auto-label-prs-by-path)
+- [x] 23. [Auto-label PRs by path](#23-auto-label-prs-by-path)
 - [ ] 24. [Run `dbt_project_evaluator` in CI](#24-run-dbt_project_evaluator-in-ci)
 
 ---
@@ -997,6 +997,10 @@ enough: check existence first and fail on any other error). Run on
 **Acceptance.** A PR touching `orchestration/dagster/` titled `fix: …` gets
 `dagster` and `fix`. Adding a new directory mapping with a brand-new label
 works on its first run. A manually added label survives a later push.
+
+Done: `.github/workflows/labeler.yml` on `pull_request_target` (labels
+Dependabot and fork PRs; checks out the base only), `.github/scripts/pr_labels.py`
+(`ensure`, `title`). `check_wiring.py` requires a labeler entry per tool.
 
 ### 24. Run `dbt_project_evaluator` in CI
 

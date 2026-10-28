@@ -17,6 +17,7 @@ def repo(tmp_path):
         "justfile",
         "README.md",
         ".github/dependabot.yml",
+        ".github/labeler.yml",
         ".pre-commit-config.yaml",
     ):
         (tmp_path / name).parent.mkdir(parents=True, exist_ok=True)
@@ -142,4 +143,11 @@ def test_a_new_workflow_label_must_be_exempted(repo):
     )
     assert check(repo) == [
         "label `new-alarm` (new-alarm.yml): not exempt in stale.yml EXEMPT"
+    ]
+
+
+def test_a_tool_missing_from_the_labeler_fails(repo):
+    edit(repo / ".github/labeler.yml", "release-diff:", "release-diffs:")
+    assert check(repo) == [
+        "release-diff: not wired into .github/labeler.yml (label `release-diff`: tooling/release-diff/**)"
     ]
