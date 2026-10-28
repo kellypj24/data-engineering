@@ -21,6 +21,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "dagster-webserver>=1.6,<2.0",
+    "moto[sqs]>=5.2.5",
     "pytest>=9.1.1",
     "pytest-cov>=7.1.0",
     "ruff>=0.16.1",

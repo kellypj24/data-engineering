@@ -2,10 +2,12 @@
 
 from src.sensors.chain import transform_after_extract
 from src.sensors.s3_sensor import s3_file_arrival_sensor
+from src.sensors.sqs_sensor import sqs_landing_sensor
 from src.telemetry.sensors import telemetry_sensors
 
 all_sensors = [
     s3_file_arrival_sensor,
+    sqs_landing_sensor,
     transform_after_extract,
     *telemetry_sensors,
 ]
