@@ -15,6 +15,9 @@
     take the team of the database the query ran in. Anything unmapped is
     NEEDS_OWNER_REVIEW, never a guess. Invoiced compute or storage on a day
     with nothing to split it by is NEEDS_OWNER_REVIEW too.
+
+    usage_hour arrives as naive UTC (utc_date_trunc in staging), so
+    CAST(usage_hour AS DATE) does not depend on the session time zone.
 #}
 
 WITH users AS (

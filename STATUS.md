@@ -9,12 +9,12 @@ _Updated 2026-10-29._
 
 - Round 3 of `docs/toolkit-expansion.md` is done (E35–E55). CI hardening done: #9, #12,
   #13, #19, #21, #22, #23.
-- Round 4 (E56–E74, P10–P14) is drafted; none started.
+- Round 4 (E56–E74, P10–P14) in progress: E56 done.
 
 ## Next
 
-1. Round 4 in its work order: E56 (cost dates in UTC) and E57 (Airbyte assets from
-   `AirbyteWorkspace`) first, then E58–E59, E60–E70, E71–E74.
+1. Round 4 in its work order: E57 (Airbyte assets from `AirbyteWorkspace`), then
+   E58–E59, E60–E70, E71–E74.
 2. CI hardening #14 (broaden Terraform validation), then #24, #15; #10 and #11 wait on
    the `ANTHROPIC_API_KEY` decision (`docs/ci-cd-hardening.md`).
 3. Lock refresh: `uv lock --upgrade` per tool to clear the advisories the daily audit
