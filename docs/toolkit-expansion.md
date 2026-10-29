@@ -123,7 +123,7 @@ Work order across both roadmaps: **P6 fixes**, then the CI quick wins in
 - [x] E51. [History tables stamped with `current_date`](#e51-history-tables-stamped-with-current_date)
 - [x] E52. [One unknown-member token per dimension](#e52-one-unknown-member-token-per-dimension)
 - [x] E53. [Event-driven ingest → dbt subgraph → export](#e53-event-driven-ingest--dbt-subgraph--export)
-- [ ] E54. [Image promotion runbook](#e54-image-promotion-runbook)
+- [x] E54. [Image promotion runbook](#e54-image-promotion-runbook)
 - [ ] E55. [Sensitive-scan runbook: freeze, verify, audit](#e55-sensitive-scan-runbook-freeze-verify-audit)
 
 Not yet tasks: [Deferred to a later round](#deferred-to-a-later-round).
