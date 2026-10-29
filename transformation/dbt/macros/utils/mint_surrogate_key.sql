@@ -41,6 +41,14 @@
         silently). The key then equals the key of the literal itself. Leave it
         unset for identity keys.
 
+        One token per dimension, each its own var:
+            {{ mint_surrogate_key(['customer_id'], null_as=var('unknown_customer')) }}
+            {{ mint_surrogate_key(['product_id'], null_as=var('unknown_product')) }}
+        A shared token ('N/A' everywhere) gives every dimension's unknown
+        member the same key, so a fact's unknown customer key also matches
+        the unknown product: a join on the wrong key column returns rows
+        instead of none.
+
         Fields are hashed in a FIXED ORDER. Changing the order, the encoding,
         or the version re-mints every key: that is a version bump, migrated
         with backfill_surrogate_keys. There is deliberately no parameter to

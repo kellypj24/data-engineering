@@ -175,7 +175,7 @@ SQL files end **without** a semicolon. dbt wraps every model in
 
 | Piece | What it's for |
 |---|---|
-| `macros/utils/mint_surrogate_key` | Versioned, collision-free UUID-shaped keys. NULL is distinct from `''`, and there are no delimiter collisions. Use it instead of `dbt_utils.generate_surrogate_key` |
+| `macros/utils/mint_surrogate_key` | Versioned, collision-free UUID-shaped keys. NULL is distinct from `''`, and there are no delimiter collisions. Use it instead of `dbt_utils.generate_surrogate_key`. Give each dimension its own `null_as` token var (`unknown_customer`, `unknown_product`): a shared token makes every dimension's unknown member the same key |
 | `macros/utils/backfill_surrogate_keys` | `run-operation` that fills or upgrades key columns in place. No source reads, no `--full-refresh`. Dry run by default |
 | `macros/utils/limit_data_in_dev`, `safe_divide` | Dev-only recency predicate; null- and zero-safe division |
 | `macros/staging/audit_columns`, `clean_strings` | `_loaded_at` / `_dbt_updated_at`; trim + lower + nullif |
