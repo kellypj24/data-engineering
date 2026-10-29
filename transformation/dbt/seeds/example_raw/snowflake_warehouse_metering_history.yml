@@ -10,7 +10,7 @@ seeds:
       meta:
         owner: data-platform
       column_types:
-        start_time: timestamp
+        start_time: timestamptz
         warehouse_name: varchar
         credits_used_compute: double
         credits_used_cloud_services: double

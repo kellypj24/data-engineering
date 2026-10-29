@@ -13,7 +13,7 @@ seeds:
         query_id: varchar
         warehouse_name: varchar
         user_name: varchar
-        start_time: timestamp
+        start_time: timestamptz
         credits_attributed_compute: double
     columns:
       - name: query_id

@@ -14,6 +14,7 @@ SQL-based transformation framework. Models raw data into staging, intermediate, 
 - `macros/overrides/generate_schema_name.sql` — Non-prod/prod schema routing
 - `macros/utils/limit_data_in_dev.sql` — Non-prod data filtering (recent N days), as a composable predicate
 - `macros/utils/safe_divide.sql` — Null/zero-safe division
+- `macros/utils/utc_date_trunc.sql` — `utc_date_trunc(datepart, column)`: truncate a **zoned** timestamp in UTC whatever the session time zone; returns naive UTC. Apply once where a zoned timestamp enters (cost staging); a naive input is read as session-local and shifted
 - `macros/utils/mint_surrogate_key.sql` — Versioned, collision-free UUID-shaped surrogate keys (`mint_surrogate_key`, `surrogate_key_version`). Use instead of `dbt_utils.generate_surrogate_key`
 - `macros/utils/row_content_hash.sql` — `row_content_hash(relation_or_columns, exclude, arrays, keep_array_order)`: one MD5 over a row's content for a snapshot's single `check_cols` column. Shares E1's per-field encoding (`_length_framed`) with its own version prefix (`row_content_hash_version`); sorted column order; arrays sorted. Snowflake ARRAY/VARIANT/OBJECT handling in `macros/snowflake/row_content_hash.sql`
 - `macros/utils/reconstruct_scd2.sql` — `reconstruct_scd2(extracts, key, extract_date, exclude, calendar)`: type-2 history from archived full extracts, presence-aware (absence closes a version; a return opens a new one even if unchanged). Output carries `content_hash` and dbt's snapshot columns. Example: `int_customers_history`

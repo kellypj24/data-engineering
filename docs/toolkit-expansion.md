@@ -133,7 +133,7 @@ the vocabulary (source type, key role, hash) the later tasks use.
 
 **P10 — Fixes to shipped code, round 2**
 
-- [ ] E56. [Cost dates truncated in UTC](#e56-cost-dates-truncated-in-utc)
+- [x] E56. [Cost dates truncated in UTC](#e56-cost-dates-truncated-in-utc)
 - [ ] E57. [Dagster: Airbyte assets from `AirbyteWorkspace`](#e57-dagster-airbyte-assets-from-airbyteworkspace)
 
 **P11 — Cheap guards**
@@ -1516,16 +1516,27 @@ the same hours to different months, and the invoice tie drifts.
 
 **How.**
 - `utc_date_trunc(datepart, column)` in `macros/utils/`, through
-  `adapter.dispatch`. Snowflake: convert to UTC and drop the zone, then
-  truncate. Default: convert `timestamptz` to UTC first; truncate naive
-  timestamps as-is, treated as UTC (the macro's doc says so).
-- Use it for every hour, day and month derivation in `models/cost/staging/` and
-  `models/cost/intermediate/`, including the `dbt.date_trunc` calls in staging.
+  `adapter.dispatch`. Snowflake: `CONVERT_TIMEZONE('UTC', ...)::TIMESTAMP_NTZ`,
+  then truncate. Default: `timezone('UTC', ...)`, then truncate. BigQuery:
+  truncate as-is (`TIMESTAMP` is an instant, truncated in UTC). Returns naive
+  UTC.
+- Input must be zoned. SQL cannot see the type, and both Snowflake and duckdb
+  read a naive input as session-local time, so the macro would shift an
+  already-UTC value. Apply it once, in staging, where `start_time` enters as
+  `TIMESTAMP_LTZ`: the two `dbt.date_trunc('hour', ...)` calls. Intermediate
+  keeps `CAST(usage_hour AS DATE)`, which is zone-free on naive UTC.
+- `usage_month` from ORGANIZATION_USAGE's `usage_date` stays on
+  `dbt.date_trunc`: a `DATE` has no zone, and `CONVERT_TIMEZONE` would turn it
+  into local midnight.
+- The duckdb fixtures' `start_time` becomes `timestamptz` (values `+00`), so
+  duckdb takes the same path as Snowflake.
 
-**Acceptance.** On duckdb with `SET TimeZone = 'Pacific/Auckland'`, a
+**Acceptance.** On duckdb with `TimeZone = 'Pacific/Auckland'`, a
 `timestamptz` hour at 23:00 UTC on 31 January maps to January. Compiled
-Snowflake SQL contains the UTC conversion. The existing cost tests and the
-invoice tie stay green.
+Snowflake SQL contains the UTC conversion. Under `Pacific/Kiritimati` (UTC+14,
+where the fixtures' 6 January hours fall on 7 January locally) the per-team
+split matches UTC; it fails on the old staging code. The existing cost tests
+and the invoice tie stay green.
 
 ---
 
