@@ -86,6 +86,15 @@ role must provide. It is not a code skeleton; there is nothing to copy.
 6. Update the root README tool table, add a `lint-<tool>` hook to the root `.pre-commit-config.yaml` (and to the `SKIP` list of ci.yml's `hooks` job), and a `<tool>` entry to `.github/labeler.yml`
 7. Verify: `just --list`, `just check-wiring`, `just <tool>::test`, `uv lock --check`
 
+## Claude Hooks
+
+`.claude/settings.json` (committed) registers `.claude/hooks/block-no-verify.py`
+as a `PreToolUse` hook: an agent's `git commit/push --no-verify`, `commit -n`,
+`core.hooksPath` override, or `LEFTHOOK=0` / `HUSKY=0` /
+`PRE_COMMIT_ALLOW_NO_CONFIG=1` / `SKIP=... git commit` is denied. Text inside
+quotes and heredocs is ignored, so commit messages may mention them. Tested by
+`.github/scripts/test_block_no_verify.py`. Hooks load at session start.
+
 ## Claude Skills
 
 `.claude/skills/` holds two families of skills.

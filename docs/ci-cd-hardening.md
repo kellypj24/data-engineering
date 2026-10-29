@@ -50,7 +50,7 @@ is why the status lives here rather than on the section headings.)
 **P3 — Claude skills & agent tooling**
 
 - [x] 8. [Bootstrap a `.claude/skills/` library for the toolkit's core workflows](#8-bootstrap-a-claudeskills-library-for-the-toolkits-core-workflows)
-- [ ] 9. [Add a `block-no-verify` agent hook](#9-add-a-block-no-verify-agent-hook)
+- [x] 9. [Add a `block-no-verify` agent hook](#9-add-a-block-no-verify-agent-hook)
 
 **P4 — AI-assisted CI quality**
 
