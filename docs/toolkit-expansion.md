@@ -1535,13 +1535,10 @@ invoice tie stay green.
 > `src/assets/airbyte.py`).
 
 **Why.** Both files build assets with `build_airbyte_assets` over
-`AirbyteResource`, the legacy API. In dagster-airbyte 0.29.26 its sibling
-`load_assets_from_airbyte_instance` is `@superseded`, and its warning points
-Airbyte 1.6+ users to the migration guide for `AirbyteWorkspace` and
-`build_airbyte_assets_definitions`; `abctl` installs a current Airbyte.
-`build_airbyte_assets` carries no annotation yet, so nothing warns. The new
-API reads connections and streams from the workspace, so table lists stop
-being hand-maintained.
+`AirbyteResource`, the pre-workspace API. dagster-airbyte's migration guide for
+Airbyte 1.6+ (which `abctl` installs) moves to `AirbyteWorkspace` and
+`build_airbyte_assets_definitions`. The workspace API reads connections and
+streams from Airbyte, so table lists stop being hand-maintained.
 
 **How.**
 - An `AirbyteWorkspace` resource from `EnvVar`s replaces `AirbyteResource`.
@@ -1640,13 +1637,26 @@ each. The seed template loads in `dbt build` on the example fixtures.
 > **Depends on E60.**
 
 **What.** `docs/patterns/incremental.md`, one example model per source type,
-and a generic test `no_tie_at_max_clock(key, clock)`.
+and a generic test `no_tie_at_max_clock(clock, partition_by=[],
+tie_breakers=[], scope='max')`.
 
 **How.**
 - Standard CTE flow: `source → typed → hashed → deduped → changed → final`.
 - `merge` with no `unique_key` is an append. The doc says so; E68 reports it.
-- `no_tie_at_max_clock` fails when two versions of one key share the maximum
-  clock value, which makes the dedup pick one arbitrarily.
+- `no_tie_at_max_clock` fails when two rows in a partition share the ordering
+  tuple `(clock, *tie_breakers)`. A tie means "latest" or "next after the
+  cursor" is arbitrary. One test covers each tie-breaking moment through its
+  arguments:
+
+  | Moment | `partition_by` | `tie_breakers` (example) | `scope` |
+  |---|---|---|---|
+  | Dedup to the latest version of a key | entity key | ingestion id | `max` |
+  | Incremental high-water mark (`>` skips late rows, `>=` re-reads them) | none | raw id | `max` |
+  | Ordering every version for history (E65) | entity key | ingestion id | `all` |
+  | CDC snapshot chunks sharing one LSN (E67) | entity key | `_airbyte_extracted_at`, `_airbyte_raw_id` | `all` |
+
+  `scope='max'` checks only the top tuple per partition; `'all'` checks every
+  rank. The doc pairs each source type (E60) with its tie-breaker columns.
 - Full-replace feeds: replace by load partition, or an anti-join soft delete
   behind a partial-delivery guard. The guard refuses to soft-delete when a
   delivery's row count is below a set share of the previous delivery.
@@ -1655,7 +1665,8 @@ and a generic test `no_tie_at_max_clock(key, clock)`.
 
 **Acceptance.** Each example model builds twice on duckdb (initial fixture,
 then a second batch) and produces the expected rows. The tie test fails on a
-fixture with a tie. The guard blocks the soft delete when the second delivery
+fixture for each moment in the table and passes once its tie-breakers are
+added. The guard blocks the soft delete when the second delivery
 is truncated.
 
 ---
