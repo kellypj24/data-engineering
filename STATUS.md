@@ -8,13 +8,13 @@ _Updated 2026-10-28._
 ## Now
 
 - Round 3 of the roadmap (`docs/toolkit-expansion.md`, `docs/ci-cd-hardening.md`) is in
-  progress. Done: E35–E55 (P7–P9); CI hardening #12, #13, #19, #21, #22, #23.
+  progress. Done: E35–E55 (P7–P9); CI hardening #9, #12, #13, #19, #21, #22, #23.
 
 ## Next
 
 1. `docs/toolkit-expansion.md` round 3 is done; next is choosing items from its *Deferred to a later round* list.
-2. CI hardening #9 (block `--no-verify` agent hook), then #10, #11, #14, #15, #24
-   (`docs/ci-cd-hardening.md`).
+2. CI hardening #14 (broaden Terraform validation), then #24, #15; #10 and #11 wait on
+   the `ANTHROPIC_API_KEY` decision (`docs/ci-cd-hardening.md`).
 3. Lock refresh: `uv lock --upgrade` per tool to clear the advisories the daily audit
    reports (`python3 .github/scripts/security_audit.py --out x.md`).
 4. Airflow/Prefect parity, lower priority than Dagster: port the round-3 Dagster
