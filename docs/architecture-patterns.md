@@ -144,6 +144,40 @@ Rules, enforced by `orchestration/dagster/tests/test_invariants.py`:
 
 Worked example: `orchestration/dagster/src/jobs/chain.py` and `src/sensors/chain.py`.
 
+### Event-driven chain: ingest → dbt subgraph → export
+
+When a file or message starts the pipeline (`s3_sensor.py`, `sqs_sensor.py`),
+the same chaining rules apply, with three jobs:
+
+| Job | What | Why a separate job |
+|---|---|---|
+| Ingest | Loads the landed data into a raw table | A table-materialized staging model in the same job as the load can start reading the raw table before the load finishes. Job boundaries are the only ordering Dagster guarantees across steps that do not share an asset dependency |
+| dbt subgraph | `dbt build` of the models downstream of what was ingested, not the whole project | One event should not rebuild unrelated marts |
+| Export | Writes files for recipients ([file-export](../delivery/file-export/)) | Exports are side effects, not data: running one twice sends a file twice. A job, not an asset, so materializing assets never sends anything |
+
+```python
+ingest_job = define_asset_job("ingest_orders", selection=AssetSelection.keys(["raw", "orders"]))
+orders_dbt_job = define_asset_job(
+    "orders_dbt",
+    selection=build_dbt_asset_selection([dbt_project_assets], "source:raw.orders+"),
+)
+
+@run_status_sensor(run_status=DagsterRunStatus.SUCCESS, monitored_jobs=[ingest_job], request_job=orders_dbt_job)
+def dbt_after_ingest(context):
+    return RunRequest(run_key=context.dagster_run.run_id)
+
+@run_status_sensor(run_status=DagsterRunStatus.SUCCESS, monitored_jobs=[orders_dbt_job], request_job=export_job)
+def export_after_dbt(context):
+    return RunRequest(run_key=context.dagster_run.run_id)
+```
+
+- The sensor that sees the event launches only the ingest job; each later job
+  is launched by a run-status sensor, so a failed ingest stops the chain.
+- An export job in a chain gets no schedule of its own. `build_export_definitions`
+  generates a STOPPED schedule per recipient: drop it for chained recipients,
+  or the invariants fail (a chained job that is also scheduled).
+- `run_key` = the upstream run id: one downstream run per upstream success.
+
 ---
 
 ## The Modern Data Stack
