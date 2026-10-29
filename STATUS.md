@@ -3,16 +3,18 @@
 Current state only; history is in git and the PRs. Update this file in the same PR as the
 work it describes.
 
-_Updated 2026-10-28._
+_Updated 2026-10-29._
 
 ## Now
 
-- Round 3 of the roadmap (`docs/toolkit-expansion.md`, `docs/ci-cd-hardening.md`) is in
-  progress. Done: E35–E55 (P7–P9); CI hardening #9, #12, #13, #19, #21, #22, #23.
+- Round 3 of `docs/toolkit-expansion.md` is done (E35–E55). CI hardening done: #9, #12,
+  #13, #19, #21, #22, #23.
+- Round 4 (E56–E74, P10–P14) is drafted; none started.
 
 ## Next
 
-1. `docs/toolkit-expansion.md` round 3 is done; next is choosing items from its *Deferred to a later round* list.
+1. Round 4 in its work order: E56 (cost dates in UTC) and E57 (Airbyte assets from
+   `AirbyteWorkspace`) first, then E58–E59, E60–E70, E71–E74.
 2. CI hardening #14 (broaden Terraform validation), then #24, #15; #10 and #11 wait on
    the `ANTHROPIC_API_KEY` decision (`docs/ci-cd-hardening.md`).
 3. Lock refresh: `uv lock --upgrade` per tool to clear the advisories the daily audit

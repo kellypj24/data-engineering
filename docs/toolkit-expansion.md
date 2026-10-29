@@ -126,6 +126,45 @@ Work order across both roadmaps: **P6 fixes**, then the CI quick wins in
 - [x] E54. [Image promotion runbook](#e54-image-promotion-runbook)
 - [x] E55. [Sensitive-scan runbook: freeze, verify, audit](#e55-sensitive-scan-runbook-freeze-verify-audit)
 
+### Round 4 (drafted 2026-10-29)
+
+Work order: E56–E59, then E60–E70 in number order, then E71–E74. E60–E62 set
+the vocabulary (source type, key role, hash) the later tasks use.
+
+**P10 — Fixes to shipped code, round 2**
+
+- [ ] E56. [Cost dates truncated in UTC](#e56-cost-dates-truncated-in-utc)
+- [ ] E57. [Dagster: Airbyte assets from `AirbyteWorkspace`](#e57-dagster-airbyte-assets-from-airbyteworkspace)
+
+**P11 — Cheap guards**
+
+- [ ] E58. [Fail on ignored `check` constraints (Snowflake extra)](#e58-fail-on-ignored-check-constraints-snowflake-extra)
+- [ ] E59. [Definition invariant: scheduled dbt jobs use `build`](#e59-definition-invariant-scheduled-dbt-jobs-use-build)
+
+**P12 — Source contracts, keys and history**
+
+- [ ] E60. [Source capability classification](#e60-source-capability-classification)
+- [ ] E61. [Incremental patterns per source type](#e61-incremental-patterns-per-source-type)
+- [ ] E62. [Key roles and the identity, content and link hashes](#e62-key-roles-and-the-identity-content-and-link-hashes)
+- [ ] E63. [Exclusion signals](#e63-exclusion-signals)
+- [ ] E64. [Test ladder](#e64-test-ladder)
+- [ ] E65. [Managed history from an observation log](#e65-managed-history-from-an-observation-log)
+- [ ] E66. [Snapshot migration hazards](#e66-snapshot-migration-hazards)
+- [ ] E67. [CDC landing tables: current state and history](#e67-cdc-landing-tables-current-state-and-history)
+
+**P13 — Project-wide tooling**
+
+- [ ] E68. [dbt baseline census](#e68-dbt-baseline-census)
+- [ ] E69. [PR impact checker](#e69-pr-impact-checker)
+- [ ] E70. [Consumer blast-radius audit (Snowflake extra)](#e70-consumer-blast-radius-audit-snowflake-extra)
+
+**P14 — Environments, identity and runbooks**
+
+- [ ] E71. [Clone hygiene (Snowflake extra)](#e71-clone-hygiene-snowflake-extra)
+- [ ] E72. [Password to key-pair cutover runbook](#e72-password-to-key-pair-cutover-runbook)
+- [ ] E73. [Postgres replication-slot guard](#e73-postgres-replication-slot-guard)
+- [ ] E74. [`validate-on-clone` stack skill](#e74-validate-on-clone-stack-skill)
+
 Not yet tasks: [Deferred to a later round](#deferred-to-a-later-round).
 
 ---
@@ -1147,9 +1186,8 @@ violation each fail the test; a clean fixture passes. Runs on duckdb.
 
 ### E38. SCD2 reconstruction from dated full extracts
 
-> **Depends on E40 and E39.** Distinct from the declined CDC-landing-table
-> reconstruction (see *Deliberately left out*): this reads archived full
-> extracts and depends on no connector.
+> **Depends on E40 and E39.** Distinct from CDC-landing-table reconstruction
+> (E67): this reads archived full extracts and depends on no connector.
 
 **What.** `reconstruct_scd2(extracts, key, extract_date, hash_col)` — a macro
 that rebuilds type-2 history from a stack of archived full extracts (one row
@@ -1463,6 +1501,488 @@ Add to `tooling/sensitive-scan/RUNBOOK.md`:
 
 ---
 
+## P10 — Fixes to shipped code, round 2
+
+### E56. Cost dates truncated in UTC
+
+> **Fixes E27.**
+
+**Why.** `int_cost_daily_allocation` derives `usage_date` with
+`CAST(usage_hour AS DATE)` (two places). On Snowflake `usage_hour` is a
+`TIMESTAMP_LTZ`, and the cast follows the session `TIMEZONE`. Hours near
+midnight move to the neighbouring day, and on the last day of a month to the
+neighbouring month. A laptop session and the prod service user then allocate
+the same hours to different months, and the invoice tie drifts.
+
+**How.**
+- `utc_date_trunc(datepart, column)` in `macros/utils/`, through
+  `adapter.dispatch`. Snowflake: convert to UTC and drop the zone, then
+  truncate. Default: convert `timestamptz` to UTC first; truncate naive
+  timestamps as-is, treated as UTC (the macro's doc says so).
+- Use it for every hour, day and month derivation in `models/cost/staging/` and
+  `models/cost/intermediate/`, including the `dbt.date_trunc` calls in staging.
+
+**Acceptance.** On duckdb with `SET TimeZone = 'Pacific/Auckland'`, a
+`timestamptz` hour at 23:00 UTC on 31 January maps to January. Compiled
+Snowflake SQL contains the UTC conversion. The existing cost tests and the
+invoice tie stay green.
+
+---
+
+### E57. Dagster: Airbyte assets from `AirbyteWorkspace`
+
+> **Fixes shipped Dagster code** (`src/utils/factories.py`,
+> `src/assets/airbyte.py`).
+
+**Why.** Both files build assets with `build_airbyte_assets` over
+`AirbyteResource`, the pre-workspace API. dagster-airbyte's migration guide for
+Airbyte 1.6+ (which `abctl` installs) moves to `AirbyteWorkspace` and
+`build_airbyte_assets_definitions`. The workspace API reads connections and
+streams from Airbyte, so table lists stop being hand-maintained.
+
+**How.**
+- An `AirbyteWorkspace` resource from `EnvVar`s replaces `AirbyteResource`.
+- `build_airbyte_assets_definitions(workspace=...)` with a
+  `connection_selector_fn` replaces the per-connection factory calls.
+- A translator keeps today's asset keys, so dbt sources and downstream deps do
+  not move.
+- `build_backup_asset` stays in `factories.py`; `build_source_assets` goes if
+  nothing else calls it.
+
+**Acceptance.** `just dagster::test` passes with the workspace API mocked. A
+test lists asset keys and matches the pre-migration list. No import of
+`build_airbyte_assets` or `AirbyteResource` remains.
+
+---
+
+## P11 — Cheap guards
+
+### E58. Fail on ignored `check` constraints (Snowflake extra)
+
+**Why.** dbt-snowflake ignores `type: check` on an enforced contract, so the
+contract reads as enforced and the check never reaches the table.
+`type: custom` with `expression: "check (...)"` renders the clause.
+
+**How.** `run-operation assert_no_check_constraints` in `macros/snowflake/`. It
+reads `graph.nodes` only, so it runs on any adapter, and fails listing every
+`model.column` with a `type: check` constraint. Wire it into `just dbt::test`
+and CI. Document the `custom` form in `transformation/dbt/CLAUDE.md`.
+
+**Acceptance.** A fixture model with `type: check` fails the operation, naming
+the model and column. `type: custom` passes. The example project passes.
+
+---
+
+### E59. Definition invariant: scheduled dbt jobs use `build`
+
+> **Extends E5.**
+
+**Why.** `dbt run` then `dbt test` materialises a model's children before its
+tests fail. With `build`, a failed test skips its children, and they keep their
+last good data.
+
+**How.** Add to the E5 suite: every scheduled or sensor-triggered job that
+invokes dbt calls `build`, never `run`. Same rule in the Airflow and Prefect
+tests where they invoke dbt.
+
+**Acceptance.** A test definition calling `run` fails the invariant. The
+shipped definitions pass.
+
+---
+
+## P12 — Source contracts, keys and history
+
+> dbt building blocks, round 3. All run on duckdb unless marked.
+
+### E60. Source capability classification
+
+**What.** `docs/patterns/source-types.md` and a seed template that declares
+each source's type.
+
+| Type | Delivery | Clock |
+|---|---|---|
+| CDC | changes, with operation and log position | log position |
+| Append-only | new rows only; rows never change | create time |
+| Full-replace | full state each delivery | none needed |
+| Mutable with a clock | changed rows | moves on update |
+| Mutable without a clock | full state or changed rows | create only, or none |
+
+Modifier on any type: **can signal deletes**.
+
+Three questions decide the type:
+1. Does each delivery carry full state, or only changes?
+2. Does the clock move on update, or only on create?
+3. Can you tell a delete from an omission?
+
+**Why.** Incremental strategy, dedup, delete handling and history all depend on
+what the source can tell you. Chosen per model without naming the type, they
+give incremental models that miss updates (filtering on a create-only clock) or
+never see deletes.
+
+**How.**
+- One permits/forbids table per type. Example: mutable without a clock forbids
+  an incremental filter on its clock; full-replace permits an anti-join soft
+  delete.
+- Seed template columns: `source_name`, `table_name`, `source_type`,
+  `signals_deletes`, `clock_column`, `clock_moves_on_update`, `owner`.
+
+**Acceptance.** The doc runs three invented feeds (`orders` changes,
+`customers` full export, an event log) through the three questions to one type
+each. The seed template loads in `dbt build` on the example fixtures.
+
+---
+
+### E61. Incremental patterns per source type
+
+> **Depends on E60.**
+
+**What.** `docs/patterns/incremental.md`, one example model per source type,
+and a generic test `no_tie_at_max_clock(clock, partition_by=[],
+tie_breakers=[], scope='max')`.
+
+**How.**
+- Standard CTE flow: `source → typed → hashed → deduped → changed → final`.
+- `merge` with no `unique_key` is an append. The doc says so; E68 reports it.
+- `no_tie_at_max_clock` fails when two rows in a partition share the ordering
+  tuple `(clock, *tie_breakers)`. A tie means "latest" or "next after the
+  cursor" is arbitrary. One test covers each tie-breaking moment through its
+  arguments:
+
+  | Moment | `partition_by` | `tie_breakers` (example) | `scope` |
+  |---|---|---|---|
+  | Dedup to the latest version of a key | entity key | ingestion id | `max` |
+  | Incremental high-water mark (`>` skips late rows, `>=` re-reads them) | none | raw id | `max` |
+  | Ordering every version for history (E65) | entity key | ingestion id | `all` |
+  | CDC snapshot chunks sharing one LSN (E67) | entity key | `_airbyte_extracted_at`, `_airbyte_raw_id` | `all` |
+
+  `scope='max'` checks only the top tuple per partition; `'all'` checks every
+  rank. The doc pairs each source type (E60) with its tie-breaker columns.
+- Full-replace feeds: replace by load partition, or an anti-join soft delete
+  behind a partial-delivery guard. The guard refuses to soft-delete when a
+  delivery's row count is below a set share of the previous delivery.
+- Caveats: microbatch is delete+insert per batch underneath, and an upstream
+  ref with no `event_time` is scanned in full for every batch.
+
+**Acceptance.** Each example model builds twice on duckdb (initial fixture,
+then a second batch) and produces the expected rows. The tie test fails on a
+fixture for each moment in the table and passes once its tie-breakers are
+added. The guard blocks the soft delete when the second delivery
+is truncated.
+
+---
+
+### E62. Key roles and the identity, content and link hashes
+
+> **Extends E1 and E40.**
+
+**What.** `docs/patterns/keys.md`, plus an audit-column check in
+`row_content_hash`.
+
+| Key role | Meaning |
+|---|---|
+| Entity key | stable across versions; identity hash (E1) over the natural key |
+| Version key | one per entity per validity interval |
+| Natural-key attribute | the source's own id, kept as an attribute |
+
+| Hash | Over | Used for |
+|---|---|---|
+| Identity | natural key | entity key (`mint_surrogate_key`) |
+| Content | non-key, non-audit columns | change detection (`row_content_hash`) |
+| Link | participating entity keys, in declared order | relationship rows (`mint_surrogate_key`; no new macro) |
+
+**Why.** A join on an entity key with no validity predicate fans out against a
+history table. A join on a natural key after staging breaks when the source
+reissues or reformats it.
+
+**How.**
+- Join rule: entity key plus a validity predicate, or the version key. Natural
+  keys are never join keys after staging.
+- `row_content_hash` fails at compile time when its column set includes an
+  audit column (the `audit_columns` macro's names) that is not excluded. It
+  already sorts columns and carries `row_content_hash_version()`.
+
+**Acceptance.** `row_content_hash` over a relation with an unexcluded audit
+column fails to compile. The E40 tests still pass. A singular test reproduces
+the fan-out: it fails on the join without the validity predicate and passes
+with it.
+
+---
+
+### E63. Exclusion signals
+
+> **Extends E4.** E4 logs rule failures beside the data; this puts the
+> decision on the row.
+
+**What.** Flag bad rows instead of dropping them. A `dq_exclusion_code` column
+(first matching rule wins; NULL means usable) is carried through every model.
+
+**Why.** A filter in staging removes a row from every consumer and leaves no
+record. One consumer wants it gone, another wants to review it, a third wants
+it counted.
+
+**How.**
+- `dq_exclusion_code(rules)`: a `case` over ordered rules, read from a
+  reason-code seed.
+- Reason-code seed: `code`, `description`, `kind` (`mandated` | `internal`).
+  Mandated rules cite their `authority`; internal rules carry `owner`,
+  `rationale` and `review_by`. A test enforces both.
+- Each consumer chooses: filter on `dq_exclusion_code is null`, keep flagged
+  rows for review, or aggregate by code.
+- `dq_excluded_rows` unions the excluded rows of every flagged model (model,
+  key, code).
+- Conservation test per flagged model: rows in = rows excluded + rows out.
+
+**Acceptance.** A fixture row matching two rules gets the first rule's code.
+The conservation test fails when a model silently drops a flagged row. The seed
+test fails on a mandated rule with no authority, and on an internal rule past
+`review_by`.
+
+---
+
+### E64. Test ladder
+
+> **Updates E18** (`dbt-test` skill).
+
+Add to `.claude/skills/dbt-test`:
+- **Sources:** content tests (`not_null`, `accepted_values`, row-count bounds),
+  not only freshness.
+- **Passthrough staging** (rename and cast only): no tests of its own.
+- **Every intermediate hop:** a grain test (`unique`,
+  `unique_combination_of_columns`, or E41's `grain_guard_is_one`).
+- **Joins:** `relationships` tests on the join keys.
+- **Marts:** re-assert grain and keys.
+- **Diagnosis:** a red mart over green upstream means the bug is in assembly,
+  the mart's own join or aggregation.
+- Generic test `config_rows_present(config_seed, union_model, key)`: every row
+  marked active in a config seed shows up in its union model.
+
+**Acceptance.** `config_rows_present` fails on a fixture where an active config
+row has no rows in the union model. The example cost models follow the ladder.
+
+---
+
+### E65. Managed history from an observation log
+
+> **Extends E32.** Depends on E62.
+
+**What.** An append-only observation log keyed on `(entity_key, observed_at)`,
+a history table derived from it, an `as_of(rel, date)` macro, and a short guide
+to picking an SCD type.
+
+**Why.** History built by grouping on the content hash merges the two A periods
+when a value goes A → B → A, losing the second change. A log keeps every
+observation, so history can be re-derived; a snapshot table cannot be rebuilt.
+
+**How.**
+- Log: one row per entity per observation, with the E40 content hash.
+  `full_refresh: false`.
+- History: islands of consecutive equal hashes per entity (as in E38), giving
+  `valid_from`, `valid_to`, `is_current`.
+- `as_of(rel, date)`: half-open, `valid_from <= date and date < valid_to`. Open
+  versions use a sentinel `valid_to` (`9999-12-31`), so the predicate has no
+  NULL branch.
+- Observed time (when we saw it) and effective time (when the source says it
+  took effect) are separate columns; `as_of` takes which one to use.
+- SCD guide in `docs/patterns/snapshots.md`: type 1, type 2 snapshot,
+  log-derived, and when each fits.
+
+**Acceptance.** A fixture A → B → A yields three versions. `as_of` returns
+exactly one row per entity for any date, including a boundary date. E39 passes
+on the derived history.
+
+---
+
+### E66. Snapshot migration hazards
+
+Add to `docs/patterns/snapshots.md`, with a row each in the
+`docs/patterns/state-migrations.md` table:
+- **Switching to `check_cols=['content_hash']`:** backfill the hash on existing
+  snapshot rows first, or every row opens a new version on the next run.
+- **Changing `unique_key`:** existing history is orphaned; its open versions
+  never close. Rewrite the key on existing rows before switching.
+- **`dbt_scd_id`** hashes the run timestamp, so a rebuilt snapshot gets new
+  values. Nothing downstream joins on it.
+
+---
+
+### E67. CDC landing tables: current state and history
+
+> **Reverses a *Deliberately left out* entry.** An Airbyte pattern; E38 stays
+> the connector-free route.
+
+**What.** `docs/patterns/cdc-landing.md` and `cdc_current(rel, key)`, with
+Airbyte's CDC and meta column names as overridable defaults.
+
+**How.**
+- Order events by LSN, then `_airbyte_extracted_at`, then `_airbyte_raw_id`:
+  initial-snapshot chunks share one LSN.
+- Tombstones drop out of current state and stay in history as deletes.
+- A stream refresh purges the landing table's history, so the dbt history model
+  is the system of record: incremental, `full_refresh: false`.
+- Collapse no-op events (same payload hash as the key's previous event).
+- Alert when `_airbyte_generation_id` changes.
+- Sync mode: dedup drops deletes; append keeps them. Use append when deletes
+  matter.
+
+**Acceptance.** A fixture landing table with snapshot chunks sharing an LSN, an
+update, a no-op, a delete and a generation change: `cdc_current` returns the
+expected rows, history keeps the delete and drops the no-op, and the
+generation-change test fires.
+
+---
+
+## P13 — Project-wide tooling
+
+### E68. dbt baseline census
+
+> **New tool:** `tooling/dbt-baseline`.
+
+**What.** A CLI over `manifest.json` from `dbt parse` (no warehouse
+credentials) that reports a project's current shape, as Markdown and JSON:
+- materialization mix, per folder
+- `merge` models with no `unique_key`
+- snapshots using `check_cols='all'` or a concatenated `unique_key`
+- which models have grain and `relationships` tests (the E64 ladder)
+- enforced contracts
+- multi-column joins, parsed from compiled SQL when the manifest has it;
+  otherwise reported as skipped
+- source `loaded_at_field`s that the E60 seed marks as moving only on create
+
+Optional flag: fail on joins on natural-key attributes after staging, using
+E62's key roles from model `meta`.
+
+**Acceptance.** A fixture manifest covering every finding produces the expected
+report. It runs on the toolkit's own project with no warehouse credentials. The
+tool passes `just check-wiring`.
+
+---
+
+### E69. PR impact checker
+
+> **New tool:** `tooling/pr-impact`. Builds on E24.
+
+**What.** `dbt parse` on base and head (no warehouse credentials), a manifest
+diff, a severity per change by whether it reaches an exposure, and one sticky
+PR comment.
+
+| Change | Severity |
+|---|---|
+| Exported column removed or renamed (columns from the E23 export config) | block (failing check) |
+| Change upstream of an exposure | review |
+| Anything else | info |
+
+**How.**
+- Both parses use the same vars. The base parse is cached as an artifact keyed
+  on the base SHA.
+- Triggered on `pull_request`, never `pull_request_target`: `dbt parse` runs
+  Jinja from the PR. Fork PRs get the result in the job summary, since their
+  token cannot comment.
+- One comment, updated in place.
+
+**Acceptance.** Fixture base/head project pairs produce block, review and info.
+The workflow uses `pull_request`. A test with a fake GitHub client shows the
+comment updated, not duplicated.
+
+---
+
+### E70. Consumer blast-radius audit (Snowflake extra)
+
+> **Promotes** *Pre-decommission consumer audit* from the deferred list.
+
+**What.** For objects being changed or retired, who reads them and what moving
+each reader costs. `macros/snowflake/` plus a report model.
+
+**How.**
+- Consumers from `ACCESS_HISTORY` (direct and base objects): users, roles,
+  query tags.
+- Walk `OBJECT_DEPENDENCIES` to every dependant, with a visited set as the
+  cycle guard.
+- Drop non-prod objects (E9 and E31 names).
+- Tier consumers by migration cost. An `unknown` tier blocks.
+- Status is `observed` with a last-seen date, never a boolean `ready`: absence
+  in the window is not proof.
+- Windows: 365 days to discover consumers, 30 days to track progress.
+- Add to `docs/patterns/durable-facts.md`: an audit fact can be durable because
+  its inputs are read from current state.
+
+**Acceptance.** On duckdb, fixture tables shaped like `ACCESS_HISTORY` and
+`OBJECT_DEPENDENCIES` (with a cycle) give the expected consumers and tiers, and
+one `unknown` consumer marks the report blocked. Compiles on Snowflake.
+
+---
+
+## P14 — Environments, identity and runbooks
+
+### E71. Clone hygiene (Snowflake extra)
+
+> **Extends E10 and E31.** `macros/snowflake/`.
+
+- `drop_database(name)`, guarded: refuses prod and shared environment
+  databases; allowed for personal (E31) and clone names only.
+- Idle-clone sweep: lists clones unused for N days, drops them only with an
+  apply flag.
+- `DATA_RETENTION_TIME_IN_DAYS = 0` on clones that a refresh replaces, so
+  replaced clones hold no Time Travel storage.
+- `clone_schema`, alongside `clone_database`.
+- Refresh only after the upstream run succeeds (E7), not on a clock.
+
+**Acceptance.** The drop guard refuses prod and shared names and allows a clone
+name. The sweep's dry run lists only clones. `clone_schema` and the retention
+setting compile on Snowflake.
+
+---
+
+### E72. Password to key-pair cutover runbook
+
+`docs/patterns/key-pair-cutover.md`:
+- Issue a new key-only identity; do not convert the password user in place.
+- Read the username from config, so falling back is a config change.
+- Always pass the role explicitly.
+- Rotate with the two public-key slots: load the new key, switch, then clear
+  the old slot.
+- Look for connection paths inside packaged dependencies, not only the
+  project's own config.
+- Retire the old identity only after a full monthly cycle with zero password
+  logins in login history.
+
+---
+
+### E73. Postgres replication-slot guard
+
+> Dagster reference implementation.
+
+**Why.** A logical replication slot whose consumer stalls keeps WAL until the
+disk fills.
+
+**How.**
+- Measure slot lag (`pg_replication_slots`, `restart_lsn` against the current
+  WAL position) and free disk (a host or provider metric).
+- Three tiers on either signal: warn, page (E6 severities), then auto-drop.
+- Auto-drop targets one slot named in config, no pattern matching. Dry run by
+  default; idempotent, so a missing slot is a no-op.
+- Recovery after a drop is a full resync of the connector; the runbook says how.
+
+**Acceptance.** With a fake connection, each tier fires at its threshold. The
+drop runs only on the configured slot, only with dry run off, and a second run
+succeeds.
+
+---
+
+### E74. `validate-on-clone` stack skill
+
+`.claude/skills/validate-on-clone`: check a change against a clone before
+merge.
+- Base manifest from `dbt parse` with the same vars as prod, cached as an
+  artifact.
+- `run`, then `test --no-fail-fast`, then a final `build` shaped like the prod
+  job.
+- Check selectors with `dbt ls` first: `state:modified+,tag:x` is an
+  intersection.
+- `on_schema_change` conflicts show only on a populated clone, not an empty
+  one.
+
+---
+
 ## Deliberately left out
 
 Reviewed and not proposed, so they are not re-derived later:
@@ -1477,9 +1997,9 @@ Reviewed and not proposed, so they are not re-derived later:
   glue, not a pattern — E25 keeps only the expected-versus-confirmed contract.
 - **Import-CTE helper macros.** Cosmetic; a `dbt-model` skill convention covers
   it without a macro.
-- **History reconstruction from CDC landing tables.** Valuable but tied to one
-  connector's landing semantics; revisit as a dlt/Airbyte pattern doc if needed.
-  E38 is the connector-free alternative: it reads archived full extracts.
+
+Reversed: *history reconstruction from CDC landing tables* was listed here and
+is now E67.
 
 ---
 
@@ -1496,5 +2016,27 @@ Backlog notes, not tasks. They get E-numbers when promoted.
 - **Engineering-analytics example stack** over issue-tracker and code-host
   data: an identity bridge between the two systems' users, issue flow time, PR
   time-to-first-review, throughput.
-- **Pre-decommission consumer audit.** List a table's readers from warehouse
-  access history before retiring it.
+- **Per-unit cost metrics gated on coverage.** NULL before coverage starts;
+  each period gated on a share of the median entity count; a test on the
+  median itself.
+- **Cost attribution for platform-run work** (extends E27). Attribute tasks and
+  dynamic tables by the database they write to, with a name-pattern fallback
+  second in the lookup order. An `is_attribution_complete` flag, since gaps
+  read as fake idle. Rank right-sizing by idle dollars, not idle %.
+- **Load-timestamp sensor.** Run downstream only when a source's load
+  timestamp moved; keep one reconciliation run on cron.
+- **Per-query telemetry.** `query_tag = invocation_id|model_id`, then pull
+  spill and queue time per model. Per-folder `+query_tag` in
+  `dbt_project.yml` for cost by domain.
+- **Source cutover via passthrough shims** plus a parity check. Mostly covered
+  by E34.
+- **Referential-integrity rollout.** FK tests land at `warn`, each orphan set
+  gets an owner, then the tests go to `error`.
+- **History-scrub runbook** (extends E55): fetch `refs/pull/*`, list PR refs
+  that still hold a removed path, verify fresh clones.
+- **`NOT IN` trap in file ingestion.** One NULL in the subquery stops ingestion
+  forever. Use `NOT EXISTS`, and keep a ledger of filename plus size or etag.
+- **Durable-facts caveats** (E29): a mapping-seed change only restates the
+  restatement window; an invoice tie cannot detect lost source history.
+- **Source material not yet reviewed for ports:** its delivery, AI-bot,
+  intake-template and review-practice pages.
