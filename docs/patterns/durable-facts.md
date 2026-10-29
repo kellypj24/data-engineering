@@ -33,6 +33,27 @@ with a control relation, such as a ledger or an invoice:
 - It **fails when zero periods are compared**. An empty control, or a join on
   mismatched types that matches nothing, cannot pass vacuously.
 
+## History tables stamped with `current_date`
+
+A table that appends the source's current state once a day, stamping each row
+with `current_date` (`snapshot_date`), is a durable fact too. Its incremental
+filter must use `>=`, not `>`:
+
+```sql
+{% if is_incremental() %}
+WHERE snapshot_date >= (SELECT MAX(snapshot_date) FROM {{ this }})
+{% endif %}
+```
+
+With `>`, the first run of each day writes that day and every later run that
+day skips it, so the day freezes at its first state. Use `delete+insert` with
+`unique_key` = the date column, so today's rows are replaced, not duplicated.
+
+| Piece | What |
+|---|---|
+| `no_frozen_days` (`tests/generic/no_frozen_days.sql`) | Flags a date whose rows equal the previous date's across every key. Data that genuinely did not change trips it too, so it warns |
+| `restate_history_date` (`macros/utils/restate_history_date.sql`) | Replaces one date's rows with a neighbouring date's, restamped. Dry run by default; record the restatement as a [state migration](state-migrations.md) |
+
 ## Backfilling a date range
 
 `--vars '{backfill_start: ..., backfill_end: ...}'` reprocesses exactly those
