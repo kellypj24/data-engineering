@@ -3,7 +3,7 @@
 Current state only; history is in git and the PRs. Update this file in the same PR as the
 work it describes.
 
-_Updated 2026-10-29._
+_Updated 2026-10-30._
 
 ## Now
 
@@ -18,7 +18,9 @@ _Updated 2026-10-29._
 2. CI hardening #14 (broaden Terraform validation), then #24, #15; #10 and #11 wait on
    the `ANTHROPIC_API_KEY` decision (`docs/ci-cd-hardening.md`).
 3. Lock refresh: `uv lock --upgrade` per tool to clear the advisories the daily audit
-   reports (`python3 .github/scripts/security_audit.py --out x.md`).
+   reports (`python3 .github/scripts/security_audit.py --out x.md`; 495 rows across 7
+   tools on 2026-10-30, certifi cleared). Lock with a current uv: Homebrew's 0.10.3
+   rewrites markers that CI's uv does not.
 4. Airflow/Prefect parity, lower priority than Dagster: port the round-3 Dagster
    patterns that apply (per-deployment schedule times, SQS sensor, warehouse backup)
    so they don't fall far behind. Dagster stays the reference.
@@ -29,8 +31,8 @@ _Updated 2026-10-29._
   instead of issues (#19).
 - `ANTHROPIC_API_KEY` secret for Claude PR review (#10) and scheduled reviews (#11); both
   skip cleanly without it.
-- Major Dependabot bumps held on red CI: #89 (Airbyte Terraform), #158 (Airflow 3), and
-  #291 (duckdb 2.0 in `tooling/release-diff`).
+- duckdb 2.0 in `orchestration/dagster` (#288) waits on `transformation/dbt` moving to
+  2.0 in the same step: a `dev.duckdb` that 2.0 creates is unreadable by duckdb 1.x.
 
 ## Blocked on
 
