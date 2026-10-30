@@ -10,6 +10,9 @@ _Updated 2026-10-30._
 - Round 3 of `docs/toolkit-expansion.md` is done (E35–E55). CI hardening done: #9, #12,
   #13, #19, #21, #22, #23.
 - Round 4 (E56–E74, P10–P14) in progress: E56 done.
+- duckdb 2.0 in dbt and dagster together (a file 2.0 creates is unreadable by 1.x);
+  file-export and release-diff via Dependabot #289, #291. dlt stays on 1.4.4 (via
+  `dlt[duckdb]`) and writes only its own pipeline files.
 
 ## Next
 
@@ -31,8 +34,6 @@ _Updated 2026-10-30._
   instead of issues (#19).
 - `ANTHROPIC_API_KEY` secret for Claude PR review (#10) and scheduled reviews (#11); both
   skip cleanly without it.
-- duckdb 2.0 in `orchestration/dagster` (#288) waits on `transformation/dbt` moving to
-  2.0 in the same step: a `dev.duckdb` that 2.0 creates is unreadable by duckdb 1.x.
 
 ## Blocked on
 
