@@ -52,7 +52,9 @@ def test_parquet_lands_at_the_expected_path_with_matching_row_count(
     assert metadata["row_count"].value == 3
     assert metadata["source_relation"].value == "raw.orders"
     assert metadata["run_id"].value == run_id
-    written = duckdb.sql(f"SELECT count(*) FROM '{path}/{PARQUET_FILE}'").fetchall()[0][0]
+    ((written,),) = duckdb.sql(
+        f"SELECT count(*) FROM '{path}/{PARQUET_FILE}'"
+    ).fetchall()
     assert written == 3
 
 
