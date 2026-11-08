@@ -377,15 +377,15 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-common-compat"
-version = "1.19.0"
+version = "1.23.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
     { name = "asgiref" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/68/a8/e1d304e2d98d5df26ef2da35e1ebfb914630f29fdb5d05560c6c982bca04/apache_airflow_providers_common_compat-1.19.0.tar.gz", hash = "sha256:887d1f84907df0b01f5ce812bd8c84aeb196742abf7a5fbb78eb5ce60adcd2bd", size = 45512, upload-time = "2026-09-14T14:48:05.245Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/4a/3b/d2ef402d583dfef225500a2bc30b431403e708c170dfba32c974a3a6185e/apache_airflow_providers_common_compat-1.23.0.tar.gz", hash = "sha256:366182c246a989fcd18d9a85f16343005adc61b70493b31b545bb80ffced60da", size = 59002, upload-time = "2026-10-24T18:48:43.417Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/db/2e/904ef0308548a4de139fecbd591456dddc2f33f5baa10faf053d34853360/apache_airflow_providers_common_compat-1.19.0-py3-none-any.whl", hash = "sha256:72f03811f5e7cd219939e1c0f2a33ac5bb8538898b0c61adaadc5c9e8acb8a91", size = 46113, upload-time = "2026-09-14T14:47:24.519Z" },
+    { url = "https://files.pythonhosted.org/packages/2b/f8/3a7c6a3b4c340169edea6908c67e05586867400c7dc0fac25a48556ae3c3/apache_airflow_providers_common_compat-1.23.0-py3-none-any.whl", hash = "sha256:566a5bc9a04da8b415b5394cb24db1a09627b6ac05b72ddd7e8559ba29dd64dc", size = 52741, upload-time = "2026-10-24T18:48:13.108Z" },
 ]
 
 [[package]]
@@ -494,7 +494,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-snowflake"
-version = "6.18.0"
+version = "6.20.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "apache-airflow" },
@@ -508,10 +508,11 @@ dependencies = [
     { name = "snowflake-connector-python" },
     { name = "snowflake-snowpark-python", marker = "python_full_version < '3.14'" },
     { name = "snowflake-sqlalchemy" },
+    { name = "sqlalchemy" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ba/71/89e7c293db99f3a0859ed65db9902a361b69f99415fff8ec0a71e6823c51/apache_airflow_providers_snowflake-6.18.0.tar.gz", hash = "sha256:2d6e4b23bc4cdafcebcafb54cd72ff1985d6dbc1528942cc8027d7f491fc99b4", size = 149757, upload-time = "2026-09-29T06:56:12.775Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/20/75/890411b8dd4d6af0f244d280ade0bd4d081c077e156d936b7776fee1fb1e/apache_airflow_providers_snowflake-6.20.0.tar.gz", hash = "sha256:a39fbbf421b48a15aa3889ccd144009b3ac23801133b33055bcaac0912ae2a5c", size = 169170, upload-time = "2026-10-24T18:48:57.332Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ab/89/5be475eaa497081bbd296ffe6804928d38ff08524bf0ad771e995d21e762/apache_airflow_providers_snowflake-6.18.0-py3-none-any.whl", hash = "sha256:4d603f6a4a697f17eb81d7a90406d64324e3a4de15efe4387cd19147135c160b", size = 80449, upload-time = "2026-09-29T06:54:41.371Z" },
+    { url = "https://files.pythonhosted.org/packages/8a/4a/db486716ac612d4011a947f98f606186f985e5918a82b592fe49d6002376/apache_airflow_providers_snowflake-6.20.0-py3-none-any.whl", hash = "sha256:400f17b268d19bb1a8a8eb539c1c8511ef537626c33fccf1d635cb817a56b5f0", size = 88981, upload-time = "2026-10-24T18:48:31.106Z" },
 ]
 
 [[package]]
