@@ -13,6 +13,11 @@ _Updated 2026-10-30._
 - duckdb 2.0 in dbt and dagster together (a file 2.0 creates is unreadable by 1.x);
   file-export and release-diff via Dependabot #289, #291. dlt stays on 1.4.4 (via
   `dlt[duckdb]`) and writes only its own pipeline files.
+- Python is pinned per tool (`.python-version`, 3.13). `just pins` and CI fail on a tool
+  without a pin or a Dockerfile or workflow that differs; `python-next.yml` runs each
+  tool's tests on the next minor weekly. Known lag: the airflow image stays on
+  `apache/airflow:2.8-python3.11` (exempt, an Airflow upgrade); every tool's
+  `requires-python` floor (3.11) is untested.
 
 ## Next
 

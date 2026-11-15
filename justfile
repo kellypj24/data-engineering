@@ -18,7 +18,11 @@ default:
     @just --list
 
 # Everything CI checks, from the root: hooks, wiring, lint, format check, tests. Run before pushing.
-check: hooks check-wiring lint fmt-check test
+check: pins hooks check-wiring lint fmt-check test
+
+# Every tool pinned to a Python version; Dockerfiles and CI agree with it (CI runs this too)
+pins:
+    uv run --no-project python .github/scripts/check_python_pins.py .
 
 # Every pre-commit hook over every file, as CI's "Pre-commit hooks" job runs them
 hooks:

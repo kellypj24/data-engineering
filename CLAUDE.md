@@ -16,7 +16,7 @@ This is a composable collection of data engineering tools organized by role:
 
 ## Conventions
 
-- **Python**: 3.11+, dependencies managed via `pyproject.toml` (no requirements.txt)
+- **Python**: pinned to 3.13 by each tool's `.python-version` (supported floor 3.11, `requires-python`); dependencies managed via `pyproject.toml` (no requirements.txt)
 - **Package manager**: `uv` for all Python operations (`uv run`, `uv pip install`)
 - **Task runner**: `just` (Justfile at root, per-tool `mod.just` files)
 - **Linting**: `ruff` for Python, `sqlfluff` for SQL (Snowflake dialect)
@@ -41,6 +41,7 @@ just fmt               # Format all code (rewrites files)
 just fmt-check         # Verify formatting without rewriting
 just check             # hooks, check-wiring, lint, fmt-check, test -- run this before pushing (~6 min)
 just check-wiring      # Every tool wired into justfile, ci.yml, dependabot, README, pre-commit
+just pins              # Every tool has a .python-version; Dockerfiles and CI agree with it
 uvx pre-commit install # once per clone: run the root .pre-commit-config.yaml on every commit (same checks as CI)
 just dagster::test     # Run Dagster tests only (parses the dbt project first)
 just airflow::test     # Run Airflow tests only
@@ -77,8 +78,8 @@ Use the `add-tool` skill in `.claude/skills/` — it does all of this and verifi
 role must provide. It is not a code skeleton; there is nothing to copy.
 
 1. Read `<role>/_template/README.md` for the role's requirements
-2. Create `<role>/<tool-name>/` with pyproject.toml, uv.lock, README.md,
-   CLAUDE.md, `mod.just`, and `tests/` — model it on `extract_load/dlt/`
+2. Create `<role>/<tool-name>/` with pyproject.toml, `.python-version`, uv.lock,
+   README.md, CLAUDE.md, `mod.just`, and `tests/` — model it on `extract_load/dlt/`
 3. Wire into the root `justfile`: the `mod` import and the aggregate recipes
 4. Wire into `.github/workflows/ci.yml`: paths-filter entry, `test-<tool>` job,
    `lint` matrix row, `lockfiles` job list

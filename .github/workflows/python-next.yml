@@ -1,0 +1,47 @@
+name: Python next
+
+# The canary: each tool's tests on the minor after the one its .python-version pins,
+# weekly. A red job means a dependency or the tool isn't ready for that Python (3.14
+# breaks dagster's tests at collection today). Nothing blocks on this workflow; it says
+# so before a pin moves.
+on:
+  schedule:
+    - cron: "23 14 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: ${{ matrix.dir }} (next Python)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        dir:
+          - orchestration/dagster
+          - orchestration/airflow
+          - orchestration/prefect
+          - orchestration/temporal
+          - extract_load/dlt
+          - delivery/file-export
+          - tooling/sensitive-scan
+          - tooling/claude-review
+          - tooling/release-diff
+          - tooling/dagster-status
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@v7
+      - name: Next minor
+        run: |
+          pin="$(cat .python-version)"
+          echo "UV_PYTHON=${pin%.*}.$(( ${pin#*.} + 1 ))" >> "$GITHUB_ENV"
+      - run: uv sync --dev
+      - run: uv run pytest tests/ -q --tb=short

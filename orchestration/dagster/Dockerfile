@@ -2,7 +2,7 @@
 # Build:  docker build -t dagster-orchestration .
 # Run:    docker run -p 4000:4000 dagster-orchestration
 
-FROM python:3.11-slim AS base
+FROM python:3.13-slim AS base
 
 WORKDIR /app
 

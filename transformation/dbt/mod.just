@@ -2,6 +2,11 @@
 # dbt command needs to be pointed at it. CI sets the same variable.
 export DBT_PROFILES_DIR := source_directory()
 
+# packages.yml dependencies, installed on first use: a fresh checkout or worktree has none,
+# and sqlfluff's dbt templater and `dbt build` both fail without them
+_deps:
+    @[ -d dbt_packages ] || uv run dbt deps
+
 # Run the Python tests, then build the example project on its seeded fixtures:
 # every model, data test, and unit test. Seeds (and their tests) build first,
 # then everything else without them: models and source tests read the fixtures
@@ -9,7 +14,7 @@ export DBT_PROFILES_DIR := source_directory()
 # the same run is dropped and recreated while they read it. DBT_ENV=prod
 # because the fixtures have fixed dates that the dev-only limit_data_in_dev
 # window would filter out.
-test:
+test: _deps
     uv run pytest tests/python
     DBT_ENV=prod uv run dbt build --select resource_type:seed
     DBT_ENV=prod uv run dbt build --exclude resource_type:seed
@@ -29,7 +34,7 @@ check-vars:
     uv run python scripts/check_vars.py
 
 # Lint SQL with sqlfluff
-lint:
+lint: _deps
     uv run sqlfluff lint models/ macros/
     uv run yamllint --strict .
 
