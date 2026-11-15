@@ -17,6 +17,13 @@ mod release-diff 'tooling/release-diff'
 default:
     @just --list
 
+# Everything CI checks, from the root: hooks, wiring, lint, format check, tests. Run before pushing.
+check: hooks check-wiring lint fmt-check test
+
+# Every pre-commit hook over every file, as CI's "Pre-commit hooks" job runs them
+hooks:
+    uvx pre-commit run --all-files --show-diff-on-failure
+
 # Run all tests
 test: dagster::test airflow::test prefect::test temporal::test dlt::test dbt::test file-export::test sensitive-scan::test claude-review::test release-diff::test dagster-status::test
 
@@ -30,5 +37,5 @@ fmt: dagster::fmt airflow::fmt prefect::fmt temporal::fmt dlt::fmt file-export::
 check-wiring:
     uv run --no-project --with pyyaml python .github/scripts/check_wiring.py
 
-# Check formatting without rewriting. This is the one to run before pushing.
+# Check formatting without rewriting (`check` runs this).
 fmt-check: dagster::fmt-check airflow::fmt-check prefect::fmt-check temporal::fmt-check dlt::fmt-check file-export::fmt-check sensitive-scan::fmt-check claude-review::fmt-check release-diff::fmt-check dagster-status::fmt-check

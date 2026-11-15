@@ -38,7 +38,8 @@ This is a composable collection of data engineering tools organized by role:
 just test              # Run all test suites
 just lint              # Lint all code
 just fmt               # Format all code (rewrites files)
-just fmt-check         # Verify formatting without rewriting -- run this before pushing
+just fmt-check         # Verify formatting without rewriting
+just check             # hooks, check-wiring, lint, fmt-check, test -- run this before pushing (~6 min)
 just check-wiring      # Every tool wired into justfile, ci.yml, dependabot, README, pre-commit
 uvx pre-commit install # once per clone: run the root .pre-commit-config.yaml on every commit (same checks as CI)
 just dagster::test     # Run Dagster tests only (parses the dbt project first)

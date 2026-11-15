@@ -135,8 +135,11 @@ just file-export::test
 # Lint all code
 just lint
 
-# Check formatting without rewriting (run this before pushing)
+# Check formatting without rewriting
 just fmt-check
+
+# Everything CI checks: pre-commit hooks, wiring, lint, format check, tests (run this before pushing)
+just check
 
 # Format all code (rewrites files)
 just fmt
