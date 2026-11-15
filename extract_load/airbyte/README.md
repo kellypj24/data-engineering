@@ -78,11 +78,13 @@ terraform destroy
 
 For solo/local use the default local state backend is fine. For team or production use, configure a remote backend (S3, GCS, Terraform Cloud) in `providers.tf`.
 
-## Custom vs Typed Connector Resources
+## Generic vs Typed Connector Resources
 
 The Airbyte Terraform provider offers two styles of resource for sources and destinations:
 
-### Custom resources (`airbyte_source_custom` / `airbyte_destination_custom`)
+### Generic resources (`airbyte_source` / `airbyte_destination`)
+
+Provider 1.x names; they replace the 0.x `airbyte_source_custom` / `airbyte_destination_custom`.
 
 - Configuration is a freeform JSON blob passed via `jsonencode({...})`.
 - Resilient to connector version upgrades -- the Terraform provider does not need to be updated when a connector's config schema changes.
@@ -94,7 +96,7 @@ The Airbyte Terraform provider offers two styles of resource for sources and des
 - Requires the `airbytehq/airbyte` Terraform provider version to include that connector's schema (can lag behind Airbyte releases).
 - Best for: stable, first-party connectors where you want strict validation and readable diffs.
 
-**This project defaults to custom resources.** Switch to typed resources on a per-connector basis when the stability trade-off makes sense.
+**This project defaults to generic resources.** Switch to typed resources on a per-connector basis when the stability trade-off makes sense.
 
 ## Adding a New Source / Destination / Connection
 
@@ -103,7 +105,7 @@ The Airbyte Terraform provider offers two styles of resource for sources and des
    - `terraform/destinations/my_destination.tf`
    - `terraform/connections/my_connection.tf`
 
-2. Use the custom resource pattern from `main.tf` as a template. You will need:
+2. Use the generic resource pattern from `main.tf` as a template. You will need:
    - The connector's `definition_id` (find it in the Airbyte UI or via the API).
    - The connector-specific configuration JSON (see the connector's docs).
 
