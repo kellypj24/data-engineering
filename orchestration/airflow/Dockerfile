@@ -1,3 +1,4 @@
+# pin-exempt: the tag is tied to the Airflow release; moving it is an Airflow upgrade
 FROM apache/airflow:2.8-python3.11
 
 USER root

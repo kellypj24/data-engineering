@@ -494,6 +494,8 @@ jobs:
       # Each tool must be in the root justfile aggregates, ci.yml, dependabot,
       # and the README table -- see .github/scripts/check_wiring.py.
       - run: uv run --no-project --with pyyaml python .github/scripts/check_wiring.py
+      # Every tool has a .python-version; Dockerfiles and workflows agree with it.
+      - run: uv run --no-project python .github/scripts/check_python_pins.py .
       - run: uv run --no-project --with pyyaml --with pytest pytest .github/scripts -q
 
   # Unconditional and server-side, so it cannot be skipped with --no-verify:

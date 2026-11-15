@@ -2,7 +2,7 @@
 name = "dlt-pipelines"
 version = "0.1.0"
 description = "Data ingestion pipelines built with dlt"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
     "dlt[duckdb,snowflake,filesystem]>=1.30.0",
     "requests>=2.33.1",
