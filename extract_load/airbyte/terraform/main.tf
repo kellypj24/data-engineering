@@ -1,9 +1,10 @@
 # ---------------------------------------------------------------------------
-# main.tf — Example source, destination, and connection using custom resources
+# main.tf — Example source, destination, and connection using generic resources
 #
-# CUSTOM vs TYPED resources:
+# GENERIC vs TYPED resources:
 #
-#   airbyte_source_custom / airbyte_destination_custom
+#   airbyte_source / airbyte_destination  (provider >= 1.0; these replace the
+#   0.x airbyte_source_custom / airbyte_destination_custom resources)
 #     - Connector config is a freeform JSON blob.
 #     - Survives connector version upgrades without Terraform provider changes.
 #     - Best for: connectors that update frequently, custom connectors, or
@@ -16,14 +17,14 @@
 #     - Best for: stable, well-supported connectors where you want IDE
 #       autocompletion and strict validation (e.g., airbyte_source_postgres).
 #
-# This file uses custom resources as the default pattern because they are
+# This file uses generic resources as the default pattern because they are
 # more resilient to version drift. Decompose into the sources/, destinations/,
 # and connections/ subdirectories as your catalog grows.
 # ---------------------------------------------------------------------------
 
-# ---- Example Source (custom) ------------------------------------------------
+# ---- Example Source (generic) -----------------------------------------------
 
-resource "airbyte_source_custom" "example" {
+resource "airbyte_source" "example" {
   name         = "example-source"
   workspace_id = var.workspace_id
 
@@ -43,9 +44,9 @@ resource "airbyte_source_custom" "example" {
   })
 }
 
-# ---- Example Destination (custom) ------------------------------------------
+# ---- Example Destination (generic) -----------------------------------------
 
-resource "airbyte_destination_custom" "example" {
+resource "airbyte_destination" "example" {
   name         = "example-destination"
   workspace_id = var.workspace_id
 
@@ -67,8 +68,8 @@ resource "airbyte_destination_custom" "example" {
 
 resource "airbyte_connection" "example" {
   name           = "example-source-to-example-destination"
-  source_id      = airbyte_source_custom.example.source_id
-  destination_id = airbyte_destination_custom.example.destination_id
+  source_id      = airbyte_source.example.source_id
+  destination_id = airbyte_destination.example.destination_id
 
   # Schedule — use cron for production, manual for development.
   schedule = {
