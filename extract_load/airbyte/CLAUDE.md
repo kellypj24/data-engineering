@@ -5,9 +5,9 @@ Managed connector-based EL using abctl (local) and Terraform for IaC.
 
 ## Key Files
 
-- `terraform/providers.tf` — Airbyte Terraform provider (~> 0.6) with OAuth auth
+- `terraform/providers.tf` — Airbyte Terraform provider (~> 1.3) with OAuth auth
 - `terraform/variables.tf` — server_url, client_id, client_secret, workspace_id
-- `terraform/main.tf` — Example custom source, destination, and connection resources
+- `terraform/main.tf` — Example generic source, destination, and connection resources
 - `terraform/sources/` — Per-source connector files (decompose as catalog grows)
 - `terraform/destinations/` — Per-destination connector files
 - `terraform/connections/` — Per-connection configuration files
@@ -28,7 +28,8 @@ TF_VAR_airbyte_server_url (default: http://localhost:8006/api/public/v1), TF_VAR
 
 ## Patterns
 
-- Uses `airbyte_source_custom` / `airbyte_destination_custom` (freeform JSON) over typed resources
-- Custom resources are more resilient to connector version drift
+- Uses the generic `airbyte_source` / `airbyte_destination` resources (freeform JSON) over typed resources
+- Provider 1.x removed `airbyte_source_custom` / `airbyte_destination_custom`; the generic resources replace them with the same `definition_id` and JSON `configuration`
+- Generic resources are more resilient to connector version drift
 - `jsonencode()` for connector-specific configuration blocks
 - Decompose into sources/, destinations/, connections/ subdirectories as catalog grows
