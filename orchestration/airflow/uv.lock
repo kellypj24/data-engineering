@@ -1218,7 +1218,7 @@ wheels = [
 
 [[package]]
 name = "dbt-snowflake"
-version = "1.12.4"
+version = "1.12.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "agate" },
@@ -1229,9 +1229,9 @@ dependencies = [
     { name = "pyopenssl" },
     { name = "snowflake-connector-python", extra = ["secure-local-storage"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/90/0a/2ca52d0082e5740eb16875733333a4d902eb72cd71b5e78a652270e67eee/dbt_snowflake-1.12.4.tar.gz", hash = "sha256:83efb205b84ed0f9ddc9e6a78f5aa7205f1ffb4b23dfbf36d55dacf31478ff9e", size = 208228, upload-time = "2026-10-22T08:35:10.441Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f6/a5/3de3a159dc5e2b24530393f1395f9e5742a2aebc6af2d17dee6821a9a7c1/dbt_snowflake-1.12.5.tar.gz", hash = "sha256:62c9ba4ae8e9dd879c3c1a642709dc215ae2a644bdedf52edf39250a6761dc8d", size = 208373, upload-time = "2026-11-04T08:30:02.022Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/26/ac/a36c354e893e2a13da612ce94909121f83001aef4daf9bd36637be5b8651/dbt_snowflake-1.12.4-py3-none-any.whl", hash = "sha256:2413e6c3959efab6a4871c3edb0d7ad1788e0610bec9d5f426b811e15686342b", size = 101447, upload-time = "2026-10-22T08:35:08.805Z" },
+    { url = "https://files.pythonhosted.org/packages/26/09/18542c7cf8513d0b8b56dac96f4ef9b7e0697eb561a9acf439ccc70b3fac/dbt_snowflake-1.12.5-py3-none-any.whl", hash = "sha256:e1bc86689fa23effbe15209227b0ac7748a0de7f80378e8879ee59af70c83668", size = 101444, upload-time = "2026-11-04T08:30:00.551Z" },
 ]
 
 [[package]]
