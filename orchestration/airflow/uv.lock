@@ -335,7 +335,7 @@ wheels = [
 
 [[package]]
 name = "apache-airflow-providers-airbyte"
-version = "6.1.0"
+version = "6.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "airbyte-api" },
@@ -343,9 +343,9 @@ dependencies = [
     { name = "apache-airflow-providers-common-compat" },
     { name = "httpx" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c0/86/340775589afc18804ff3442ac134fa35207b4ada0c075bedf789b75b2f81/apache_airflow_providers_airbyte-6.1.0.tar.gz", hash = "sha256:dbcace859b117b7fce61e4dd5d89a7c2f96554c4788b06097c8bb60c82e844f9", size = 39664, upload-time = "2026-09-29T06:54:56.994Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/28/a8/4eb2b6822b145aacd3c2940d205964f0197dfc423582c6107031448dcae3/apache_airflow_providers_airbyte-6.2.0.tar.gz", hash = "sha256:2ce05d8752a4d240ff2b75b11e7a49ddc0a84f5d8d12d2b082ec6cb5fb7fb72b", size = 40827, upload-time = "2026-10-13T11:02:51.114Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f5/2b/1361e028df8c464e27ddd4f9e6e42e003bc5500f3c13a58f68f39b29ec1b/apache_airflow_providers_airbyte-6.1.0-py3-none-any.whl", hash = "sha256:24cc102e918f89003b9454be37c7b5c2e15fda505fb5c357c518bedcdb374165", size = 23975, upload-time = "2026-09-29T06:39:24.856Z" },
+    { url = "https://files.pythonhosted.org/packages/4d/5c/7d12c74885f4c6322b880cbe4e49241b6aa35d1722f4b8999a1c6a61e978/apache_airflow_providers_airbyte-6.2.0-py3-none-any.whl", hash = "sha256:74a1465918d2e42ee4cecff07fe73707a153fb06087336f3c59dbaa380984e83", size = 24424, upload-time = "2026-10-13T11:00:53.12Z" },
 ]
 
 [[package]]
